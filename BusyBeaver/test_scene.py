@@ -45,3 +45,28 @@ class RotatingTapeCellTest(Timeline):
             duration=tl1.duration,
             rate_func=smooth
         )
+
+class TapeCellTest2(Timeline):
+    """
+    uv run janim run test_scene.py TapeCellTest2 -i
+    """
+    def construct(self):
+        ch0 = R"#text(fill: white)[0]"
+        ch1 = R"#text(fill: red)[1]"
+        cell = TapeCell(tile_data=ch0)
+        self.forward()
+        self.play(Create(cell))
+        self.forward()
+        cell.get_chromatic_effect().show()
+        self.play(
+            cell.create_chromatic_in_updater(duration=4.0, intensity=20)
+        )
+        self.play(
+            cell.stop_chromatic_in_updater(intensity=20)
+        )
+        self.forward(1)
+        self.play(
+            cell.create_set_value_animation(ch1)
+        )
+        self.forward(1)
+        

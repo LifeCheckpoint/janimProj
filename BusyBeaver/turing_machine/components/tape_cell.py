@@ -61,7 +61,7 @@ class TapeCell(Group):
 
         self.add(self.frame, self.word)
 
-    def create_set_value_animation(self, value: str):
+    def create_set_value_animation(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
         """
         获取设置方格字符值的动画
         
@@ -74,21 +74,21 @@ class TapeCell(Group):
             DataUpdater(
                 self.frame,
                 lambda item, p: item.glow.set(color=YELLOW, alpha=0.5 * p.alpha, size=0.3 * p.alpha).r,
-                duration=0.5,
+                duration=glow_time,
             ),
-            Wait(0.25),
+            Wait(wait_time),
             Transform(
                 self.word,
                 TypstMath(
                     text=self.tile_data,
                 ).points.scale(self.text_scaling).r,
-                duration=1,
+                duration=transform_time,
             ),
-            Wait(0.25),
+            Wait(wait_time),
             DataUpdater(
                 self.frame,
                 lambda item, p: item.glow.set(color=YELLOW, alpha=0.5 * (1 - p.alpha), size=0.3 * (1 - p.alpha)).r,
-                duration=0.5,
+                duration=glow_time,
             ),
         )
 
