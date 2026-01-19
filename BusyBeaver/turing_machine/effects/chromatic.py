@@ -37,6 +37,13 @@ class ChromaticEffect(SimpleFrameEffect):
         self.intensity = intensity
         self.glow_color = glow_color
 
+        self.apply_uniforms_set(
+            threshold=self.threshold,
+            radius=self.radius,
+            intensity=self.intensity,
+            glow_color=self.glow_color,
+        )
+
     def apply_uniforms_set(
         self,
         threshold: float | None = None,

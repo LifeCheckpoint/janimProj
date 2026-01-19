@@ -1,5 +1,7 @@
 from janim.imports import * # type: ignore
 from turing_machine.components.tape_cell import TapeCell
+from turing_machine.effects.alpha_vignette import AlphaVignetteEffect
+from turing_machine.effects.lens import LensEffect
 
 class PaperTileTest(Timeline):
     """
@@ -83,3 +85,58 @@ class TapeCellTest2(Timeline):
             cell.create_clear_value_animation()
         )
         self.forward(1)
+
+class AlphaVignetteEffectTest(Timeline):
+    """
+    uv run janim run test_scene.py AlphaVignetteEffectTest -i
+    """
+    def construct(self):
+        rect2 = Rect(20, 20).fill.set(color=RED, alpha=1).r
+        rect = Rect(4, 2).fill.set(color=BLUE, alpha=1).r
+        vignette = AlphaVignetteEffect(rect)
+        self.play(Create(rect2))
+        self.forward()
+        self.play(Create(rect))
+        self.forward(2)
+        vignette.show()
+        self.forward(2)
+        self.play(
+            DataUpdater(
+                vignette,
+                lambda item, p: item.apply_uniforms_set(
+                    vignette_radius=0.8 - 0.5 * p.alpha,
+                    vignette_softness=0.4,
+                    vignette_intensity=1.0 + 2.0 * p.alpha,
+                    aspect_ratio=1.77,
+                ),
+            ),
+            duration=4.0,
+            rate_func=smooth
+        )
+
+class LensEffectTest(Timeline):
+    """
+    uv run janim run test_scene.py LensEffectTest -i
+    """
+    def construct(self):
+        rect2 = Rect(20, 20).fill.set(color=RED, alpha=1).r
+        rect = Rect(4, 2).fill.set(color=BLUE, alpha=1).r
+        lens = LensEffect(rect)
+        self.play(Create(rect2))
+        self.forward()
+        self.play(Create(rect))
+        self.forward(2)
+        lens.show()
+        self.forward(2)
+        self.play(
+            DataUpdater(
+                lens,
+                lambda item, p: item.apply_uniforms_set(
+                    lens_radius=0.5 + 0.3 * p.alpha,
+                    lens_strength=0.5 + 1.5 * p.alpha,
+                    aspect_ratio=1.77,
+                ),
+            ),
+            duration=4.0,
+            rate_func=smooth
+        )

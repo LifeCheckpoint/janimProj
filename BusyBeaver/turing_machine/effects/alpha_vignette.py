@@ -42,6 +42,13 @@ class AlphaVignetteEffect(SimpleFrameEffect):
         self.vignette_intensity = vignette_intensity
         self.aspect_ratio = aspect_ratio
 
+        self.apply_uniforms_set(
+            vignette_radius=self.vignette_radius,
+            vignette_softness=self.vignette_softness,
+            vignette_intensity=self.vignette_intensity,
+            aspect_ratio=self.aspect_ratio,
+        )
+
     def apply_uniforms_set(
         self,
         vignette_radius: float | None = None,

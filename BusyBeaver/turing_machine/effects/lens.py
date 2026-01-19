@@ -37,6 +37,12 @@ class LensEffect(SimpleFrameEffect):
         self.lens_radius = lens_radius
         self.aspect_ratio = aspect_ratio
 
+        self.apply_uniforms_set(
+            lens_strength=self.lens_strength,
+            lens_radius=self.lens_radius,
+            aspect_ratio=self.aspect_ratio,
+        )
+
     def apply_uniforms_set(
         self,
         lens_strength: float | None = None,
