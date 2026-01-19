@@ -2,7 +2,8 @@ from janim.imports import * # type: ignore
 from turing_machine.components.tape_cell import TapeCell
 from turing_machine.effects.alpha_vignette import AlphaVignetteEffect
 from turing_machine.effects.lens import LensEffect
-
+from turing_machine.components.paper_tile import InfinityTapeItem
+from turing_machine.logic.tapecore import InfiniteTape
 class PaperTileTest(Timeline):
     """
     uv run janim run test_scene.py PaperTileTest -i
@@ -120,7 +121,7 @@ class LensEffectTest(Timeline):
     """
     def construct(self):
         rect2 = Rect(20, 20).fill.set(color=RED, alpha=1).r
-        rect = Rect(4, 2).fill.set(color=BLUE, alpha=1).r
+        rect = Rect(4, 2)
         lens = LensEffect(rect)
         self.play(Create(rect2))
         self.forward()
@@ -140,3 +141,38 @@ class LensEffectTest(Timeline):
             duration=4.0,
             rate_func=smooth
         )
+
+class InfinityTapeItemTest(Timeline):
+    """
+    uv run janim run test_scene.py InfinityTapeItemTest -i
+    """
+    def construct(self):
+        tape = InfiniteTape[str](empty_value="", initial_window_size=11)
+        tape.write_batch_absolute(start_abs_index=-2, data=["A", "B", "C_0", "D_1", "E", "F", "G"])
+        tape.move_pointer(1)
+        tape_item = InfinityTapeItem(
+            showcase_radius=5,
+            tape_center_at=DOWN * 1,
+            init_tape=tape,
+            cell_setting=lambda abs_index, value: TapeCell(
+                square_size=0.8,
+                tile_data=value,
+                line_color=WHITE,
+                text_scaling=1.0,
+            ),
+            vignette_setting=lambda item: AlphaVignetteEffect(
+                item,
+                vignette_radius=0.5,
+                vignette_softness=0.2,
+                vignette_intensity=2.0,
+                aspect_ratio=16 / 9,
+            ),
+            lens_setting=lambda item: LensEffect(
+                item,
+                lens_radius=1.2,
+                lens_strength=0.5,
+                aspect_ratio=16 / 9,
+            ),
+        ).points.scale(0.9).r
+        self.play(Create(tape_item))
+        self.forward(2)
