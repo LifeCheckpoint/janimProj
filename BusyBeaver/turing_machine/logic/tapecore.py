@@ -1,11 +1,22 @@
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Generic
 from pydantic import BaseModel, PrivateAttr, Field
 
+
+class CellValue(BaseModel):
+    """
+    纸带单元格的值包装类
+    """
+    absolute_index: int = Field(..., description="单元格的绝对索引")
+    value: Any = Field(default=None, description="单元格的实际值")
+
+
 T = TypeVar("T")
 
 class InfiniteTape(BaseModel, Generic[T]):
     """
     无限长纸带数据结构
+
+    需通过 set_window_size 方法在初始化后设置窗口大小
     """
     
     # 默认空值，用于初始化或清空时填充
@@ -26,12 +37,7 @@ class InfiniteTape(BaseModel, Generic[T]):
     # 窗口半径
     _window_radius: int = PrivateAttr(default=5)
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        self.set_window_size(self.initial_window_size)
-
-
-    def set_window_size(self, size: int) -> None:
+    def set_window_size(self, size: Optional[int] = None):
         """
         设置窗口大小。
         
@@ -40,11 +46,10 @@ class InfiniteTape(BaseModel, Generic[T]):
 
         :param size: 可视窗口的总长度。
         :type size: int
-        :return: None
+        :return: Self
         """
-        # 计算半径：(size - 1) // 2
-        # 例如 size=11 -> radius=5; size=1 -> radius=0
-        self._window_radius = (size - 1) // 2
+        self._window_radius = (size - 1) // 2 if size is not None else (self.initial_window_size - 1) // 2
+        return self
 
     def reset(self) -> None:
         """
@@ -64,7 +69,7 @@ class InfiniteTape(BaseModel, Generic[T]):
         """内部辅助：根据绝对索引获取值，如果不存在返回默认空值"""
         return self._tape_data.get(abs_index, self.empty_value)
 
-    def __getitem__(self, offset: int) -> Tuple[int, Optional[T]]:
+    def __getitem__(self, offset: int) -> CellValue:
         """
         单个读取（下标方式读取）。
         
@@ -72,22 +77,22 @@ class InfiniteTape(BaseModel, Generic[T]):
 
         :param offset: 相对偏移量。0 表示当前指针位置，-1 表示左移一位。
         :type offset: int
-        :return: (该数据的绝对索引, 数据内容)
-        :rtype: Tuple[int, Optional[T]]
+        :return: CellValue 包含绝对索引和对应内容
+        :rtype: CellValue
         """
         target_abs_index = self._pointer + offset
-        return target_abs_index, self._get_value(target_abs_index)
+        return CellValue(absolute_index=target_abs_index, value=self._get_value(target_abs_index))
 
-    def read_current(self) -> Tuple[int, Optional[T]]:
+    def read_current(self):
         """
         快速读取。
         
         读取当前指针指向的数据（相当于下标[0]）。
 
-        :return: (当前绝对索引, 数据内容)
-        :rtype: Tuple[int, Optional[T]]
+        :return: CellValue 包含绝对索引和对应内容
+        :rtype: CellValue
         """
-        return self[0]
+        return CellValue(absolute_index=self._pointer, value=self._get_value(self._pointer))
 
     def __setitem__(self, offset: int, value: T) -> None:
         """
