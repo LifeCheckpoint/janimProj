@@ -64,9 +64,11 @@ class TapeCell(Group):
         """
         设置新的字符组件
         """
-        self.remove(self.word)
+        self.word.hide()
         self.word = new_word
-        self.add(self.word)
+        # self.word.become(new_word)
+        # self.word.show()
+        # new_word.hide()
 
     def create_set_value_animation(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
         """
@@ -86,7 +88,8 @@ class TapeCell(Group):
         self.tile_data = value
         new_word = TypstMath(
             text=self.tile_data,
-        ).points.scale(self.text_scaling).r
+        ).points.scale(self.text_scaling).r \
+         .points.move_to(self.word).r
         
         return Succession(
             DataUpdater(
@@ -125,7 +128,8 @@ class TapeCell(Group):
         self.tile_data = ""
         new_word = TypstMath(
             text=self.tile_data,
-        ).points.scale(self.text_scaling).r
+        ).points.scale(self.text_scaling).r \
+         .points.move_to(self.word).r
 
         return Succession(
             Rotate(self, angle=PI / 12, duration=wiggle_time / 2, rate_func=smooth),

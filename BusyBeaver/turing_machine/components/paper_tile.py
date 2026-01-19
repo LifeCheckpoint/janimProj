@@ -12,12 +12,14 @@ class InfinityTapeItem(Group):
 
     该类仅用于显示范围半径内的格子组件，并同步 Tape 的部分操作
     """
-    cells_group: Group[VItem]
+    cells_group: Group[TapeCell]
     pointer: SVGItem
     vignette_effect: AlphaVignetteEffect | IdentityEffect
     lens_effect: LensEffect | IdentityEffect
     left_temp_cell: TapeCell
     right_temp_cell: TapeCell
+
+    tape: InfiniteTape[str]
     
     def __init__(
         self,
@@ -98,7 +100,7 @@ class InfinityTapeItem(Group):
             .points.next_to(self.cells_group[showcase_radius], RIGHT, buff=0)
 
         self.pointer.points.next_to(self.cells_group[showcase_radius], UP, buff=0.5)
-        
+
         self.add(self.cells_group, self.pointer)
 
         # 应用 shader 序列
@@ -114,4 +116,28 @@ class InfinityTapeItem(Group):
 
         # 将最后一个 shader effect 添加到当前 Group
         self.add(self.vignette_effect.show())
+        
+    def set_value(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1):
+        """
+        设置当前指针位置的格子数据，并获取动画
+
+        :param value: 要设置的字符数据
+        :type value: str
+        :param glow_time: 发光时间
+        :type glow_time: float
+        :param wait_time: 等待时间
+        :type wait_time: float
+        :param transform_time: 变换时间
+        :type transform_time: float
+        :return: 返回设置动画
+        :rtype: Succession
+
+        """
+        self.tape.write_current(value)
+        return self.cells_group[self.showcase_radius].create_set_value_animation(
+            value=value,
+            glow_time=glow_time,
+            wait_time=wait_time,
+            transform_time=transform_time,
+        )
         

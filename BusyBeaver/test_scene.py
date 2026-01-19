@@ -143,6 +143,20 @@ class LensEffectTest(Timeline):
             rate_func=smooth
         )
 
+class ShaderTransformTest(Timeline):
+    """
+    uv run janim run test_scene.py ShaderTransformTest -i
+    """
+    def construct(self):
+        rect1 = Rect(2, 3).stroke.set(color=RED).r
+        rect2 = Rect(3, 2).stroke.set(color=BLUE).r
+        LensEffect(rect1).show()
+        LensEffect(rect2).show()
+        self.play(Create(rect1))
+        self.forward(1)
+        self.play(Transform(rect1, rect2))
+        self.forward(1)
+
 class IdentityEffectTest(Timeline):
     """
     uv run janim run test_scene.py IdentityEffectTest -i
@@ -176,19 +190,30 @@ class InfinityTapeItemTest(Timeline):
                 line_color=WHITE,
                 text_scaling=1.0,
             ),
-            vignette_setting=lambda item: AlphaVignetteEffect(
-                item,
-                vignette_radius=0.6,
-                vignette_softness=0.2,
-                vignette_intensity=2.0,
-                aspect_ratio=16 / 9,
-            ),
-            lens_setting=lambda item: LensEffect(
-                item,
-                lens_radius=1.2,
-                lens_strength=0.5,
-                aspect_ratio=16 / 9,
-            ),
+            # vignette_setting=lambda item: AlphaVignetteEffect(
+            #     item,
+            #     vignette_radius=0.6,
+            #     vignette_softness=0.2,
+            #     vignette_intensity=2.0,
+            #     aspect_ratio=16 / 9,
+            # ),
+            # lens_setting=lambda item: LensEffect(
+            #     item,
+            #     lens_radius=1.2,
+            #     lens_strength=0.5,
+            #     aspect_ratio=16 / 9,
+            # ),
         ).points.scale(0.9).r
         self.play(Create(tape_item))
-        self.forward(2)
+        self.forward(1)
+        self.play(
+            tape_item.set_value("D_2"),
+        )
+        self.play(
+            tape_item.set_value("D_3"),
+        )
+        self.play(
+            tape_item.set_value("D_4"),
+        )
+        self.forward(1)
+
