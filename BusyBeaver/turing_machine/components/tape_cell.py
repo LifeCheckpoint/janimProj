@@ -1,5 +1,4 @@
 from janim.imports import * # type: ignore
-from typing import Self, List
 from ..effects.chromatic import ChromaticEffect
 
 class TapeCell(Group):
@@ -61,7 +60,7 @@ class TapeCell(Group):
 
         self.add(self.frame, self.word)
 
-    def set_new_word(self, new_word: TypstMath):
+    def _set_new_word(self, new_word: TypstMath):
         """
         设置新的字符组件
         """
@@ -107,7 +106,7 @@ class TapeCell(Group):
                 lambda item, p: item.glow.set(color=YELLOW, alpha=0.5 * (1 - p.alpha), size=0.3 * (1 - p.alpha)).r,
                 duration=glow_time,
             ),
-            Do(lambda: self.set_new_word(new_word)),
+            Do(lambda: self._set_new_word(new_word)),
         )
 
     def create_clear_value_animation(self, wiggle_time: float = 0.15, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
@@ -138,7 +137,7 @@ class TapeCell(Group):
                 self.word,
                 duration=transform_time,
             ),
-            Do(lambda: self.set_new_word(new_word)),
+            Do(lambda: self._set_new_word(new_word)),
         )
 
     def get_chromatic_effect(self) -> ChromaticEffect:
