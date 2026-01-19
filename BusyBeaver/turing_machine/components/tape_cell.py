@@ -61,14 +61,33 @@ class TapeCell(Group):
 
         self.add(self.frame, self.word)
 
+    def set_new_word(self, new_word: TypstMath):
+        """
+        设置新的字符组件
+        """
+        self.remove(self.word)
+        self.word = new_word
+        self.add(self.word)
+
     def create_set_value_animation(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
         """
         获取设置方格字符值的动画
         
         :param value: 字符值
         :type value: str
+        :param glow_time: 发光时间，默认值为 0.5
+        :type glow_time: float
+        :param wait_time: 等待时间，默认值为 0.25
+        :type wait_time: float
+        :param transform_time: 变换时间，默认值为 1.0
+        :type transform_time: float
+        :return: Succession 动画序列
+        :rtype: Succession
         """
         self.tile_data = value
+        new_word = TypstMath(
+            text=self.tile_data,
+        ).points.scale(self.text_scaling).r
         
         return Succession(
             DataUpdater(
@@ -79,9 +98,7 @@ class TapeCell(Group):
             Wait(wait_time),
             Transform(
                 self.word,
-                TypstMath(
-                    text=self.tile_data,
-                ).points.scale(self.text_scaling).r,
+                new_word,
                 duration=transform_time,
             ),
             Wait(wait_time),
@@ -90,10 +107,39 @@ class TapeCell(Group):
                 lambda item, p: item.glow.set(color=YELLOW, alpha=0.5 * (1 - p.alpha), size=0.3 * (1 - p.alpha)).r,
                 duration=glow_time,
             ),
+            Do(lambda: self.set_new_word(new_word)),
         )
 
-    def clear_set_value_animation(self):
-        pass
+    def create_clear_value_animation(self, wiggle_time: float = 0.15, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
+        """
+        获取清除方格字符值的动画
+
+        :param wiggle_time: 单次抖动时间，默认值为 0.15
+        :type wiggle_time: float
+        :param wait_time: 等待时间，默认值为 0.25
+        :type wait_time: float
+        :param transform_time: 变换时间，默认值为 1.0
+        :type transform_time: float
+        :return: Succession 动画序列
+        :rtype: Succession
+        """
+        self.tile_data = ""
+        new_word = TypstMath(
+            text=self.tile_data,
+        ).points.scale(self.text_scaling).r
+
+        return Succession(
+            Rotate(self, angle=PI / 12, duration=wiggle_time / 2, rate_func=smooth),
+            Rotate(self, angle=-PI / 6, duration=wiggle_time, rate_func=smooth),
+            Rotate(self, angle=PI / 6, duration=wiggle_time, rate_func=smooth),
+            Rotate(self, angle=-PI / 12, duration=wiggle_time / 2, rate_func=smooth),
+            Wait(wait_time),
+            FadeOut(
+                self.word,
+                duration=transform_time,
+            ),
+            Do(lambda: self.set_new_word(new_word)),
+        )
 
     def get_chromatic_effect(self) -> ChromaticEffect:
         """

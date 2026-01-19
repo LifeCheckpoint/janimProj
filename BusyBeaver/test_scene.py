@@ -53,6 +53,8 @@ class TapeCellTest2(Timeline):
     def construct(self):
         ch0 = R"#text(fill: white)[0]"
         ch1 = R"#text(fill: red)[1]"
+        ch2 = R"#text(fill: blue)[2]"
+        ch3 = R"#text(fill: green)[3]"
         cell = TapeCell(tile_data=ch0)
         self.forward()
         self.play(Create(cell))
@@ -69,4 +71,15 @@ class TapeCellTest2(Timeline):
             cell.create_set_value_animation(ch1)
         )
         self.forward(1)
-        
+        self.play(
+            cell.create_set_value_animation(ch2)
+        )
+        self.forward(1)
+        self.play(
+            cell.create_set_value_animation(ch3)
+        )
+        self.forward(1)
+        self.play(
+            cell.create_clear_value_animation()
+        )
+        self.forward(1)
