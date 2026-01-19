@@ -2,6 +2,7 @@ from janim.imports import * # type: ignore
 from turing_machine.components.tape_cell import TapeCell
 from turing_machine.effects.alpha_vignette import AlphaVignetteEffect
 from turing_machine.effects.lens import LensEffect
+from turing_machine.effects.identity import IdentityEffect
 from turing_machine.components.paper_tile import InfinityTapeItem
 from turing_machine.logic.tapecore import InfiniteTape
 class PaperTileTest(Timeline):
@@ -142,6 +143,21 @@ class LensEffectTest(Timeline):
             rate_func=smooth
         )
 
+class IdentityEffectTest(Timeline):
+    """
+    uv run janim run test_scene.py IdentityEffectTest -i
+    """
+    def construct(self):
+        rect2 = Rect(20, 20).fill.set(color=RED, alpha=1).r
+        rect = Rect(4, 2)
+        identity = IdentityEffect(rect)
+        self.play(Create(rect2))
+        self.forward()
+        self.play(Create(rect))
+        self.forward(2)
+        identity.show()
+        self.forward(4)
+
 class InfinityTapeItemTest(Timeline):
     """
     uv run janim run test_scene.py InfinityTapeItemTest -i
@@ -154,7 +170,7 @@ class InfinityTapeItemTest(Timeline):
             showcase_radius=5,
             tape_center_at=DOWN * 1,
             init_tape=tape,
-            cell_setting=lambda abs_index, value: TapeCell(
+            cell_setting=lambda _, value: TapeCell(
                 square_size=0.8,
                 tile_data=value,
                 line_color=WHITE,
@@ -162,7 +178,7 @@ class InfinityTapeItemTest(Timeline):
             ),
             vignette_setting=lambda item: AlphaVignetteEffect(
                 item,
-                vignette_radius=0.5,
+                vignette_radius=0.6,
                 vignette_softness=0.2,
                 vignette_intensity=2.0,
                 aspect_ratio=16 / 9,

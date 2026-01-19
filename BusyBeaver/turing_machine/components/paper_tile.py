@@ -1,6 +1,7 @@
 from janim.imports import * # type: ignore
 from typing import Callable, cast
 from ..effects.alpha_vignette import AlphaVignetteEffect
+from ..effects.identity import IdentityEffect
 from ..effects.lens import LensEffect
 from ..logic.tapecore import InfiniteTape
 from .tape_cell import TapeCell
@@ -13,8 +14,8 @@ class InfinityTapeItem(Group):
     """
     cells_group: Group[VItem]
     pointer: SVGItem
-    vignette_effect: AlphaVignetteEffect | None
-    lens_effect: LensEffect | None
+    vignette_effect: AlphaVignetteEffect | IdentityEffect
+    lens_effect: LensEffect | IdentityEffect
     left_temp_cell: TapeCell
     right_temp_cell: TapeCell
     
@@ -97,13 +98,20 @@ class InfinityTapeItem(Group):
             .points.next_to(self.cells_group[showcase_radius], RIGHT, buff=0)
 
         self.pointer.points.next_to(self.cells_group[showcase_radius], UP, buff=0.5)
-
-        self.vignette_effect = vignette_setting(Group(self.cells_group, self.pointer)) if vignette_setting else None
-        self.lens_effect = lens_setting(self.cells_group) if lens_setting else None
-
+        
         self.add(self.cells_group, self.pointer)
-        if self.vignette_effect is not None:
-            pass
-            self.add(self.vignette_effect.show())
-        if self.lens_effect is not None:
-            self.add(self.lens_effect.show())
+
+        # 应用 shader 序列
+        if lens_setting is not None:
+            self.lens_effect = lens_setting(self.cells_group).show()
+        else:
+            self.lens_effect = IdentityEffect(self.cells_group).show()
+
+        if vignette_setting is not None:
+            self.vignette_effect = vignette_setting(Group(self.lens_effect, self.pointer)).show()
+        else:
+            self.vignette_effect = IdentityEffect(Group(self.lens_effect, self.pointer)).show()
+
+        # 将最后一个 shader effect 添加到当前 Group
+        self.add(self.vignette_effect.show())
+        
