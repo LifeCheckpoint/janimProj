@@ -5,6 +5,16 @@ from turing_machine.effects.lens import LensEffect
 from turing_machine.effects.identity import IdentityEffect
 from turing_machine.components.paper_tile import InfinityTapeItem
 from turing_machine.logic.tapecore import InfiniteTape
+
+# from dowhen import goto
+# from janim.render.renderer_vitem_plane import VItemPlaneRenderer
+# source_hash = "f746551d"
+# goto("if self.vbo_points.size != self.vbo_mapped_points.size:").when(
+#     VItemPlaneRenderer._update_points_normal,
+#     "if new_attrs.points is not self.attrs.points \\",
+#     source_hash=source_hash
+# )
+
 class PaperTileTest(Timeline):
     """
     uv run janim run test_scene.py PaperTileTest -i
@@ -203,7 +213,7 @@ class InfinityTapeItemTest(Timeline):
             #     lens_strength=0.5,
             #     aspect_ratio=16 / 9,
             # ),
-        ).points.scale(0.9).r
+        )
         self.play(Create(tape_item))
         self.forward(1)
         self.play(
@@ -215,5 +225,15 @@ class InfinityTapeItemTest(Timeline):
         self.play(
             tape_item.set_value("D_4"),
         )
-        self.forward(1)
 
+        for _ in range(5):
+            self.forward(1)
+            self.play(
+                tape_item.tape_shift_right(duration=1.0),
+            )
+        
+        for _ in range(5):
+            self.forward(1)
+            self.play(
+                tape_item.tape_shift_left(duration=1.0),
+            )

@@ -265,6 +265,7 @@ class InfiniteTape(BaseModel, Generic[T]):
         """
         window_movement = -1 * direction
         self._window_center += window_movement
+        self._pointer -= direction
         return direction
 
     def move_window(self, direction: int) -> int:
@@ -280,6 +281,7 @@ class InfiniteTape(BaseModel, Generic[T]):
         :rtype: int
         """
         self._window_center += direction
+        self._pointer += direction
         return direction
 
 

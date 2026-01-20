@@ -64,11 +64,9 @@ class TapeCell(Group):
         """
         设置新的字符组件
         """
-        self.word.hide()
+        self.remove(self.word)
         self.word = new_word
-        # self.word.become(new_word)
-        # self.word.show()
-        # new_word.hide()
+        self.add(self.word)
 
     def create_set_value_animation(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
         """

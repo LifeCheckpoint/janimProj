@@ -16,8 +16,6 @@ class InfinityTapeItem(Group):
     pointer: SVGItem
     vignette_effect: AlphaVignetteEffect | IdentityEffect
     lens_effect: LensEffect | IdentityEffect
-    left_temp_cell: TapeCell
-    right_temp_cell: TapeCell
 
     tape: InfiniteTape[str]
     
@@ -58,6 +56,7 @@ class InfinityTapeItem(Group):
         self.tape = init_tape if init_tape else InfiniteTape[str](empty_value="", initial_window_size=showcase_radius * 2 + 1).set_window_size()
         self.center_at = center_at if center_at is not None else self.tape.read_current().absolute_index
         self.center_scaling = center_scaling
+        self.cell_setting = cell_setting
 
         self.cells_group = Group(depth=10)
         self.pointer = SVGItem(
@@ -140,4 +139,96 @@ class InfinityTapeItem(Group):
             wait_time=wait_time,
             transform_time=transform_time,
         )
+    
+    def tape_shift_right(self, duration: float = 1.0) -> Succession:
+        """
+        将格子整体向右移动一个位置
+        """
+
+        # 更新格子数据
+        self.tape.move_tape(1)
+
+        def delete_right():
+            """
+            删除最右边格子
+            """
+            self.cells_group[-1].hide()
+            self.cells_group.remove(self.cells_group[-1])
+
+        def update_refs():
+            """
+            更新移动后格子引用
+            """
+            # 格子组插入最左边新格子
+            target_offset = -self.showcase_radius
+            print(f"insert tape at abs index: {self.tape[target_offset].absolute_index} with value: {self.tape[target_offset].value}")
+            new_tape = TapeCell(
+                square_size=0.8,
+                tile_data=self.tape[target_offset].value,
+                line_color=WHITE,
+                text_scaling=1.0,
+            ) if not self.cell_setting \
+              else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
+            new_tape.points.next_to(self.cells_group[0], LEFT, buff=0)
+            self.cells_group.add(new_tape, insert=True)
+
+        return Succession(
+            Do(delete_right), 
+            AnimGroup(
+                *[
+                    self.cells_group[i].anim.points.move_to(self.cells_group[i + 1].points.box.center)
+                    for i in range(0, len(self.cells_group) - 1) # type: ignore
+                ],
+                self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
+                self.cells_group[self.showcase_radius - 1].anim.points.scale(self.center_scaling), # type: ignore
+                duration=duration,
+                rate_func=smooth,
+            ),
+            Do(update_refs),
+        )
+    
+    def tape_shift_left(self, duration: float = 1.0) -> Succession:
+        """
+        将格子整体向左移动一个位置
+        """
+        # 更新格子数据
+        self.tape.move_tape(-1)
+
+        def delete_left():
+            """
+            删除最左边格子
+            """
+            self.cells_group[0].hide()
+            self.cells_group.remove(self.cells_group[0])
+
+        def update_refs():
+            """
+            更新移动后格子引用
+            """
+            # 格子组插入最右边新格子
+            target_offset = self.showcase_radius
+            print(f"insert tape at abs index: {self.tape[target_offset].absolute_index} with value: {self.tape[target_offset].value}")
+            new_tape = TapeCell(
+                square_size=0.8,
+                tile_data=self.tape[target_offset].value,
+                line_color=WHITE,
+                text_scaling=1.0,
+            ) if not self.cell_setting \
+              else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
+            new_tape.points.next_to(self.cells_group[-1], RIGHT, buff=0)
+            self.cells_group.add(new_tape, insert=False)
         
+        return Succession(
+            Do(delete_left),
+            AnimGroup(
+                *[
+                    self.cells_group[i].anim.points.move_to(self.cells_group[i - 1].points.box.center)
+                    for i in range(len(self.cells_group) - 1, 0, -1) # type: ignore
+                ],
+                self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
+                self.cells_group[self.showcase_radius + 1].anim.points.scale(self.center_scaling), # type: ignore
+                duration=duration,
+                rate_func=smooth,
+            ),
+            Do(update_refs),
+        )
