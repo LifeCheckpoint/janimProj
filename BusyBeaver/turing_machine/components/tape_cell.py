@@ -2,8 +2,9 @@ from janim.imports import * # type: ignore
 from ..effects.chromatic import ChromaticEffect
 
 class TapeCell(Group):
-    frame: Square
+    frame: RoundedRect
     word: TypstMath
+    index_text: Text | None
     glowing_effect: ChromaticEffect
 
     def __init__(
@@ -12,7 +13,8 @@ class TapeCell(Group):
         square_size: float = 1.0,
         tile_data: None | str = None,
         line_color: str = WHITE,
-        text_scaling: float = 1.2
+        text_scaling: float = 1.2,
+        index: int | None = None,
     ):
         """
         图灵机纸带方格
@@ -27,6 +29,8 @@ class TapeCell(Group):
         :type line_color: str
         :param text_scaling: 纸带上字符的缩放大小
         :type text_scaling: float
+        :param index: 纸带格的绝对索引
+        :type index: int | None
         """
         super().__init__()
 
@@ -35,6 +39,7 @@ class TapeCell(Group):
         self.text_scaling = text_scaling
         self.tile_data = tile_data
         self.center = center
+        self.index = index
 
         self._build_tiles()
 
@@ -49,9 +54,14 @@ class TapeCell(Group):
         """
         构建纸带方格组件
         """
-        self.frame = Square(
-            side_length=self.square_size
-        ).stroke.set(color=self.line_color).r
+        self.frame = RoundedRect(
+            self.square_size,
+            self.square_size,
+            corner_radius=0.1,
+            fill_color="#1E2130",
+            fill_alpha=1,
+            stroke_color=self.line_color,
+        )
         self.frame.points.move_to(self.center)
         self.word = TypstMath(
             text=self.tile_data if self.tile_data else "",
@@ -59,6 +69,13 @@ class TapeCell(Group):
         self.word.points.move_to(self.center)
 
         self.add(self.frame, self.word)
+
+        if self.index is not None:
+            self.index_text = Text(str(self.index), font_size=16, color=GREY, fill_alpha=0.5)
+            self.index_text.points.next_to(self.frame, DOWN, buff=0.1)
+            self.add(self.index_text)
+        else:
+            self.index_text = None
 
     def _set_new_word(self, new_word: TypstMath):
         """

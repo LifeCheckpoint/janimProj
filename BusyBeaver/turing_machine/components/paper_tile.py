@@ -71,6 +71,7 @@ class InfinityTapeItem(Group):
                     tile_data=self.tape[i].value,
                     line_color=WHITE,
                     text_scaling=1.0,
+                    index=self.center_at + i,
                 )
             else:
                 cell = cell_setting(self.center_at + i, self.tape[i].value)
@@ -167,6 +168,7 @@ class InfinityTapeItem(Group):
                 tile_data=self.tape[target_offset].value,
                 line_color=WHITE,
                 text_scaling=1.0,
+                index=self.tape[target_offset].absolute_index,
             ) if not self.cell_setting \
               else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
             new_tape.points.next_to(self.cells_group[0], LEFT, buff=0)
@@ -182,7 +184,7 @@ class InfinityTapeItem(Group):
                 self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
                 self.cells_group[self.showcase_radius - 1].anim.points.scale(self.center_scaling), # type: ignore
                 duration=duration,
-                rate_func=smooth,
+                rate_func=ease_out_expo,
             ),
             Do(update_refs),
         )
@@ -212,6 +214,7 @@ class InfinityTapeItem(Group):
                 tile_data=self.tape[target_offset].value,
                 line_color=WHITE,
                 text_scaling=1.0,
+                index=self.tape[target_offset].absolute_index,
             ) if not self.cell_setting \
               else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
             new_tape.points.next_to(self.cells_group[-1], RIGHT, buff=0)
@@ -227,7 +230,7 @@ class InfinityTapeItem(Group):
                 self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
                 self.cells_group[self.showcase_radius + 1].anim.points.scale(self.center_scaling), # type: ignore
                 duration=duration,
-                rate_func=smooth,
+                rate_func=ease_out_expo,
             ),
             Do(update_refs),
         )

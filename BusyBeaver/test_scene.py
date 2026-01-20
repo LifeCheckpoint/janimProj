@@ -197,11 +197,12 @@ class InfinityTapeItemTest(Timeline):
             showcase_radius=5,
             tape_center_at=DOWN * 1,
             init_tape=tape,
-            cell_setting=lambda _, value: TapeCell(
+            cell_setting=lambda index, value: TapeCell(
                 square_size=0.8,
                 tile_data=value,
                 line_color=WHITE,
                 text_scaling=1.0,
+                index=index,
             ),
             # vignette_setting=lambda item: AlphaVignetteEffect(
             #     item,
