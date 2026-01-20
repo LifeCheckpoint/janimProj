@@ -244,9 +244,9 @@ class GridCellTest(Timeline):
     uv run janim run test_scene.py GridCellTest -i
     """
     def construct(self):
-        cell1 = GridCell(state_name="B", write_bit=0, move_dir="RIGHT", is_active=True)
-        cell2 = GridCell(state_name="C", write_bit=1, move_dir="LEFT", is_active=False)
-        cell3 = GridCell(state_name="HALT", write_bit=1, move_dir="STOP", is_active=False)
+        cell1 = GridCell(state_name="<c BLUE>B</c>", write_bit=0, move_dir="RIGHT", is_active=True)
+        cell2 = GridCell(state_name="<c YELLOW>C</c>", write_bit=1, move_dir="LEFT", is_active=False)
+        cell3 = GridCell(state_name="<c RED>HALT</c>", write_bit=1, move_dir="STOP", is_active=False)
         
         group = Group(cell1, cell2, cell3)
         group.points.arrange(RIGHT, buff=0.5)
