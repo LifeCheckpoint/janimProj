@@ -138,6 +138,7 @@ class InfinityTapeItem(Group):
             glow_time=glow_time,
             wait_time=wait_time,
             transform_time=transform_time,
+            center_scaling=self.center_scaling,
         )
     
     def tape_shift_right(self, duration: float = 1.0) -> Succession:
@@ -161,7 +162,6 @@ class InfinityTapeItem(Group):
             """
             # 格子组插入最左边新格子
             target_offset = -self.showcase_radius
-            print(f"insert tape at abs index: {self.tape[target_offset].absolute_index} with value: {self.tape[target_offset].value}")
             new_tape = TapeCell(
                 square_size=0.8,
                 tile_data=self.tape[target_offset].value,
@@ -207,7 +207,6 @@ class InfinityTapeItem(Group):
             """
             # 格子组插入最右边新格子
             target_offset = self.showcase_radius
-            print(f"insert tape at abs index: {self.tape[target_offset].absolute_index} with value: {self.tape[target_offset].value}")
             new_tape = TapeCell(
                 square_size=0.8,
                 tile_data=self.tape[target_offset].value,

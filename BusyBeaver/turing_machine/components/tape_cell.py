@@ -68,7 +68,14 @@ class TapeCell(Group):
         self.word = new_word
         self.add(self.word)
 
-    def create_set_value_animation(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1.0) -> Succession:
+    def create_set_value_animation(
+        self,
+        value: str,
+        glow_time: float = 0.5,
+        wait_time: float = 0.25,
+        transform_time: float = 1.0,
+        center_scaling: float = 1.2,
+    ) -> Succession:
         """
         获取设置方格字符值的动画
         
@@ -80,13 +87,15 @@ class TapeCell(Group):
         :type wait_time: float
         :param transform_time: 变换时间，默认值为 1.0
         :type transform_time: float
+        :param center_scaling: 中心放大倍数，默认值为 1.2
+        :type center_scaling: float
         :return: Succession 动画序列
         :rtype: Succession
         """
         self.tile_data = value
         new_word = TypstMath(
             text=self.tile_data,
-        ).points.scale(self.text_scaling).r \
+        ).points.scale(self.text_scaling * center_scaling).r \
          .points.move_to(self.word).r
         
         return Succession(
