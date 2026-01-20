@@ -1,7 +1,7 @@
 from janim.imports import *
 
 CYAN = "#00FFFF"
-local_font = ["Judou Sans Hans", "Microsoft YaHei"]
+local_font = ["Judou Sans Hans Bold", "Microsoft YaHei"]
 
 class GridCell(Group):
     def __init__(
@@ -56,13 +56,13 @@ class GridCell(Group):
         
         # Direction Button
         dir_map = {
-            "RIGHT": "右移 →",
-            "LEFT": "← 左移",
-            "STOP": "停止 ■"
+            "RIGHT": "右移 <c GREEN>→</c>",
+            "LEFT": "<c GREEN>←</c> 左移",
+            "STOP": "停止 <c RED>■</c>"
         }
         dir_str = dir_map.get(self.move_dir, self.move_dir)
         
-        self.dir_text = Text(dir_str, font_size=10, color=WHITE, font=local_font)
+        self.dir_text = Text(dir_str, font_size=10, color=WHITE, font=local_font, format='rich')
         
         # Calculate button size based on text
         btn_w = self.dir_text.points.box.width + 0.1
