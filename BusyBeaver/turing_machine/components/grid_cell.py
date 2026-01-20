@@ -1,4 +1,4 @@
-from janim.imports import *
+from janim.imports import * # type: ignore
 
 CYAN = "#00FFFF"
 local_font = ["Judou Sans Hans Bold", "Microsoft YaHei"]
@@ -7,7 +7,7 @@ class GridCell(Group):
     def __init__(
         self,
         state_name: str = "B",
-        write_bit: int = 0,
+        write_bit: int | str = 0,
         move_dir: str = "RIGHT",
         is_active: bool = False,
         width: float = 1.1,

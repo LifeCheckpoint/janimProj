@@ -6,6 +6,8 @@ from turing_machine.effects.identity import IdentityEffect
 from turing_machine.components.paper_tile import InfinityTapeItem
 from turing_machine.logic.tapecore import InfiniteTape
 from turing_machine.components.grid_cell import GridCell
+from turing_machine.components.grid_table import GridTable
+from turing_machine.logic.turingcore import Transition
 
 # from dowhen import goto
 # from janim.render.renderer_vitem_plane import VItemPlaneRenderer
@@ -259,4 +261,27 @@ class GridCellTest(Timeline):
             cell1.animate_active(False),
             cell2.animate_active(True),
         )
+        self.forward()
+
+class GridTableTest(Timeline):
+    """
+    uv run janim run test_scene.py GridTableTest -i
+    """
+    def construct(self):
+        states = ["A", "B", "HALT"]
+        symbols = ["0", "1"]
+        transitions = {
+            ("A", "0"): Transition(next_state="B", write_symbol="1", direction="R"),
+            ("A", "1"): Transition(next_state="A", write_symbol="1", direction="L"),
+            ("B", "0"): Transition(next_state="A", write_symbol="1", direction="L"),
+            ("B", "1"): Transition(next_state="HALT", write_symbol="1", direction="S"),
+        }
+        
+        table = GridTable(states, symbols, transitions)
+        self.play(Create(table))
+        self.forward()
+        
+        # Highlight cell (A, 0)
+        cell = table["A", "0"]
+        self.play(cell.animate_active(True))
         self.forward()
