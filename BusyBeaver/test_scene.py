@@ -5,6 +5,7 @@ from turing_machine.effects.lens import LensEffect
 from turing_machine.effects.identity import IdentityEffect
 from turing_machine.components.paper_tile import InfinityTapeItem
 from turing_machine.logic.tapecore import InfiniteTape
+from turing_machine.components.grid_cell import GridCell
 
 # from dowhen import goto
 # from janim.render.renderer_vitem_plane import VItemPlaneRenderer
@@ -237,3 +238,25 @@ class InfinityTapeItemTest(Timeline):
             self.play(
                 tape_item.tape_shift_left(duration=1.0),
             )
+
+class GridCellTest(Timeline):
+    """
+    uv run janim run test_scene.py GridCellTest -i
+    """
+    def construct(self):
+        cell1 = GridCell(state_name="B", write_bit=0, move_dir="RIGHT", is_active=True)
+        cell2 = GridCell(state_name="C", write_bit=1, move_dir="LEFT", is_active=False)
+        cell3 = GridCell(state_name="HALT", write_bit=1, move_dir="STOP", is_active=False)
+        
+        group = Group(cell1, cell2, cell3)
+        group.points.arrange(RIGHT, buff=0.5)
+        
+        self.play(Create(group))
+        self.forward()
+        
+        # Test toggling active state
+        self.play(
+            cell1.animate_active(False),
+            cell2.animate_active(True),
+        )
+        self.forward()
