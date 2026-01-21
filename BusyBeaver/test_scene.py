@@ -12,14 +12,14 @@ from turing_machine.turing_machine import TuringMachine
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.components.turing_counter import TuringCounter
 
-# from dowhen import goto
-# from janim.render.renderer_vitem_plane import VItemPlaneRenderer
-# source_hash = "f746551d"
-# goto("if self.vbo_points.size != self.vbo_mapped_points.size:").when(
-#     VItemPlaneRenderer._update_points_normal,
-#     "if new_attrs.points is not self.attrs.points \\",
-#     source_hash=source_hash
-# )
+from dowhen import goto
+from janim.render.renderer_vitem_plane import VItemPlaneRenderer
+source_hash = "f746551d"
+goto("if self.vbo_points.size != self.vbo_mapped_points.size:").when(
+    VItemPlaneRenderer._update_points_normal,
+    "if new_attrs.points is not self.attrs.points \\",
+    source_hash=source_hash
+)
 
 class PaperTileTest(Timeline):
     """
@@ -328,7 +328,7 @@ class TuringMachineTest(Timeline):
         # 2. Setup Machine
         tm = TuringMachine(
             core, 
-            showcase_radius=6,
+            showcase_radius=12,
             table_scaling=0.9,
             table_config={"transpose": True},
             counter_config={"max_value": 6},
@@ -342,9 +342,9 @@ class TuringMachineTest(Timeline):
         
         # 4. Run steps
         for _ in range(6):
-            for animate in tm.step(duration=1.0):
+            for animate in tm.step(duration=0.75):
                 self.play(animate)
-            self.forward(0.5)
+            self.forward(1)
             
         # 5. Hide/Show Table
         self.forward(1)

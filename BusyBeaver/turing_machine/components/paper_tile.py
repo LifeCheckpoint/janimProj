@@ -190,7 +190,7 @@ class InfinityTapeItem(Group):
             new_tape.points.scale(scale_factor)
             
             new_tape.points.next_to(self.cells_group[0], LEFT, buff=0)
-            self.cells_group.add(new_tape, insert=True)
+            self.cells_group.add(new_tape, prepend=True)
 
         return Succession(
             Do(delete_right), 
@@ -245,7 +245,7 @@ class InfinityTapeItem(Group):
             new_tape.points.scale(scale_factor)
 
             new_tape.points.next_to(self.cells_group[-1], RIGHT, buff=0)
-            self.cells_group.add(new_tape, insert=False)
+            self.cells_group.add(new_tape, prepend=False)
         
         return Succession(
             Do(delete_left),
