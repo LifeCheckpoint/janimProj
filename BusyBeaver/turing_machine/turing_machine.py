@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple, Set, Any
 from .components.paper_tile import InfinityTapeItem
 from .components.grid_table import GridTable
 from .components.tape_cell import TapeCell
+from .components.turing_counter import TuringCounter
 from .logic.turingcore import TuringMachineCore, StepResult
 
 class TuringMachine(Group):
@@ -14,22 +15,27 @@ class TuringMachine(Group):
         self,
         turing_core: TuringMachineCore,
         showcase_radius: int = 5,
+        table_scaling: float = 0.8,
+        counter_scaling: float = 0.6,
         table_config: Optional[dict[str, Any]] = None,
         tape_config: Optional[dict[str, Any]] = None,
+        counter_config: Optional[dict[str, Any]] = None,
         **kwargs
     ):
         self.core = turing_core
         self.showcase_radius = showcase_radius
         self.table_config = table_config or {}
         self.tape_config = tape_config or {}
+        self.counter_config = counter_config or {}
         
         self.is_table_shown = False
+        self.is_counter_shown = False
         self.last_active_cell = None
 
         super().__init__(**kwargs)
         
         self._setup_machine()
-        self._init_layout()
+        self._init_layout(table_scaling, counter_scaling)
         
         self.table.hide()
         
@@ -71,14 +77,22 @@ class TuringMachine(Group):
             transitions=self.core._transitions,
             **self.table_config
         )
+
+        # 初始化计数器
+        self.counter = TuringCounter(**self.counter_config)
+        self.counter.hide()
         
         # 将子组件添加到 Group 中
-        self.add(self.tape_item, self.table)
+        self.add(self.tape_item, self.table, self.counter)
         
-    def _init_layout(self):
+    def _init_layout(self, table_scaling: float, counter_scaling: float):
         self.tape_item.points.scale(0.7)
         self.tape_item.points.move_to(DOWN * 1.5)
-        self.table.points.scale(0.8)
+        
+        self.counter.points.scale(counter_scaling)
+        self.counter.points.next_to(self.tape_item.pointer, LEFT, buff=0.75)
+
+        self.table.points.scale(table_scaling)
         self.table.points.next_to(self.tape_item, UP, buff=0.25).shift(LEFT * 0.25)
         
     def show_table_anim(self, duration: float = 1.0) -> AnimGroup:
@@ -105,6 +119,30 @@ class TuringMachine(Group):
         return AnimGroup(
             FadeOut(self.table, duration=duration),
             self.tape_item.anim(duration=duration).points.shift(UP * 0.25), # type: ignore
+        )
+
+    def show_counter_anim(self, duration: float = 1.0) -> AnimGroup:
+        """
+        显示计数器动画
+        """
+        if self.is_counter_shown:
+            return AnimGroup()
+            
+        self.is_counter_shown = True
+        return AnimGroup(
+            FadeIn(self.counter, duration=duration)
+        )
+
+    def hide_counter_anim(self, duration: float = 1.0) -> AnimGroup:
+        """
+        隐藏计数器动画
+        """
+        if not self.is_counter_shown:
+            return AnimGroup()
+            
+        self.is_counter_shown = False
+        return AnimGroup(
+            FadeOut(self.counter, duration=duration)
         )
         
     def step(self, duration: float = 1.0) -> list[Animation]:
@@ -154,5 +192,8 @@ class TuringMachine(Group):
                 anims.append(self.tape_item.tape_shift_left(duration=duration / 2))
             elif direction == "L":
                 anims.append(self.tape_item.tape_shift_right(duration=duration / 2))
+
+        # 更新计数器
+        anims.append(self.counter.anim_set_value(self.core._step_count, duration=duration))
             
         return anims
