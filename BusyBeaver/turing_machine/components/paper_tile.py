@@ -117,6 +117,15 @@ class InfinityTapeItem(Group):
         # 将最后一个 shader effect 添加到当前 Group
         self.add(self.vignette_effect.show())
         
+    def _get_cell_scale_factor(self, ref_cell: TapeCell) -> float:
+        """
+        获取参考格子的缩放比例
+        """
+        # 使用 frame 的宽度来计算缩放比例
+        current_width = ref_cell.frame.points.box.width
+        base_width = ref_cell.square_size
+        return current_width / base_width
+
     def set_value(self, value: str, glow_time: float = 0.5, wait_time: float = 0.25, transform_time: float = 1):
         """
         设置当前指针位置的格子数据，并获取动画
@@ -163,6 +172,11 @@ class InfinityTapeItem(Group):
             """
             # 格子组插入最左边新格子
             target_offset = -self.showcase_radius
+            
+            # 获取参考格子（使用移动后的第一个格子）
+            ref_cell = self.cells_group[0]
+            scale_factor = self._get_cell_scale_factor(ref_cell)
+
             new_tape = TapeCell(
                 square_size=0.8,
                 tile_data=self.tape[target_offset].value,
@@ -171,6 +185,10 @@ class InfinityTapeItem(Group):
                 index=self.tape[target_offset].absolute_index,
             ) if not self.cell_setting \
               else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
+            
+            # 应用缩放
+            new_tape.points.scale(scale_factor)
+            
             new_tape.points.next_to(self.cells_group[0], LEFT, buff=0)
             self.cells_group.add(new_tape, insert=True)
 
@@ -209,6 +227,11 @@ class InfinityTapeItem(Group):
             """
             # 格子组插入最右边新格子
             target_offset = self.showcase_radius
+
+            # 获取参考格子（最右边的格子）
+            ref_cell = self.cells_group[-1]
+            scale_factor = self._get_cell_scale_factor(ref_cell)
+
             new_tape = TapeCell(
                 square_size=0.8,
                 tile_data=self.tape[target_offset].value,
@@ -217,6 +240,10 @@ class InfinityTapeItem(Group):
                 index=self.tape[target_offset].absolute_index,
             ) if not self.cell_setting \
               else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
+            
+            # 应用缩放
+            new_tape.points.scale(scale_factor)
+
             new_tape.points.next_to(self.cells_group[-1], RIGHT, buff=0)
             self.cells_group.add(new_tape, insert=False)
         

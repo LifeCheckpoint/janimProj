@@ -8,6 +8,8 @@ from turing_machine.logic.tapecore import InfiniteTape
 from turing_machine.components.grid_cell import GridCell
 from turing_machine.components.grid_table import GridTable
 from turing_machine.logic.turingcore import Transition
+from turing_machine.turing_machine import TuringMachine
+from turing_machine.logic.turingcore import TuringMachineCore
 
 # from dowhen import goto
 # from janim.render.renderer_vitem_plane import VItemPlaneRenderer
@@ -257,7 +259,6 @@ class GridCellTest(Timeline):
         self.play(Create(group))
         self.forward()
         
-        # Test toggling active state
         self.play(
             cell1.animate_active(False),
             cell2.animate_active(True),
@@ -285,4 +286,47 @@ class GridTableTest(Timeline):
         # Highlight cell (A, 0)
         cell = table["A", "0"]
         self.play(cell.animate_active(True))
+        self.forward()
+
+class TuringMachineTest(Timeline):
+    """
+    uv run janim run test_scene.py TuringMachineTest -i
+    """
+    def construct(self):
+        # 1. Setup Core
+        core = TuringMachineCore(
+            initial_tape="00000",
+            start_state="A",
+            blank_symbol="0",
+            halt_states=["HALT"]
+        )
+        
+        # 2-state Busy Beaver (approximate or simple example)
+        # A, 0 -> B, 1, R
+        core.add_rule("A", "0", "B", "1", "R")
+        # A, 1 -> B, 1, L
+        core.add_rule("A", "1", "B", "1", "L")
+        # B, 0 -> A, 1, L
+        core.add_rule("B", "0", "A", "1", "L")
+        # B, 1 -> HALT, 1, R
+        core.add_rule("B", "1", "HALT", "1", "R")
+        
+        # 2. Setup Machine
+        tm = TuringMachine(core, showcase_radius=3)
+        
+        # 3. Show
+        self.play(Create(tm.tape_item))
+        self.play(tm.show_table_anim())
+        self.forward()
+        
+        # 4. Run steps
+        for _ in range(6):
+            for animate in tm.step(duration=1.0):
+                self.play(animate)
+            self.forward(0.5)
+            
+        # 5. Hide/Show Table
+        self.play(tm.hide_table_anim())
+        self.forward()
+        self.play(tm.show_table_anim())
         self.forward()
