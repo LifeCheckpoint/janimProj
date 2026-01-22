@@ -11,6 +11,7 @@ from turing_machine.logic.turingcore import Transition
 from turing_machine.turing_machine import TuringMachine
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.components.turing_counter import TuringCounter
+from turing_machine.components.turing_machine_transform import TuringMachineTransform
 
 from dowhen import goto
 from janim.render.renderer_vitem_plane import VItemPlaneRenderer
@@ -338,6 +339,7 @@ class TuringMachineTest(Timeline):
         self.play(Create(tm.tape_item))
         self.play(tm.show_table_anim())
         self.play(tm.show_counter_anim()) # Show counter
+        self.play(tm.show_transform_anim()) # Show transform
         self.forward()
         
         # 4. Run steps
@@ -349,5 +351,37 @@ class TuringMachineTest(Timeline):
         # 5. Hide/Show Table
         self.forward(1)
         self.play(tm.hide_counter_anim())
+        self.play(tm.hide_transform_anim())
         self.play(tm.hide_table_anim())
         self.forward(1)
+
+class TuringMachineTransformTest(Timeline):
+    """
+    uv run janim run test_scene.py TuringMachineTransformTest -i
+    """
+    def construct(self):
+        transform = TuringMachineTransform()
+        self.play(FadeIn(transform))
+        self.forward()
+        
+        self.play(
+            transform.anim_update_info(
+                state_from="A",
+                state_to="B",
+                read_symbol="0",
+                write_symbol="1",
+                direction="R"
+            )
+        )
+        self.forward()
+        
+        self.play(
+            transform.anim_update_info(
+                state_from="B",
+                state_to="HALT",
+                read_symbol="1",
+                write_symbol="0",
+                direction="L"
+            )
+        )
+        self.forward()

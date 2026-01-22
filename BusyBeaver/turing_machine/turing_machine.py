@@ -4,6 +4,7 @@ from .components.paper_tile import InfinityTapeItem
 from .components.grid_table import GridTable
 from .components.tape_cell import TapeCell
 from .components.turing_counter import TuringCounter
+from .components.turing_machine_transform import TuringMachineTransform
 from .logic.turingcore import TuringMachineCore, StepResult
 
 class TuringMachine(Group):
@@ -17,9 +18,11 @@ class TuringMachine(Group):
         showcase_radius: int = 5,
         table_scaling: float = 0.8,
         counter_scaling: float = 0.6,
+        transform_scaling: float = 0.75,
         table_config: Optional[dict[str, Any]] = None,
         tape_config: Optional[dict[str, Any]] = None,
         counter_config: Optional[dict[str, Any]] = None,
+        transform_config: Optional[dict[str, Any]] = None,
         **kwargs
     ):
         self.core = turing_core
@@ -27,15 +30,17 @@ class TuringMachine(Group):
         self.table_config = table_config or {}
         self.tape_config = tape_config or {}
         self.counter_config = counter_config or {}
+        self.transform_config = transform_config or {}
         
         self.is_table_shown = False
         self.is_counter_shown = False
+        self.is_transform_shown = False
         self.last_active_cell = None
 
         super().__init__(**kwargs)
         
         self._setup_machine()
-        self._init_layout(table_scaling, counter_scaling)
+        self._init_layout(table_scaling, counter_scaling, transform_scaling)
         
         self.table.hide()
         
@@ -81,16 +86,23 @@ class TuringMachine(Group):
         # 初始化计数器
         self.counter = TuringCounter(**self.counter_config)
         self.counter.hide()
+
+        # 初始化逻辑转换展示
+        self.transform = TuringMachineTransform(**self.transform_config)
+        self.transform.hide()
         
         # 将子组件添加到 Group 中
-        self.add(self.tape_item, self.table, self.counter)
+        self.add(self.tape_item, self.table, self.counter, self.transform)
         
-    def _init_layout(self, table_scaling: float, counter_scaling: float):
+    def _init_layout(self, table_scaling: float, counter_scaling: float, transform_scaling: float):
         self.tape_item.points.scale(0.7)
         self.tape_item.points.move_to(DOWN * 1.5)
         
         self.counter.points.scale(counter_scaling)
         self.counter.points.next_to(self.tape_item.pointer, LEFT, buff=0.75)
+
+        self.transform.points.scale(transform_scaling)
+        self.transform.points.next_to(self.tape_item.pointer, RIGHT, buff=1).shift(UP * 0.75)
 
         self.table.points.scale(table_scaling)
         self.table.points.next_to(self.tape_item, UP, buff=0.25).shift(LEFT * 0.25)
@@ -144,6 +156,30 @@ class TuringMachine(Group):
         return AnimGroup(
             FadeOut(self.counter, duration=duration)
         )
+
+    def show_transform_anim(self, duration: float = 1.0) -> AnimGroup:
+        """
+        显示逻辑转换展示动画
+        """
+        if self.is_transform_shown:
+            return AnimGroup()
+            
+        self.is_transform_shown = True
+        return AnimGroup(
+            FadeIn(self.transform, duration=duration)
+        )
+
+    def hide_transform_anim(self, duration: float = 1.0) -> AnimGroup:
+        """
+        隐藏逻辑转换展示动画
+        """
+        if not self.is_transform_shown:
+            return AnimGroup()
+            
+        self.is_transform_shown = False
+        return AnimGroup(
+            FadeOut(self.transform, duration=duration)
+        )
         
     def step(self, duration: float = 1.0) -> list[Animation]:
         """
@@ -157,6 +193,33 @@ class TuringMachine(Group):
         
         # 构建动画序列
         anims = []
+
+        # 更新逻辑转换展示
+        if self.is_transform_shown:
+            # 获取当前状态和读取的符号
+            curr_state = pre_info.state
+            curr_symbol = pre_info.current_symbol
+            
+            if pre_info.transition_applied:
+                next_state = pre_info.transition_applied.next_state
+                write_symbol = pre_info.transition_applied.write_symbol
+                direction = pre_info.transition_applied.direction
+            else:
+                # 停机状态
+                next_state = curr_state
+                write_symbol = curr_symbol
+                direction = "S"
+                
+            anims.append(
+                self.transform.anim_update_info(
+                    state_from=curr_state,
+                    state_to=next_state,
+                    read_symbol=curr_symbol,
+                    write_symbol=write_symbol,
+                    direction=direction,
+                    duration=duration / 2
+                )
+            )
         
         # 表格高亮动画
         if self.is_table_shown:
