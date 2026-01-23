@@ -49,20 +49,21 @@ class GridCell(Group):
         )
 
         # Content
-        self.label = Text("下一状态", font_size=9, color=GREY, font=local_font)
+        self.label = Text("Next", font_size=9, color=GREY, font=local_font)
         
         self.state_text = Text(self.state_name, font_size=23, font=local_font, format='rich')
-        self.write_text = Text(f"<c #BBBBBB>写入</c> <c #EEEEEE><fs 1.1>{self.write_bit}</fs></c>", format='rich', font_size=14, font=local_font)
+        # self.write_text = Text(f"<c #BBBBBB>写入</c> <c #EEEEEE><fs 1.1>{self.write_bit}</fs></c>", format='rich', font_size=14, font=local_font)
+        self.write_text = Text(f"<c #EEEEEE><fs 1.1>{self.write_bit}</fs></c>", format='rich', font_size=14, font=local_font)
         
         # Direction Button
         dir_map = {
-            "RIGHT": "右移 <c GREEN>→</c>",
-            "LEFT": "<c GREEN>←</c> 左移",
-            "STOP": "停止 <c RED>■</c>"
+            "RIGHT": "<c GREEN>→</c>",
+            "LEFT": "<c GREEN>←</c>",
+            "STOP": "<c RED>■</c>"
         }
         dir_str = dir_map.get(self.move_dir, self.move_dir)
         
-        self.dir_text = Text(dir_str, font_size=10, color=WHITE, font=local_font, format='rich')
+        self.dir_text = Text(dir_str, font_size=14, color=WHITE, font=local_font, format='rich')
         
         # Calculate button size based on text
         btn_w = self.dir_text.points.box.width + 0.1
@@ -73,7 +74,7 @@ class GridCell(Group):
             btn_h,
             corner_radius=0.01,
             fill_color="#6A4C93",
-            fill_alpha=1,
+            fill_alpha=0,
             stroke_alpha=0,
             depth=10,
         )

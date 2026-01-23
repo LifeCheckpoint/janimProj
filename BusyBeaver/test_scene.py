@@ -339,7 +339,7 @@ class TuringMachineTest(Timeline):
         self.play(Create(tm.tape_item))
         self.play(tm.show_table_anim())
         self.play(tm.show_counter_anim()) # Show counter
-        self.play(tm.show_transform_anim()) # Show transform
+        # self.play(tm.show_transform_anim()) # Show transform
         self.forward()
         
         # 4. Run steps
@@ -351,7 +351,7 @@ class TuringMachineTest(Timeline):
         # 5. Hide/Show Table
         self.forward(1)
         self.play(tm.hide_counter_anim())
-        self.play(tm.hide_transform_anim())
+        # self.play(tm.hide_transform_anim())
         self.play(tm.hide_table_anim())
         self.forward(1)
 

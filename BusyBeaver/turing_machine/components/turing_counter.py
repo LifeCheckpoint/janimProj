@@ -19,7 +19,7 @@ class TuringCounter(Group):
         self.bg = RoundedRect(3, 1.5, corner_radius=0.1, fill_color="#0B1026", fill_alpha=1, stroke_alpha=0.5, stroke_color=BLUE_E)
         
         # Label
-        self.label = Text("执行步数", font_size=20, color=BLUE_B, font=local_font)
+        self.label = Text("步数", font_size=20, color=BLUE_B, font=local_font)
         self.label.points.move_to(self.bg.points.box.top + DOWN * 0.25)
         
         # Number

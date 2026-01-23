@@ -14,6 +14,7 @@ class InfinityTapeItem(Group):
     """
     cells_group: Group[TapeCell]
     pointer: SVGItem
+    pointer_text: TypstText
     vignette_effect: AlphaVignetteEffect | IdentityEffect
     lens_effect: LensEffect | IdentityEffect
 
@@ -63,6 +64,9 @@ class InfinityTapeItem(Group):
             file_path=str(Path(__file__).parent.parent / "svgs" / "pointer.svg"),
             scale=1.0,
         )
+        self.pointer_text = TypstText(
+            R"#text(size: 24pt, fill: yellow)[$H$]",
+        )
 
         for i in range(-self.showcase_radius, self.showcase_radius + 1):
             if not cell_setting:
@@ -100,8 +104,9 @@ class InfinityTapeItem(Group):
             .points.next_to(self.cells_group[showcase_radius], RIGHT, buff=0)
 
         self.pointer.points.next_to(self.cells_group[showcase_radius], UP, buff=0.5)
+        self.pointer_text.points.move_to(self.pointer.points.box.center).shift(UP * 0.25)
 
-        self.add(self.cells_group, self.pointer)
+        self.add(self.cells_group, self.pointer, self.pointer_text)
 
         # 应用 shader 序列
         if lens_setting is not None:
