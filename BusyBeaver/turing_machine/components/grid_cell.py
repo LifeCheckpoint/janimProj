@@ -57,35 +57,37 @@ class GridCell(Group):
         
         # Direction Button
         dir_map = {
-            "RIGHT": "<c GREEN>→</c>",
-            "LEFT": "<c GREEN>←</c>",
-            "STOP": "<c RED>■</c>"
+            "RIGHT": "<c #C9E2AE>→</c>",
+            "LEFT": "<c #C9E2AE>←</c>",
+            "STOP": "<c #F7A1A3>■</c>"
         }
         dir_str = dir_map.get(self.move_dir, self.move_dir)
         
-        self.dir_text = Text(dir_str, font_size=14, color=WHITE, font=local_font, format='rich')
+        self.dir_text = Text(dir_str, font_size=65, format="rich", font=local_font, depth=5)
+        self.dir_text.fill.set(alpha=0.15).r.stroke.set(alpha=0)
         
         # Calculate button size based on text
-        btn_w = self.dir_text.points.box.width + 0.1
-        btn_h = self.dir_text.points.box.height + 0.05
+        # btn_w = self.dir_text.points.box.width + 0.1
+        # btn_h = self.dir_text.points.box.height + 0.05
         
-        self.dir_bg = RoundedRect(
-            btn_w,
-            btn_h,
-            corner_radius=0.01,
-            fill_color="#6A4C93",
-            fill_alpha=0,
-            stroke_alpha=0,
-            depth=10,
-        )
-        self.dir_group = Group(self.dir_bg, self.dir_text)
-        self.dir_text.points.move_to(self.dir_bg)
+        # self.dir_bg = RoundedRect(
+        #     btn_w,
+        #     btn_h,
+        #     corner_radius=0.01,
+        #     fill_color="#6A4C93",
+        #     fill_alpha=0,
+        #     stroke_alpha=0,
+        #     depth=10,
+        # )
+        # self.dir_group = Group(self.dir_bg, self.dir_text)
+        self.dir_group = Group(self.dir_text)
+        # self.dir_text.points.move_to(self.dir_bg)
         
         center = self.background.points.box.center
         self.label.points.move_to(center + UP * (self.height / 2 - 0.15))
         self.state_text.points.move_to(center + UP * 0.15)
         self.write_text.points.move_to(center + DOWN * 0.15)
-        self.dir_group.points.move_to(center + DOWN * 0.4)
+        self.dir_group.points.move_to(center)
         
         self.add(self.background, self.border, self.label, self.state_text, self.write_text, self.dir_group)
 
