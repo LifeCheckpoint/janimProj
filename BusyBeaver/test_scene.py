@@ -331,6 +331,7 @@ class TuringMachineTest(Timeline):
             core, 
             showcase_radius=12,
             table_scaling=0.9,
+            tape_config={"center_scaling": 1.0},
             table_config={"transpose": True},
             counter_config={"max_value": 6},
         )

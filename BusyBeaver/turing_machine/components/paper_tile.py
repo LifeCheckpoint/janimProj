@@ -30,6 +30,7 @@ class InfinityTapeItem(Group):
         cell_setting: Callable[[int, str], TapeCell] | None = None,
         vignette_setting: Callable[[Item], AlphaVignetteEffect] | None = None,
         lens_setting: Callable[[Item], LensEffect] | None = None,
+        extra_text_scaling: float | None = None,
     ):
         """
         无限长纸带 Item
@@ -50,6 +51,8 @@ class InfinityTapeItem(Group):
         :type vignette_setting: Callable[[Item], AlphaVignetteEffect] | None
         :param lens_setting: 镜头效果设置函数，接收当前 Item 作为参数并返回 LensEffect 实例
         :type lens_setting: Callable[[Item], LensEffect] | None
+        :param extra_text_scaling: 额外的文本缩放比例，用于调整格子中文字的大小
+        :type extra_text_scaling: float | None
         """
         super().__init__()
 
@@ -58,6 +61,7 @@ class InfinityTapeItem(Group):
         self.center_at = center_at if center_at is not None else self.tape.read_current().absolute_index
         self.center_scaling = center_scaling
         self.cell_setting = cell_setting
+        self.extra_text_scaling = extra_text_scaling
 
         self.cells_group = Group(depth=10)
         self.pointer = SVGItem(
@@ -74,7 +78,7 @@ class InfinityTapeItem(Group):
                     square_size=0.8,
                     tile_data=self.tape[i].value,
                     line_color=WHITE,
-                    text_scaling=1.0,
+                    text_scaling=1.0 * (self.extra_text_scaling if self.extra_text_scaling else 1.0),
                     index=self.center_at + i,
                 )
             else:
@@ -154,6 +158,7 @@ class InfinityTapeItem(Group):
             wait_time=wait_time,
             transform_time=transform_time,
             center_scaling=self.center_scaling,
+            extra_text_scaling=self.extra_text_scaling if self.extra_text_scaling else 1.0,
         )
     
     def tape_shift_right(self, duration: float = 1.0) -> Succession:
@@ -186,7 +191,7 @@ class InfinityTapeItem(Group):
                 square_size=0.8,
                 tile_data=self.tape[target_offset].value,
                 line_color=WHITE,
-                text_scaling=1.0,
+                text_scaling=1.0 * scale_factor,
                 index=self.tape[target_offset].absolute_index,
             ) if not self.cell_setting \
               else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)
@@ -241,7 +246,7 @@ class InfinityTapeItem(Group):
                 square_size=0.8,
                 tile_data=self.tape[target_offset].value,
                 line_color=WHITE,
-                text_scaling=1.0,
+                text_scaling=1.0 * scale_factor,
                 index=self.tape[target_offset].absolute_index,
             ) if not self.cell_setting \
               else self.cell_setting(self.tape[target_offset].absolute_index, self.tape[target_offset].value)

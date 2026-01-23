@@ -55,6 +55,7 @@ class TuringMachine(Group):
                 tile_data=value,
                 index=index,
             ),
+            extra_text_scaling=0.7,
             **self.tape_config
         )
         

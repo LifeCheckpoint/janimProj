@@ -39,7 +39,7 @@ class TapeCell(Group):
         self.text_scaling = text_scaling
         self.tile_data = tile_data
         self.center = center
-        self.index = index
+        self.index_ = index
 
         self._build_tiles()
 
@@ -70,8 +70,8 @@ class TapeCell(Group):
 
         self.add(self.frame, self.word)
 
-        if self.index is not None:
-            self.index_text = Text(str(self.index), font_size=16, color=GREY, fill_alpha=0.5)
+        if self.index_ is not None:
+            self.index_text = Text(str(self.index_), font_size=16, color=GREY, fill_alpha=0.5)
             self.index_text.points.next_to(self.frame, DOWN, buff=0.1)
             self.add(self.index_text)
         else:
@@ -92,6 +92,7 @@ class TapeCell(Group):
         wait_time: float = 0.25,
         transform_time: float = 1.0,
         center_scaling: float = 1.2,
+        extra_text_scaling: float = 0.7,
     ) -> Succession:
         """
         获取设置方格字符值的动画
@@ -112,7 +113,7 @@ class TapeCell(Group):
         self.tile_data = value
         new_word = TypstMath(
             text=self.tile_data,
-        ).points.scale(self.text_scaling * center_scaling).r \
+        ).points.scale(self.text_scaling * center_scaling * extra_text_scaling).r \
          .points.move_to(self.word).r
         
         return Succession(
