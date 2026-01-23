@@ -58,6 +58,7 @@ class TuringMachine(Group):
             extra_text_scaling=0.7,
             **self.tape_config
         )
+        self.tape_item.set_pointer_text(self.core._state)
         
         # 初始化状态转移表
         states: Set[str] = set()
@@ -274,5 +275,8 @@ class TuringMachine(Group):
 
         # 更新计数器
         anims.append(self.counter.anim_set_value(self.core._step_count, duration=duration))
+
+        # 更新指针状态文本
+        anims.append(self.tape_item.animate_pointer_text(self.core._state, duration=duration))
             
         return anims

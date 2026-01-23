@@ -61,7 +61,7 @@ class InfinityTapeItem(Group):
         self.center_at = center_at if center_at is not None else self.tape.read_current().absolute_index
         self.center_scaling = center_scaling
         self.cell_setting = cell_setting
-        self.extra_text_scaling = extra_text_scaling
+        self.extra_text_scaling = extra_text_scaling if extra_text_scaling else 1.0
 
         self.cells_group = Group(depth=10)
         self.pointer = SVGItem(
@@ -69,7 +69,7 @@ class InfinityTapeItem(Group):
             scale=1.0,
         )
         self.pointer_text = TypstText(
-            R"#text(size: 24pt, fill: yellow)[$H$]",
+            RF"#text(size: {self.extra_text_scaling * 2.5}em, fill: yellow)[\_]",
         )
 
         for i in range(-self.showcase_radius, self.showcase_radius + 1):
@@ -109,6 +109,8 @@ class InfinityTapeItem(Group):
 
         self.pointer.points.next_to(self.cells_group[showcase_radius], UP, buff=0.5)
         self.pointer_text.points.move_to(self.pointer.points.box.center).shift(UP * 0.25)
+
+        self.pointer_initial_height = self.pointer.points.box.height
 
         self.add(self.cells_group, self.pointer, self.pointer_text)
 
@@ -161,6 +163,46 @@ class InfinityTapeItem(Group):
             extra_text_scaling=self.extra_text_scaling if self.extra_text_scaling else 1.0,
         )
     
+    def _create_pointer_text(self, state: str) -> TypstText:
+        """
+        创建新的指针文本组件
+        """
+        current_scale = self.pointer.points.box.height / self.pointer_initial_height
+        
+        new_text = TypstText(
+            RF"#text(size: {self.extra_text_scaling * 2.5}em, fill: yellow)[{state}]"
+        )
+        
+        new_text.points.scale(current_scale)
+        new_text.points.move_to(self.pointer.points.box.center).shift(UP * 0.25 * current_scale)
+        
+        return new_text
+
+    def set_pointer_text(self, state: str):
+        """
+        直接设置指针文本
+        """
+        new_text = self._create_pointer_text(state)
+        self.remove(self.pointer_text)
+        self.pointer_text = new_text
+        self.add(self.pointer_text)
+
+    def animate_pointer_text(self, state: str, duration: float = 1.0) -> Succession:
+        """
+        动画更新指针文本
+        """
+        new_text = self._create_pointer_text(state)
+        
+        def update_text_ref():
+            self.remove(self.pointer_text)
+            self.pointer_text = new_text
+            self.add(self.pointer_text)
+
+        return Succession(
+            Transform(self.pointer_text, new_text, duration=duration),
+            Do(update_text_ref)
+        )
+
     def tape_shift_right(self, duration: float = 1.0) -> Succession:
         """
         将格子整体向右移动一个位置
