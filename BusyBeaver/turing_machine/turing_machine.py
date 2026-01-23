@@ -91,9 +91,11 @@ class TuringMachine(Group):
         # 初始化逻辑转换展示
         self.transform = TuringMachineTransform(**self.transform_config)
         self.transform.hide()
+
+        self.framebox = SVGItem(str(Path(__file__).parent / "svgs" / "choice_frame.svg"))
         
         # 将子组件添加到 Group 中
-        self.add(self.tape_item, self.table, self.counter, self.transform)
+        self.add(self.tape_item, self.table, self.counter, self.transform, self.framebox)
         
     def _init_layout(self, table_scaling: float, counter_scaling: float, transform_scaling: float):
         self.tape_item.points.scale(0.7)
@@ -107,6 +109,9 @@ class TuringMachine(Group):
 
         self.table.points.scale(table_scaling)
         self.table.points.next_to(self.tape_item, UP, buff=0.25).shift(LEFT * 0.25)
+
+        self.framebox.points.scale(0.25)
+        self.framebox.points.move_to(self.tape_item.cells_group[self.tape_item.showcase_radius].points.box.center + UP * 0.1)
         
     def show_table_anim(self, duration: float = 1.0) -> AnimGroup:
         """
@@ -118,7 +123,8 @@ class TuringMachine(Group):
         self.is_table_shown = True
         return AnimGroup(
             FadeIn(self.table, duration=duration),
-            self.tape_item.anim(duration=duration).points.shift(DOWN * 0.25), # type: ignore
+            self.tape_item.anim(duration=duration).points.shift(DOWN * 0.25),
+            self.framebox.anim(duration=duration).points.shift(DOWN * 0.25),
         )
         
     def hide_table_anim(self, duration: float = 1.0) -> AnimGroup:
@@ -131,7 +137,8 @@ class TuringMachine(Group):
         self.is_table_shown = False
         return AnimGroup(
             FadeOut(self.table, duration=duration),
-            self.tape_item.anim(duration=duration).points.shift(UP * 0.25), # type: ignore
+            self.tape_item.anim(duration=duration).points.shift(UP * 0.25),
+            self.framebox.anim(duration=duration).points.shift(UP * 0.25),
         )
 
     def show_counter_anim(self, duration: float = 1.0) -> AnimGroup:
@@ -253,9 +260,17 @@ class TuringMachine(Group):
             # 纸带移动动画
             direction = pre_info.transition_applied.direction
             if direction == "R":
-                anims.append(self.tape_item.tape_shift_left(duration=duration / 2))
+                shift_tape_anim = self.tape_item.tape_shift_left(duration=duration / 2)
             elif direction == "L":
-                anims.append(self.tape_item.tape_shift_right(duration=duration / 2))
+                shift_tape_anim = self.tape_item.tape_shift_right(duration=duration / 2)
+            else:
+                shift_tape_anim = AnimGroup()
+
+            anims.append(Succession(
+                FadeOut(self.framebox, duration=duration / 4),
+                shift_tape_anim,
+                FadeIn(self.framebox, duration=duration / 4),
+            ))
 
         # 更新计数器
         anims.append(self.counter.anim_set_value(self.core._step_count, duration=duration))

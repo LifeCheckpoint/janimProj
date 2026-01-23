@@ -337,7 +337,7 @@ class TuringMachineTest(Timeline):
         )
         
         # 3. Show
-        self.play(Create(tm.tape_item))
+        self.play(FadeIn(tm.tape_item))
         self.play(tm.show_table_anim())
         self.play(tm.show_counter_anim()) # Show counter
         # self.play(tm.show_transform_anim()) # Show transform
