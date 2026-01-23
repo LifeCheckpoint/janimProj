@@ -254,7 +254,7 @@ class InfinityTapeItem(Group):
                 self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
                 self.cells_group[self.showcase_radius - 1].anim.points.scale(self.center_scaling), # type: ignore
                 duration=duration,
-                rate_func=ease_out_expo,
+                rate_func=ease_inout_cubic,
             ),
             Do(update_refs),
         )
@@ -309,7 +309,7 @@ class InfinityTapeItem(Group):
                 self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
                 self.cells_group[self.showcase_radius + 1].anim.points.scale(self.center_scaling), # type: ignore
                 duration=duration,
-                rate_func=ease_out_expo,
+                rate_func=ease_inout_cubic,
             ),
             Do(update_refs),
         )

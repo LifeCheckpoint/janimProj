@@ -261,9 +261,9 @@ class TuringMachine(Group):
             # 纸带移动动画
             direction = pre_info.transition_applied.direction
             if direction == "R":
-                shift_tape_anim = self.tape_item.tape_shift_left(duration=duration)
+                shift_tape_anim = self.tape_item.tape_shift_left(duration=duration * 2)
             elif direction == "L":
-                shift_tape_anim = self.tape_item.tape_shift_right(duration=duration)
+                shift_tape_anim = self.tape_item.tape_shift_right(duration=duration * 2)
             else:
                 shift_tape_anim = AnimGroup()
 
