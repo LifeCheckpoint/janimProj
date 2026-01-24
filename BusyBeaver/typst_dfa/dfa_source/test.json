@@ -1,0 +1,10 @@
+{
+    "circle": {
+        "start": [0],
+        "stop": [15]
+    },
+    "text": {
+        "start": [9],
+        "stop": [17]
+    }
+}

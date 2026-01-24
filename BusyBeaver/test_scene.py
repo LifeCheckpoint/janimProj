@@ -386,3 +386,38 @@ class TuringMachineTransformTest(Timeline):
             )
         )
         self.forward()
+
+
+class TypDFATest(Timeline):
+    """
+    uv run janim run test_scene.py TypDFATest -i
+    """
+    def construct(self):
+        from typst_dfa.typst_dfa import load_dfa_typst
+
+        dfa = load_dfa_typst("test")
+        self.play(Create(dfa.dfa_main_item))
+        self.forward(1)
+
+        self.play(*[
+            DataUpdater(
+                dfa.dfa_main_item[i],
+                lambda item, p: item.glow.set(alpha=p.alpha)
+            ) for i in dfa.circle_item["start"]
+        ])
+        self.forward(1)
+        self.play(
+            *[
+                DataUpdater(
+                    dfa.dfa_main_item[i],
+                    lambda item, p: item.glow.set(alpha=p.alpha)
+                ) for i in dfa.circle_item["stop"]
+            ],
+            *[
+                DataUpdater(
+                    dfa.dfa_main_item[i],
+                    lambda item, p: item.glow.set(alpha=1 - p.alpha)
+                ) for i in dfa.circle_item["start"]
+            ],
+        )
+        self.forward(1)
