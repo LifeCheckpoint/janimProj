@@ -308,7 +308,8 @@ class TuringMachineTest(Timeline):
     uv run janim run test_scene.py TuringMachineTest -i
     """
     def construct(self):
-        # 1. Setup Core
+        from typst_dfa.typst_dfa import load_dfa_typst
+        
         core = TuringMachineCore(
             initial_tape="00000",
             start_state="A",
@@ -316,17 +317,19 @@ class TuringMachineTest(Timeline):
             halt_states=["HALT"]
         )
         
-        # 2-state Busy Beaver
-        # A, 0 -> B, 1, R
         core.add_rule("A", "0", "B", "1", "R")
-        # A, 1 -> B, 1, L
         core.add_rule("A", "1", "B", "1", "L")
-        # B, 0 -> A, 1, L
         core.add_rule("B", "0", "A", "1", "L")
-        # B, 1 -> HALT, 1, R
         core.add_rule("B", "1", "HALT", "1", "R")
+
+        dfa_graph = load_dfa_typst("busy_2_1")
+        for item in dfa_graph.dfa_main_item.walk_descendants(): # type: ignore
+            item: VItem
+            item.glow.set(color=WHITE)
+        dfa_graph.dfa_main_item.points.move_to(RIGHT * 4 + DOWN * 1).scale(0.7)
         
-        # 2. Setup Machine
+        self.forward(1)
+        
         tm = TuringMachine(
             core, 
             showcase_radius=12,
@@ -336,24 +339,27 @@ class TuringMachineTest(Timeline):
             counter_config={"max_value": 6},
         )
         
-        # 3. Show
         self.play(FadeIn(tm.tape_item))
-        self.play(tm.show_table_anim())
-        self.play(tm.show_counter_anim()) # Show counter
-        # self.play(tm.show_transform_anim()) # Show transform
+        self.play(tm.show_counter_anim(), tm.show_table_anim(), FadeIn(dfa_graph.dfa_main_item))
         self.forward()
         
-        # 4. Run steps
         for _ in range(6):
+            self.play(
+                *[
+                    Flash(dfa_graph.dfa_main_item[i], line_length=0.05, color=WHITE)
+                    for i
+                    in (dfa_graph.circle_item[tm.curr_state] if tm.curr_state else [])
+                ],
+                duration=0.3,
+            )
+
             for animate in tm.step(duration=0.75):
                 self.play(animate)
+            
             self.forward(1)
             
-        # 5. Hide/Show Table
         self.forward(1)
-        self.play(tm.hide_counter_anim())
-        # self.play(tm.hide_transform_anim())
-        self.play(tm.hide_table_anim())
+        self.play(tm.hide_counter_anim(), tm.hide_table_anim(), FadeOut(dfa_graph.dfa_main_item))
         self.forward(1)
 
 class TuringMachineTransformTest(Timeline):
@@ -423,7 +429,7 @@ class TypDFATest(Timeline):
         self.forward(1)
         self.play(FadeOut(dfa.dfa_main_item))
 
-        dfa2 = load_dfa_typst("test2")
+        dfa2 = load_dfa_typst("busy_2_1")
         for item in dfa2.dfa_main_item.walk_descendants(None): # type: ignore
             item: VItem
             item.glow.set(color=WHITE)
@@ -464,4 +470,3 @@ class TypDFATest(Timeline):
         self.play(FadeIn(busy_6_2.dfa_main_item))
         self.forward(4)
         self.play(FadeOut(busy_6_2.dfa_main_item))
-        

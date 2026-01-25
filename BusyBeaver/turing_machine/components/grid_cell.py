@@ -53,7 +53,7 @@ class GridCell(Group):
         
         self.state_text = Text(self.state_name, font_size=23, font=local_font, format='rich')
         # self.write_text = Text(f"<c #BBBBBB>写入</c> <c #EEEEEE><fs 1.1>{self.write_bit}</fs></c>", format='rich', font_size=14, font=local_font)
-        self.write_text = Text(f"<c #EEEEEE><fs 1.1>{self.write_bit}</fs></c>", format='rich', font_size=14, font=local_font)
+        self.write_text = Text(f"<c #EEEEEE>{self.write_bit}</c>", format='rich', font_size=24, font=local_font)
         
         # Direction Button
         dir_map = {
@@ -64,7 +64,7 @@ class GridCell(Group):
         dir_str = dir_map.get(self.move_dir, self.move_dir)
         
         self.dir_text = Text(dir_str, font_size=65, format="rich", font=local_font, depth=5)
-        self.dir_text.fill.set(alpha=0.15).r.stroke.set(alpha=0)
+        self.dir_text.fill.set(alpha=0.3).r.stroke.set(alpha=0)
         
         # Calculate button size based on text
         # btn_w = self.dir_text.points.box.width + 0.1
@@ -86,7 +86,7 @@ class GridCell(Group):
         center = self.background.points.box.center
         self.label.points.move_to(center + UP * (self.height / 2 - 0.15))
         self.state_text.points.move_to(center + UP * 0.15)
-        self.write_text.points.move_to(center + DOWN * 0.15)
+        self.write_text.points.move_to(center + DOWN * 0.2)
         self.dir_group.points.move_to(center)
         
         self.add(self.background, self.border, self.label, self.state_text, self.write_text, self.dir_group)

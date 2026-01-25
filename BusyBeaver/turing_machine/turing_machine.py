@@ -8,6 +8,8 @@ from .components.turing_machine_transform import TuringMachineTransform
 from .logic.turingcore import TuringMachineCore, StepResult
 
 class TuringMachine(Group):
+    curr_state: str | None = None
+
     """
     图灵机动画物体
     组装了纸带 (InfinityTapeItem) 和状态转移表 (GridTable)
@@ -202,6 +204,8 @@ class TuringMachine(Group):
         
         # 构建动画序列
         anims = []
+
+        self.curr_state = pre_info.state
 
         # 更新逻辑转换展示
         if self.is_transform_shown:
