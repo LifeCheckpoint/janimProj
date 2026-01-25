@@ -421,3 +421,47 @@ class TypDFATest(Timeline):
             ],
         )
         self.forward(1)
+        self.play(FadeOut(dfa.dfa_main_item))
+
+        dfa2 = load_dfa_typst("test2")
+        for item in dfa2.dfa_main_item.walk_descendants(None): # type: ignore
+            item: VItem
+            item.glow.set(color=WHITE)
+        
+        self.play(Create(dfa2.dfa_main_item))
+        self.forward(1)
+        self.play(*[
+            DataUpdater(
+                dfa2.dfa_main_item[i],
+                lambda item, p: item.glow.set(alpha=p.alpha)
+            ) for i in dfa2.circle_item["A"]
+        ])
+        self.forward(1)
+        self.play(*[
+            DataUpdater(
+                dfa2.dfa_main_item[i],
+                lambda item, p: item.glow.set(alpha=p.alpha)
+            ) for i in dfa2.circle_item["B"]
+        ])
+        self.forward(1)
+        self.play(*[
+            DataUpdater(
+                dfa2.dfa_main_item[i],
+                lambda item, p: item.glow.set(alpha=p.alpha)
+            ) for i in dfa2.circle_item["H"]
+        ])
+        self.forward(2)
+        self.play(FadeOut(dfa2.dfa_main_item))
+
+        self.forward(1)
+        busy_6_1 = load_dfa_typst("busy_6_1")
+        self.play(FadeIn(busy_6_1.dfa_main_item))
+        self.forward(4)
+        self.play(FadeOut(busy_6_1.dfa_main_item))
+
+        self.forward(1)
+        busy_6_2 = load_dfa_typst("busy_6_2")
+        self.play(FadeIn(busy_6_2.dfa_main_item))
+        self.forward(4)
+        self.play(FadeOut(busy_6_2.dfa_main_item))
+        
