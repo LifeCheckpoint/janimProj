@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from janim.imports import * # type: ignore
 from typing import List, Optional, Tuple, Set, Any
+from pydantic import BaseModel, ConfigDict
+
 from .components.paper_tile import InfinityTapeItem
 from .components.grid_table import GridTable
 from .components.tape_cell import TapeCell
@@ -192,18 +196,72 @@ class TuringMachine(Group):
             FadeOut(self.transform, duration=duration)
         )
         
-    def step(self, duration: float = 1.0) -> list[Animation]:
+    def step(self, duration: float = 1.0):
         """
         执行一步图灵机操作并返回动画序列
 
-        :return: 动画序列，由于使用 Succession 在当前版本会有状态更新 Bug，返回 list 以供外部 play 使用
+        :return: 动画序列，由于使用 Succession 在当前版本会有状态更新 Bug，返回匿名动画执行类以供外部 play 使用
         :rtype: list[Animation]
         """
+        class TuringMachineStepAnim(BaseModel):
+            model_config = ConfigDict(arbitrary_types_allowed=True)
+
+            # 将所有需要的动画作为属性
+            anim_transformer_update_info: Animation | None = None
+            anim_table_cancel_highlight: Animation | None = None
+            anim_table_highlight: Animation | None = None
+            anim_update_tape_object: Animation | None = None
+            anim_tape_shift: Animation | None = None
+            anim_counter_update: Animation | None = None
+            anim_pointer_text_update: Animation | None = None
+
+            def __repr__(self) -> str:
+                return "<TuringMachineStepAnim>"
+
+            def run_step_anim(self, timeline: Timeline, after_step_idx: Callable[[int], None] = lambda idx: None):
+                """
+                执行图灵机一步动画
+
+                :param timeline: 时间线对象，用于执行 play
+                :type timeline: Timeline
+                :param after_step_idx: 每步执行后回调，参数为当前步数索引
+                :type after_step_idx: Callable[[int], None]
+                """
+                curr_idx = 0
+                if self.anim_transformer_update_info:
+                    timeline.play(self.anim_transformer_update_info)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+                if self.anim_table_cancel_highlight:
+                    timeline.play(self.anim_table_cancel_highlight)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+                if self.anim_table_highlight:
+                    timeline.play(self.anim_table_highlight)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+                if self.anim_update_tape_object:
+                    timeline.play(self.anim_update_tape_object)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+                if self.anim_tape_shift:
+                    timeline.play(self.anim_tape_shift)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+                if self.anim_counter_update:
+                    timeline.play(self.anim_counter_update)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+                if self.anim_pointer_text_update:
+                    timeline.play(self.anim_pointer_text_update)
+                    after_step_idx(curr_idx)
+                    curr_idx += 1
+
         pre_info = self.core.current_info
         self.core.step()
         
         # 构建动画序列
-        anims = []
+        anims = TuringMachineStepAnim()
 
         self.curr_state = pre_info.state
 
@@ -223,15 +281,13 @@ class TuringMachine(Group):
                 write_symbol = curr_symbol
                 direction = "S"
                 
-            anims.append(
-                self.transform.anim_update_info(
-                    state_from=curr_state,
-                    state_to=next_state,
-                    read_symbol=curr_symbol,
-                    write_symbol=write_symbol,
-                    direction=direction,
-                    duration=duration / 2
-                )
+            anims.anim_transformer_update_info = self.transform.anim_update_info(
+                state_from=curr_state,
+                state_to=next_state,
+                read_symbol=curr_symbol,
+                write_symbol=write_symbol,
+                direction=direction,
+                duration=duration / 2
             )
         
         # 表格高亮动画
@@ -242,14 +298,14 @@ class TuringMachine(Group):
             if cell:
                 # 如果有上一个高亮且不是当前这个，先取消高亮
                 if self.last_active_cell and self.last_active_cell != cell:
-                    anims.append(self.last_active_cell.animate_active(False, duration=duration/4))
+                    anims.anim_table_cancel_highlight = self.last_active_cell.animate_active(False, duration=duration/4)
                 
                 # 高亮当前规则
-                anims.append(cell.animate_active(True, duration=duration/4))
+                anims.anim_table_highlight = cell.animate_active(True, duration=duration/4)
                 self.last_active_cell = cell
             elif self.last_active_cell:
                 # 如果没有匹配规则，取消之前的规则高亮
-                anims.append(self.last_active_cell.animate_active(False, duration=duration/4))
+                anims.anim_table_cancel_highlight = self.last_active_cell.animate_active(False, duration=duration/4)
                 self.last_active_cell = None
         
         # 如果已经停机，且没有规则应用，只返回高亮清除动画
@@ -260,7 +316,7 @@ class TuringMachine(Group):
         if pre_info.transition_applied:
             write_val = pre_info.transition_applied.write_symbol
             # tape_item.set_value 会更新 tape_item 内部的 tape 副本
-            anims.append(self.tape_item.set_value(write_val, transform_time=duration / 2))
+            anims.anim_update_tape_object = self.tape_item.set_value(write_val, transform_time=duration / 2)
             
             # 纸带移动动画
             direction = pre_info.transition_applied.direction
@@ -271,16 +327,16 @@ class TuringMachine(Group):
             else:
                 shift_tape_anim = AnimGroup()
 
-            anims.append(Succession(
+            anims.anim_tape_shift = Succession(
                 FadeOut(self.framebox, duration=duration / 4),
                 shift_tape_anim,
                 FadeIn(self.framebox, duration=duration / 4),
-            ))
+            )
 
         # 更新计数器
-        anims.append(self.counter.anim_set_value(self.core._step_count, duration=duration))
+        anims.anim_counter_update = self.counter.anim_set_value(self.core._step_count, duration=duration)
 
         # 更新指针状态文本
-        anims.append(self.tape_item.animate_pointer_text(self.core._state, duration=duration))
+        anims.anim_pointer_text_update = self.tape_item.animate_pointer_text(self.core._state, duration=duration)
             
         return anims

@@ -344,18 +344,7 @@ class TuringMachineTest(Timeline):
         self.forward()
         
         for _ in range(6):
-            self.play(
-                *[
-                    Flash(dfa_graph.dfa_main_item[i], line_length=0.05, color=WHITE)
-                    for i
-                    in (dfa_graph.circle_item[tm.curr_state] if tm.curr_state else [])
-                ],
-                duration=0.3,
-            )
-
-            for animate in tm.step(duration=0.75):
-                self.play(animate)
-            
+            tm.step(duration=0.75).run_step_anim(self)
             self.forward(1)
             
         self.forward(1)
