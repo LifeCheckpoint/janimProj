@@ -459,3 +459,42 @@ class TypDFATest(Timeline):
         self.play(FadeIn(busy_6_2.dfa_main_item))
         self.forward(4)
         self.play(FadeOut(busy_6_2.dfa_main_item))
+
+
+from history_grid.history_grid import HistoryGrid
+class HistoryGridTest(Timeline):
+    """
+    uv run janim run test_scene.py HistoryGridTest -i
+    """
+    def construct(self):
+        tape_range = range(-2, 3)
+        
+        # Create some dummy history
+        history = []
+        for t in range(4):
+            tape = InfiniteTape[str](empty_value="0")
+            if t == 0:
+                pass # all 0
+            elif t == 1:
+                tape.write_absolute(1, "1")
+                tape.write_absolute(2, "1")
+            elif t == 2:
+                tape.write_absolute(0, "1")
+                tape.write_absolute(1, "1")
+                tape.write_absolute(2, "1")
+            elif t == 3:
+                tape.write_absolute(1, "1")
+                tape.write_absolute(2, "1")
+            history.append(tape)
+            
+        grid = HistoryGrid(tape_range=tape_range)
+        grid.points.to_center()
+        grid.show()
+        
+        self.forward(1)
+        
+        for t, tape in enumerate(history):
+            self.play(grid.get_add_column_anim(tape, t))
+            self.forward(0.5)
+            
+        self.forward(2)
