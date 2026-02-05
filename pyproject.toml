@@ -6,6 +6,10 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "dowhen>=0.1.0",
+    "janim[gui]",
     "numpy>=2.4.1",
     "pydantic>=2.12.5",
 ]
+
+[tool.uv.sources]
+janim = { git = "https://github.com/jkjkil4/JAnim.git" }
