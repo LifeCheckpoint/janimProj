@@ -1,16 +1,5 @@
 from janim.imports import * # type: ignore
-from tools import get_typ_doc
-
-local_font = ["Judou Sans Hans Bold", "Microsoft YaHei"]
-
-from dowhen import goto
-from janim.render.renderer_vitem_plane import VItemPlaneRenderer
-source_hash = "f746551d"
-goto("if self.vbo_points.size != self.vbo_mapped_points.size:").when(
-    VItemPlaneRenderer._update_points_normal,
-    "if new_attrs.points is not self.attrs.points \\",
-    source_hash=source_hash
-)
+from tools import get_typ_doc, local_font
 
 class s1_2(Timeline):
     """
