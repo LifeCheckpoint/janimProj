@@ -92,7 +92,8 @@ class GridTable(Group):
     def get_cell(self, state: str, symbol: str) -> Optional[GridCell]:
         return self.cells.get((state, symbol))
         
-    def __getitem__(self, key: Any) -> Any:
-        if isinstance(key, tuple) and len(key) == 2 and isinstance(key[0], str):
-            return self.cells[key]
-        return super().__getitem__(key)
+    def __getitem__(self, key: Tuple[str, Any] | int | Any) -> GridCell:
+        if isinstance(key, tuple):
+            if len(key) == 2 and isinstance(key[0], str):
+                return self.cells[key]
+        return super().__getitem__(key) # type: ignore

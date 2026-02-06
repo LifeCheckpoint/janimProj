@@ -45,7 +45,7 @@ class s2_1(Timeline):
             table_scaling=0.9,
             tape_config={"center_scaling": 1.0},
             table_config={"transpose": True},
-            counter_config={"max_value": 20},
+            counter_config={"max_value": 15},
         )
         image_turing = ImageItem("resources/turing.jpg").points.shift(RIGHT * 4.5 + UP * 1).scale(0.75).r
         surrounding_rect_tape = SurroundingRect(tm.tape_item.cells_group, buff=0.2, depth=-20).points.shift(DOWN * 0.2).r
@@ -187,7 +187,7 @@ class s2_1(Timeline):
         self.forward()
         self.play(Write(text_turing_machine), Write(text_turing_machine_en))
         
-        example_recurrence_times = 10
+        example_recurrence_times = 6
         example_reading_anim = Succession(
             FadeIn(group_reading_example),
             *[
@@ -256,8 +256,25 @@ class s2_1(Timeline):
             FadeOut(group_moving_example),
         )
         
+        grid_new = tm.table.copy()
+        grid_new.points.shift(UP * 1)
+        grid_new.depth.set(-50)
+        rec_grid_row1 = SurroundingRect(
+            Group(
+                grid_new[("A", "0")],
+                grid_new[("H", "0")],
+            ),
+            depth=-60,
+        ).points.shift(UP * 1).r
+        rec_grid_row2 = SurroundingRect(
+            Group(
+                grid_new[("A", "1")],
+                grid_new[("H", "1")],
+            ),
+            depth=-60,
+        ).points.shift(UP * 1).r
 
-        for i in range(20):
+        for i in range(15):
             match i:
                 case 1:
                     tm.step(duration=0.75).run_step_anim(self)
@@ -334,15 +351,74 @@ class s2_1(Timeline):
                             Write(text_heading_instruction),
                         )
                         if idx == 4: self.prepare(
-                            AnimGroup(
-                                AnimGroup(example_reading_anim, at=1.0),
-                                AnimGroup(example_writing_anim, at=2.5),
-                                AnimGroup(example_changing_state_anim, at=4.0),
-                                AnimGroup(example_moving_anim, at=5.5)
-                            )
+                            AnimGroup(example_reading_anim, at=1.0),
+                            AnimGroup(example_writing_anim, at=2.5),
+                            AnimGroup(example_changing_state_anim, at=4.0),
+                            AnimGroup(example_moving_anim, at=5.5)
                         )
                     tm.step(duration=0.75).run_step_anim(self, case6ops)
+                case 11:
+                    self.prepare(
+                        FadeOut(surrounding_group_heading_cpy[-1]),
+                        text_heading_instruction.anim.points.shift(DOWN * 0.5),
+                        *[
+                            rect.anim.fill.set(alpha=1.0)
+                            for rect in surrounding_group_heading_cpy[1:-2]
+                        ],
+                        surrounding_group_heading_cpy[1].anim.points.shift(DOWN * 0.2),
+                        FadeIn(grid_new),
+                        self.camera.anim.points.shift(UP * 1).scale(0.9),
+                    )
+                    def case11ops(idx):
+                        if idx == 1: self.prepare(
+                            Write(rec_grid_row1),
+                        )
+                        if idx == 3: self.prepare(
+                            Transform(rec_grid_row1, rec_grid_row2),
+                        )
+                    tm.step(duration=0.5).run_step_anim(self, case11ops)
+                    self.prepare(
+                        Succession(
+                            Wait(1.5),
+                            AnimGroup(
+                                FadeOut(grid_new),
+                                FadeOut(rec_grid_row2),
+                                FadeOut(surrounding_group_heading_cpy[0:-2]),
+                                FadeOut(text_heading_instruction),
+                                self.camera.anim.points.shift(DOWN * 1).scale(10 / 9),
+                            )
+                        )
+                    )
                 case _:
                     tm.step(duration=0.5).run_step_anim(self)
             
             self.forward(1)
+
+        text_halt = TypstText("HALT").points.scale(1).move_to(tm.tape_item.pointer_text).r
+        text_halt.astype(VItem).fill.set(color=RED_B)
+        self.play(
+            tm.table[("A", "1")].animate_active(False),
+            tm.table[("H", "0")].animate_active(True),
+            tm.table[("H", "1")].animate_active(True),
+            TransformMatchingDiff(tm.tape_item.pointer_text, text_halt)
+        )
+        self.forward(1.5)
+        self.play(
+            FadeOut(tm.table),
+            FadeOut(tm.counter),
+            FadeOut(tm.tape_item.cells_group),
+            FadeOut(tm.tape_item.pointer),
+            FadeOut(tm.framebox),
+            FadeOut(text_halt),
+            FadeOut(text_turing_machine),
+            FadeOut(text_turing_machine_en),
+        )
+        self.forward(1)
+
+class s2_2(Timeline):
+    """
+    uv run janim run s2_TuringMachineAndHalt.py s2_2 -i
+    """
+    def construct(self) -> None:
+        pass
+    
