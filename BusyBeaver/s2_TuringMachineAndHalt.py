@@ -65,7 +65,7 @@ class s2_1(Timeline):
                                                 .fill.set(color=GREEN_A).r
         )
         surrounding_group_tape_cpy = surrounding_group_tape.copy()
-        surround_rect_heading = SurroundingRect(tm.tape_item.pointer, buff=0.4, depth=-20)
+        surround_rect_heading = SurroundingRect(tm.tape_item.pointer, buff=0.4, depth=-20).points.shift(DOWN * 0.1).r
         surround_rect_heading.color.set(color="#FFDDCF")
         surround_rect_heading.glow.set(color="#FFDDCF", alpha=0.5)
         surrounding_group_heading = Group(
@@ -129,11 +129,134 @@ class s2_1(Timeline):
         text_mark_instruction.points.move_to(RIGHT * 4.5 + DOWN * 0.5)
         text_infinity = TypstMath("oo", depth=-40).points.scale(1.5).to_border(DOWN).shift(DOWN * 0.2).r
 
+        text_heading_instruction = TypstDoc(get_typ_doc("heading_instruction"), depth=-30).points.scale(0.5).r
+        text_heading_instruction.points.move_to(RIGHT * 4.2 + DOWN * 0.5)
+        text_heading_instruction.points.scale(1.5)
+        group_reading_example = Group(
+            TapeCell(tile_data="1", square_size=0.6, text_scaling=0.6) \
+                .points.move_to(ORIGIN).r \
+                .depth.set(-40).r,
+            SVGItem(str(Path(__file__).parent / "turing_machine" / "svgs" / "choice_frame.svg")) \
+                .points.move_to(ORIGIN).scale(0.2).r \
+                .depth.set(-45).r,
+        )
+        group_reading_example.points.next_to(text_heading_instruction.get_label("reading"), LEFT, buff=0.65)
+        temp_writing_tape_cell = TapeCell(tile_data="1", square_size=0.6, text_scaling=0.6) \
+                .points.move_to(ORIGIN).r \
+                .depth.set(-40).r
+        group_writing_example = Group(
+            temp_writing_tape_cell,
+            TypstMath("0", depth=-50).points.scale(0.6).move_to(temp_writing_tape_cell.word).r,
+            SVGItem(str(Path(__file__).parent / "turing_machine" / "svgs" / "choice_frame.svg")) \
+                .points.move_to(ORIGIN).scale(0.2).r \
+                .depth.set(-45).r,
+        )
+        group_writing_example.points.next_to(text_heading_instruction.get_label("writing"), LEFT, buff=0.65)
+        group_changing_state_example = Group(
+            SVGItem(
+                file_path=str(Path(__file__).parent / "turing_machine" / "svgs" / "pointer.svg"),
+                scale=0.25,
+                depth=-40,
+            ),
+            TypstText(
+                RF"#text(size: 0.8em, fill: yellow)[A]",
+                depth=-45,
+            ),
+            TypstText(
+                RF"#text(size: 0.8em, fill: yellow)[B]",
+                depth=-45,
+            ),
+        )
+        group_changing_state_example.points.next_to(text_heading_instruction.get_label("state_changing"), RIGHT, buff=0.45)
+        group_changing_state_example[0].points.shift(DOWN * 0.08)
+        group_moving_example = Group(
+            SVGItem(
+                file_path=str(Path(__file__).parent / "turing_machine" / "svgs" / "pointer.svg"),
+                scale=0.2,
+                depth=-40,
+            ),
+            TapeCell(square_size=0.3).depth.set(-40).r,
+            TapeCell(square_size=0.3).depth.set(-40).r,
+        )
+        group_moving_example[2].points.next_to(group_moving_example[1], RIGHT, buff=0)
+        group_moving_example[0].points.next_to(group_moving_example[0], UP, buff=0.05)
+        group_moving_example.points.next_to(text_heading_instruction.get_label("moving"), RIGHT, buff=0.35)
+
         self.play(FadeIn(tm.tape_item))
         self.play(tm.show_counter_anim(), tm.show_table_anim())
         self.forward()
         self.play(Write(text_turing_machine), Write(text_turing_machine_en))
         
+        example_recurrence_times = 10
+        example_reading_anim = Succession(
+            FadeIn(group_reading_example),
+            *[
+                Succession(
+                    FadeOut(group_reading_example[1], duration=0.5),
+                    Wait(0.5),
+                    FadeIn(group_reading_example[1], duration=0.5),
+                    Wait(0.5)
+                ) for _ in range(example_recurrence_times)
+            ],
+            FadeOut(group_reading_example),
+        )
+        example_writing_anim = Succession(
+            AnimGroup(
+                FadeIn(group_writing_example[0]),
+                FadeIn(group_writing_example[2]),
+            ),
+            *[
+                Succession(
+                    AnimGroup(
+                        FadeOut(group_writing_example[0].word, duration=0.5),
+                        FadeIn(group_writing_example[1], duration=0.5),
+                    ),
+                    Wait(0.5),
+                    AnimGroup(
+                        FadeOut(group_writing_example[1], duration=0.5),
+                        FadeIn(group_writing_example[0].word, duration=0.5),
+                    ),
+                    Wait(0.5)
+                ) for _ in range(example_recurrence_times)
+            ],
+            FadeOut(group_writing_example),
+        )
+        example_changing_state_anim = Succession(
+            AnimGroup(
+                FadeIn(group_changing_state_example[0]),
+                FadeIn(group_changing_state_example[1]),
+            ),
+            *[
+                Succession(
+                    AnimGroup(
+                        FadeOut(group_changing_state_example[1], duration=0.5),
+                        FadeIn(group_changing_state_example[2], duration=0.5),
+                    ),
+                    Wait(0.5),
+                    AnimGroup(
+                        FadeOut(group_changing_state_example[2], duration=0.5),
+                        FadeIn(group_changing_state_example[1], duration=0.5),
+                    ),
+                    Wait(0.5)
+                ) for _ in range(example_recurrence_times)
+            ],
+            FadeOut(group_changing_state_example),
+        )
+        distance_of_2_little_cell = group_moving_example[2].points.box.get_x() - group_moving_example[1].points.box.get_x()
+        example_moving_anim = Succession(
+            FadeIn(group_moving_example),
+            *[
+                Succession(
+                    AnimGroup(group_moving_example[0].anim.points.shift(RIGHT * distance_of_2_little_cell), duration=0.5),
+                    Wait(0.5),
+                    AnimGroup(group_moving_example[0].anim.points.shift(LEFT * distance_of_2_little_cell), duration=0.5),
+                    Wait(0.5),
+                ) for _ in range(example_recurrence_times)
+            ],
+            FadeOut(group_moving_example),
+        )
+        
+
         for i in range(20):
             match i:
                 case 1:
@@ -206,6 +329,17 @@ class s2_1(Timeline):
                             Transform(surrounding_group_tape_cpy[0], surrounding_group_heading_cpy[0]),
                             FadeIn(Group(*surrounding_group_heading_cpy[1:-2])),
                             lag_ratio=0.2,
+                        )
+                        if idx == 3: self.prepare(
+                            Write(text_heading_instruction),
+                        )
+                        if idx == 4: self.prepare(
+                            AnimGroup(
+                                AnimGroup(example_reading_anim, at=1.0),
+                                AnimGroup(example_writing_anim, at=2.5),
+                                AnimGroup(example_changing_state_anim, at=4.0),
+                                AnimGroup(example_moving_anim, at=5.5)
+                            )
                         )
                     tm.step(duration=0.75).run_step_anim(self, case6ops)
                 case _:
