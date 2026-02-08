@@ -773,7 +773,7 @@ class s1_5(Timeline):
         for c, t in zip(number_colors, text_big_numbers):
             t.points.move_to(ORIGIN).scale(1.3).r
             t.astype(VItem).fill.set(color=c)
-        image_busy_beaver = ImageItem("typ_docs/beaver.png")
+        image_busy_beaver = SVGItem("resources/beaver.svg")
         image_busy_beaver.points.scale(0.5).move_to(
             text_big_number.get_label("beaver_image").points.box.center
         )

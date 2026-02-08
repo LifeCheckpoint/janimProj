@@ -1,16 +1,6 @@
 from janim.imports import * # type: ignore
 from tools import get_typ_doc, local_font
-from turing_machine.components.grid_cell import GridCell
-from turing_machine.components.grid_table import GridTable
-from turing_machine.components.paper_tile import InfinityTapeItem
 from turing_machine.components.tape_cell import TapeCell
-from turing_machine.components.turing_counter import TuringCounter
-from turing_machine.components.turing_machine_transform import TuringMachineTransform
-from turing_machine.effects.alpha_vignette import AlphaVignetteEffect
-from turing_machine.effects.identity import IdentityEffect
-from turing_machine.effects.lens import LensEffect
-from turing_machine.logic.tapecore import InfiniteTape
-from turing_machine.logic.turingcore import Transition
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.turing_machine import TuringMachine
 from typst_dfa.typst_dfa import load_dfa_typst
@@ -420,5 +410,124 @@ class s2_2(Timeline):
     uv run janim run s2_TuringMachineAndHalt.py s2_2 -i
     """
     def construct(self) -> None:
-        pass
-    
+        svg_algorithm = SVGItem(str(Path(__file__).parent / "resources" / "algorithm.svg")).points.scale(0.75).shift(RIGHT).r
+        text_algo_algo = Text("算法", font=local_font).points.scale(1).move_to(svg_algorithm[8:10]).r
+        text_algo_order_search = Text("排序搜索", font=local_font).points.scale(1).move_to(svg_algorithm[10:12]).r
+        text_algo_graph = Text("图论", font=local_font).points.scale(1).move_to(svg_algorithm[12:14]).r
+        text_algo_encryption = Text("加密与安全", font=local_font).points.scale(1).move_to(svg_algorithm[14:16]).r
+        text_algo_ai = Text("人工智能", font=local_font).points.scale(1).move_to(svg_algorithm[16:18]).r
+        text_algo_compress = Text("数据压缩", font=local_font).points.scale(1).move_to(svg_algorithm[18:20]).r
+        text_algo_numerical = Text("数值计算", font=local_font).points.scale(1).move_to(svg_algorithm[20:22]).r
+        text_algo_turing_machine = Text("Turing Machine", font=local_font).points.scale(1.25).move_to(svg_algorithm[22]).r
+        text_algo_addition = TypstDoc(get_typ_doc("a_plus_b")).points.scale(0.65).r
+        text_algo_addition.points.move_to(LEFT * 5 + UP * 1.25)
+        core_aplusb = TuringMachineCore(
+            initial_tape="111011",
+            start_state="A",
+            blank_symbol="0",
+            halt_states=["HALT"]
+        )
+        core_aplusb.add_rule("A", "1", "A", "1", "R")
+        core_aplusb.add_rule("A", "0", "B", "0", "R")
+        core_aplusb.add_rule("B", "1", "C", "0", "L")
+        core_aplusb.add_rule("B", "0", "HALT", "0", "R")
+        core_aplusb.add_rule("C", "1", "C", "1", "S")
+        core_aplusb.add_rule("C", "0", "A", "1", "R")
+        tm_aplusb = TuringMachine(
+            core_aplusb,
+            showcase_radius=20,
+            table_scaling=0.75,
+            tape_config={"center_scaling": 1},
+            table_config={"transpose": True},
+            counter_config={"max_value": 11},
+        )
+        tm_aplusb.counter.points.shift(RIGHT * 0.25 + UP * 0.25)
+        tm_aplusb.is_table_shown = True
+        brace_3_1 = Brace(tm_aplusb.tape_item.cells_group[20:23], DOWN, buff=0)
+        brace_3_1_text = brace_3_1.points.create_text("a=3").points.shift(UP * 0.1).r
+        brace_2_1 = Brace(tm_aplusb.tape_item.cells_group[24:26], DOWN, buff=0)
+        brace_2_1_text = brace_2_1.points.create_text("b=2").points.shift(UP * 0.1).r
+        brace_5_1 = Brace(tm_aplusb.tape_item.cells_group[13:18], DOWN, buff=0)
+        brace_5_1_text = brace_5_1.points.create_text("a+b=5").points.shift(UP * 0.1).r
+        dfa_aplusb = load_dfa_typst("a_plus_b").dfa_main_item
+        dfa_aplusb.points.move_to(RIGHT * 4 + UP * 1).scale(0.65)
+
+        self.play(
+            Write(svg_algorithm),
+            AnimGroup(
+                *[
+                    Write(text) for text in [
+                        text_algo_algo,
+                        text_algo_order_search,
+                        text_algo_graph,
+                        text_algo_encryption,
+                        text_algo_ai,
+                        text_algo_compress,
+                        text_algo_numerical,
+                    ]
+                ],
+                lag_ratio=0.2,
+                at=0.5
+            )
+        )
+        self.play(Write(text_algo_turing_machine))
+        self.forward(2)
+        self.play(
+            AnimGroup(
+                AnimGroup(
+                    FadeOut(svg_algorithm),
+                    FadeOut(text_algo_algo),
+                    FadeOut(text_algo_order_search),
+                    FadeOut(text_algo_graph),
+                    FadeOut(text_algo_encryption),
+                    FadeOut(text_algo_ai),
+                    FadeOut(text_algo_compress),
+                    FadeOut(text_algo_numerical),
+                    FadeOut(text_algo_turing_machine),
+                )
+            ),
+            Write(tm_aplusb.tape_item),
+            Write(tm_aplusb.framebox),
+            Write(tm_aplusb.table),
+            Write(tm_aplusb.counter),
+            self.camera.anim.points.shift(UP * 0.5),
+            Write(text_algo_addition),
+            Write(dfa_aplusb),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            Write(brace_3_1),
+            Write(brace_3_1_text),
+        )
+        self.play(
+            Write(brace_2_1),
+            Write(brace_2_1_text),
+        )
+        self.forward(1)
+        self.play(
+            FadeOut(brace_3_1),
+            FadeOut(brace_3_1_text),
+            FadeOut(brace_2_1),
+            FadeOut(brace_2_1_text),
+        )
+        for i in range(11):
+            tm_aplusb.step(duration=0.2).run_step_anim(self, compress=True)
+            self.forward(0.25)
+        self.play(
+            Write(brace_5_1),
+            Write(brace_5_1_text),
+        )
+        self.forward(1.5)
+        self.play(FadeOut(
+            Group(
+                tm_aplusb.tape_item,
+                tm_aplusb.framebox,
+                tm_aplusb.table,
+                tm_aplusb.counter,
+                text_algo_addition,
+                dfa_aplusb,
+                brace_5_1,
+                brace_5_1_text,
+            )
+        ))

@@ -218,7 +218,7 @@ class TuringMachine(Group):
             def __repr__(self) -> str:
                 return "<TuringMachineStepAnim>"
 
-            def run_step_anim(self, timeline: Timeline, after_step_idx: Callable[[int], None] = lambda idx: None):
+            def run_step_anim(self, timeline: Timeline, after_step_idx: Callable[[int], None] = lambda idx: None, compress: bool = False):
                 """
                 执行图灵机一步动画
 
@@ -227,35 +227,22 @@ class TuringMachine(Group):
                 :param after_step_idx: 每步执行后回调，参数为当前步数索引
                 :type after_step_idx: Callable[[int], None]
                 """
-                curr_idx = 0
-                if self.anim_transformer_update_info:
-                    timeline.play(self.anim_transformer_update_info)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
-                if self.anim_table_cancel_highlight:
-                    timeline.play(self.anim_table_cancel_highlight)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
-                if self.anim_table_highlight:
-                    timeline.play(self.anim_table_highlight)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
-                if self.anim_update_tape_object:
-                    timeline.play(self.anim_update_tape_object)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
-                if self.anim_tape_shift:
-                    timeline.play(self.anim_tape_shift)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
-                if self.anim_counter_update:
-                    timeline.play(self.anim_counter_update)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
-                if self.anim_pointer_text_update:
-                    timeline.play(self.anim_pointer_text_update)
-                    after_step_idx(curr_idx)
-                    curr_idx += 1
+                anims = [
+                    self.anim_transformer_update_info,
+                    self.anim_table_cancel_highlight,
+                    self.anim_table_highlight,
+                    self.anim_update_tape_object,
+                    self.anim_tape_shift,
+                    self.anim_counter_update,
+                    self.anim_pointer_text_update,
+                ]
+                for i, anim in enumerate(anims):
+                    if anim:
+                        if not compress:
+                            timeline.play(anim)
+                        else:
+                            timeline.play(anim, duration=duration)
+                        after_step_idx(i)
 
         pre_info = self.core.current_info
         self.core.step()
