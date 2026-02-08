@@ -531,3 +531,81 @@ class s2_2(Timeline):
                 brace_5_1_text,
             )
         ))
+
+class s2_3(Timeline):
+    """
+    uv run janim run s2_TuringMachineAndHalt.py s2_3 -i
+    """
+    def construct(self) -> None:
+        text_four_ops = TypstMath("+ space - times div").points.scale(3).move_to(DOWN * PI).r
+        video_3a = Video("resources/艾尔登法环_clip.mp4").points.move_to(DOWN * 3 * PI).r
+        video_3a.start()
+        svg_gpt = SVGItem("resources/gpt.svg").points.scale(1.5).move_to(DOWN * 5 * PI).r
+        brace_3 = Brace(
+            Group(
+                video_3a,
+                text_four_ops.copy().points.shift(UP * 2).r,
+                svg_gpt.copy().points.shift(DOWN * 2).r,
+            ),
+            direction=RIGHT,
+            buff=2.5,
+        )
+        brace_3_text = brace_3.points.create_text(
+            "<c RED>大号</c>图灵机",
+            format="rich",
+            font=local_font,
+        ).points.scale(5).shift(RIGHT * 5).r
+
+        self.prepare(Rotate(svg_gpt, angle=5 * PI), duration=5)
+        self.play(
+            DataUpdater(
+                self.camera,
+                lambda data, p: data.points.shift(DOWN * (
+                    5 * PI * p.alpha + np.sin(5 * PI * p.alpha)
+                )),
+                duration=6.0,
+            ),
+            Succession(
+                Write(text_four_ops),
+                Wait(0.5),
+                FadeOut(text_four_ops),
+                at=0.75,
+            ),
+            Succession(
+                FadeIn(video_3a),
+                Wait(0.5),
+                FadeOut(video_3a),
+                at=2.0,
+            ),
+            Succession(
+                FadeIn(svg_gpt),
+                at=3.75,
+            )
+        )
+        self.play(
+            AnimGroup(
+                text_four_ops.anim.points.shift(UP * 2),
+                svg_gpt.anim.points.shift(DOWN * 2),
+                self.camera.anim.points.move_to(video_3a.points.box.center).scale(3),
+            ),
+            AnimGroup(
+                FadeIn(video_3a),
+                FadeIn(text_four_ops),
+                lag_ratio=0.2,
+            ),
+            Write(brace_3),
+            AnimGroup(
+                Write(brace_3_text),
+                self.camera.anim.points.shift(RIGHT * 4),
+            ),
+            lag_ratio=0.3,
+        )
+        self.forward(2)
+        self.play(
+            FadeOut(video_3a),
+            FadeOut(text_four_ops),
+            FadeOut(svg_gpt),
+            FadeOut(brace_3),
+            FadeOut(brace_3_text),
+        )
+        self.forward(1)
