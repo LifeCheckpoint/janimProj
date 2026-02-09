@@ -796,3 +796,146 @@ class s2_4(Timeline):
             lag_ratio=0.2,
         )
         self.forward(1)
+
+class s2_5(Timeline):
+    """
+    uv run janim run s2_TuringMachineAndHalt.py s2_5 -i
+    """
+    def construct(self) -> None:
+        text_halt = Text("HALT", font=local_font).points.scale(2).r
+        text_halt.color.set(color=YELLOW)
+        text_halt_quest = Text("HALT?", font=local_font).points.scale(2).r
+        text_halt_quest.color.set(color=RED)
+        icon_loop = SVGItem(str(Path(__file__).parent / "resources" / "loop.svg")).points.scale(0.35).r
+        icon_loop.astype(VItem).color.set(color=GREEN_B).r
+        icon_stop = Square(0.6).color.set(color=RED_B, alpha=1).r
+        icon_loop_2 = icon_loop.copy()
+        icon_stop_2 = icon_stop.copy()
+        svg_pointer_1 = SVGItem("turing_machine/svgs/pointer.svg").points.scale(0.7).r
+        svg_pointer_2 = svg_pointer_1.copy()
+        text_turing_M1 = TypstMath("M").points.scale(1.5).move_to(svg_pointer_1).shift(UP * 0.2).r
+        text_turing_M2 = TypstMath("M'").points.scale(1.5).move_to(svg_pointer_2).shift(UP * 0.2).r
+        turing_M1 = Group(svg_pointer_1, text_turing_M1)
+        turing_M1.points.shift(LEFT * 2)
+        turing_M2 = Group(svg_pointer_2, text_turing_M2)
+        turing_M2.points.shift(RIGHT * 2)
+        text_M12_rule = TypstDoc(get_typ_doc("loop_or_finish")).points.scale(1.2).move_to(DOWN * 1.5).r
+        icon_loop.points.move_to(text_M12_rule.get_label("loop1"))
+        icon_stop.points.move_to(text_M12_rule.get_label("halt1"))
+        icon_loop_2.points.move_to(text_M12_rule.get_label("loop2"))
+        icon_stop_2.points.move_to(text_M12_rule.get_label("halt2"))
+        text_M2_1 = TypstMath("M'").points.scale(1.5).next_to(icon_stop, LEFT, buff=0.7).shift(UP * 0.1).r
+        text_M2_2 = TypstMath("M'").points.scale(1.5).next_to(icon_loop_2, LEFT, buff=0.7).shift(UP * 0.1).r
+        rect_con_1 = SurroundingRect(
+            Group(
+                text_M2_2,
+                icon_stop_2,
+                icon_loop_2,
+            ),
+            color=YELLOW,
+        ).points.shift(RIGHT * 0.5).r
+        rect_con_2 = SurroundingRect(
+            Group(
+                text_M2_1,
+                icon_stop,
+                icon_loop,
+            ),
+            color=YELLOW,
+        ).points.shift(RIGHT * 0.5).r
+        text_M2_1.points.shift(RIGHT * 0.5)
+        text_M2_2.points.shift(RIGHT * 0.5)
+        text_halt_quest_answer = Text("<c RED_B>停机问题</c><c GREEN_B>不可判定</c>", font=local_font, format="rich").points.scale(1.5).move_to(RIGHT * 5.5 + UP * 0.5).r
+        text_halt_quest_en = Text("<c BLUE_B>The </c><fs 1.4><c GREEN_B>Undecidability</c></fs>\n<c BLUE_B>of the Halting Problem</c>", font=local_font, format="rich").points.scale(0.85).move_to(RIGHT * 5.5 + DOWN * 0.5).r
+        text_halt_quest_answer2 = Text("<c RED_B>停机问题</c><c YELLOW_B>不可计算</c>", font=local_font, format="rich").points.scale(1.5).move_to(RIGHT * 5.5 + UP * 0.5).r
+        text_halt_quest_en2 = Text("<c BLUE_B>The </c><fs 1.4><c YELLOW_B>Uncomputability</c></fs>\n<c BLUE_B>of the Halting Problem</c>", font=local_font, format="rich").points.scale(0.85).move_to(RIGHT * 5.5 + DOWN * 0.5).r
+
+        self.play(Write(text_halt))
+        self.forward(1)
+        self.play(TransformMatchingDiff(text_halt, text_halt_quest))
+        self.forward(3)
+        self.play(
+            text_halt_quest.anim.points.move_to(UP * 3 + LEFT * 5),
+            Write(turing_M1),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(Transform(
+            turing_M1,
+            turing_M2,
+            hide_src=False,
+        ))
+        self.forward(1)
+        self.play(
+            AnimGroup(
+                turing_M1.anim.points.shift(UP * 1.5),
+                turing_M2.anim.points.shift(UP * 1.5),
+            ),
+            AnimGroup(
+                Write(text_M12_rule),
+                Write(icon_loop),
+                Write(icon_stop),
+                Write(icon_loop_2),
+                Write(icon_stop_2),
+            ),
+            lag_ratio=0.2,
+        )
+        self.prepare(
+            Rotate(icon_loop, angle=-2 * PI),
+            Rotate(icon_loop_2, angle=-2 * PI),
+            duration=4,
+        )
+        self.forward(2)
+        self.play(
+            Transform(turing_M2, text_M2_1, hide_src=False, flatten=True),
+            Transform(turing_M2, text_M2_2, hide_src=False, flatten=True),
+            Group(
+                text_M12_rule,
+                icon_loop,
+                icon_stop,
+                icon_loop_2,
+                icon_stop_2,
+            ).anim.points.shift(RIGHT * 0.5),
+        )
+        self.prepare(
+            Rotate(icon_loop, angle=-6 * PI),
+            Rotate(icon_loop_2, angle=-6 * PI),
+            duration=12,
+        )
+        self.forward(1.5)
+        self.play(Write(rect_con_1))
+        self.forward(2.5)
+        self.play(Transform(rect_con_1, rect_con_2))
+        self.forward(2.5)
+        self.play(
+            FadeOut(rect_con_2),
+            self.camera.anim.points.shift(RIGHT * 2),
+            TransformMatchingDiff(text_halt_quest, text_halt_quest_answer),
+            Write(text_halt_quest_en),
+            lag_ratio=0.2,
+        )
+        self.forward(1.5)
+        self.play(
+            TransformMatchingDiff(text_halt_quest_answer, text_halt_quest_answer2),
+            TransformMatchingDiff(text_halt_quest_en, text_halt_quest_en2),
+        )
+        self.forward(2)
+        self.play(
+            FadeOut(Group(
+                turing_M1,
+                turing_M2,
+                icon_loop,
+                icon_stop,
+                icon_loop_2,
+                icon_stop_2,
+                text_M12_rule,
+                text_M2_1,
+                text_M2_2,
+            )),
+            AnimGroup(
+                Uncreate(text_halt_quest_answer2),
+                Uncreate(text_halt_quest_en2),
+            ),
+            lag_ratio=0.5,
+        )
+        self.forward(1)
+        
