@@ -882,9 +882,9 @@ class s2_5(Timeline):
         self.prepare(
             Rotate(icon_loop, angle=-2 * PI),
             Rotate(icon_loop_2, angle=-2 * PI),
-            duration=4,
+            duration=7,
         )
-        self.forward(2)
+        self.forward(5)
         self.play(
             Transform(turing_M2, text_M2_1, hide_src=False, flatten=True),
             Transform(turing_M2, text_M2_2, hide_src=False, flatten=True),
@@ -938,4 +938,3 @@ class s2_5(Timeline):
             lag_ratio=0.5,
         )
         self.forward(1)
-        
