@@ -203,6 +203,8 @@ class TuringMachine(Group):
         :return: 动画序列，由于使用 Succession 在当前版本会有状态更新 Bug，返回匿名动画执行类以供外部 play 使用
         :rtype: list[Animation]
         """
+        machine_self = self
+        
         class TuringMachineStepAnim(BaseModel):
             model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -233,7 +235,7 @@ class TuringMachine(Group):
                     self.anim_table_highlight,
                     self.anim_update_tape_object,
                     self.anim_tape_shift,
-                    self.anim_counter_update,
+                    self.anim_counter_update if machine_self.is_counter_shown else None,
                     self.anim_pointer_text_update,
                 ]
                 for i, anim in enumerate(anims):

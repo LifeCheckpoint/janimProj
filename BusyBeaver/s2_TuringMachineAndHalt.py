@@ -609,3 +609,190 @@ class s2_3(Timeline):
             FadeOut(brace_3_text),
         )
         self.forward(1)
+
+class s2_4(Timeline):
+    """
+    uv run janim run s2_TuringMachineAndHalt.py s2_4 -i
+    """
+    def construct(self) -> None:
+        # 不同子 Timeline 演示不同内容
+        class TMFinal(Timeline):
+            def construct(self) -> None:
+                text_final = Text("停机", font=local_font).points.scale(1.5).move_to(UP * 3.75).r
+                dfa = load_dfa_typst("tm_final").dfa_main_item
+                dfa.points.scale(0.6).next_to(text_final, RIGHT, buff=0.25).shift(LEFT * 1)
+                self.prepare(
+                    Succession(
+                        Wait(24),
+                        text_final.anim.points.shift(LEFT * 1),
+                        Write(dfa),
+                    )
+                )
+                self.camera.points.shift(UP * 0.75)
+                core = TuringMachineCore(
+                    initial_tape="001",
+                    start_state="A",
+                    halt_states=["HALT"],
+                )
+                core.add_rule("A", "0", "A", "1", "R")
+                core.add_rule("A", "1", "HALT", "1", "S")
+                tm = TuringMachine(
+                    core,
+                    showcase_radius=12,
+                    table_scaling=1.0,
+                    tape_config={"center_scaling": 1.0},
+                    table_config={"transpose": True},
+                    counter_config={"max_value": 3},
+                )
+                tm.is_table_shown = True
+                
+                self.play(
+                    Write(text_final),
+                    Write(tm.tape_item),
+                    Write(tm.framebox),
+                    Write(tm.table),
+                    Write(tm.counter),
+                )
+                self.forward(1)
+                for _ in range(3):
+                    tm.step(duration=0.25).run_step_anim(self, compress=True)
+                    self.forward(0.5)
+                self.forward(1)
+                self.play(FadeOut(tm.counter))
+                self.forward(30)
+        
+        class TMLoop(Timeline):
+            def construct(self) -> None:
+                text_loop = Text("循环", font=local_font).points.scale(1.5).move_to(UP * 3.75).r
+                dfa = load_dfa_typst("tm_loop").dfa_main_item
+                dfa.points.scale(0.6).next_to(text_loop, RIGHT, buff=0.25).shift(LEFT * 1)
+                self.prepare(
+                    Succession(
+                        Wait(24 - 10),
+                        text_loop.anim.points.shift(LEFT * 1),
+                        Write(dfa),
+                    )
+                )
+                self.camera.points.shift(UP * 0.75)
+                core = TuringMachineCore(
+                    initial_tape="01",
+                    start_state="A",
+                    halt_states=["HALT"],
+                )
+                core.add_rule("A", "0", "A", "1", "R")
+                core.add_rule("A", "1", "A", "0", "L")
+                tm = TuringMachine(
+                    core,
+                    showcase_radius=12,
+                    table_scaling=1.0,
+                    tape_config={"center_scaling": 1.0},
+                    table_config={"transpose": True},
+                    counter_config={"max_value": 100000},
+                )
+                tm.is_table_shown = True
+                
+                self.play(
+                    Write(text_loop),
+                    Write(tm.tape_item),
+                    Write(tm.framebox),
+                    Write(tm.table),
+                    Write(tm.counter),
+                )
+                self.forward(1)
+                for idx in range(15):
+                    tm.step(duration=0.25).run_step_anim(self, compress=True)
+                    if idx == 4:
+                        tm.is_counter_shown = False
+                        self.play(FadeOut(tm.counter))
+                    self.forward(0.5)
+                self.forward(30)
+
+        class TMInfinite(Timeline):
+            def construct(self) -> None:
+                text_infinite = Text("无限", font=local_font).points.scale(1.5).move_to(UP * 3.75).r
+                dfa = load_dfa_typst("tm_infinite").dfa_main_item
+                dfa.points.scale(0.6).next_to(text_infinite, RIGHT, buff=0.25).shift(LEFT * 1)
+                self.prepare(
+                    Succession(
+                        Wait(24 - 20),
+                        text_infinite.anim.points.shift(LEFT * 1),
+                        Write(dfa),
+                    )
+                )
+                self.camera.points.shift(UP * 0.75)
+                core = TuringMachineCore(
+                    initial_tape="000",
+                    start_state="A",
+                    halt_states=["HALT"],
+                )
+                core.add_rule("A", "0", "A", "1", "R")
+                core.add_rule("A", "1", "A", "0", "R")
+                tm = TuringMachine(
+                    core,
+                    showcase_radius=12,
+                    table_scaling=1.0,
+                    tape_config={"center_scaling": 1.0},
+                    table_config={"transpose": True},
+                    counter_config={"max_value": 100000},
+                )
+                tm.is_table_shown = True
+                tm.is_counter_shown = False
+
+                self.play(
+                    Write(text_infinite),
+                    Write(tm.tape_item),
+                    Write(tm.framebox),
+                    Write(tm.table),
+                )
+                self.forward(1)
+                for _ in range(20):
+                    tm.step(duration=0.25).run_step_anim(self, compress=True)
+                    self.forward(0.5)
+                self.forward(30)
+
+        tm_final = TMFinal().build().to_item().show()
+        debug_clip = False
+        clip_final = TransformableFrameClip(
+            tm_final,
+            debug=debug_clip,
+        )
+        sep_line_1 = DashedLine(DOWN * 5, UP * 5, depth=-10).points.shift(RIGHT * 8).r.show()
+        clip_final.show()
+        self.forward(9)
+        self.play(
+            sep_line_1.anim.points.move_to(LEFT * self.camera.points.size[0] / 6),
+            clip_final.anim.clip.set(left=1 / 3, right=1 / 3, x_offset=-1 / 3),
+        )
+        
+        tm_loop = TMLoop().build().to_item().show()
+        clip_loop = TransformableFrameClip(
+            tm_loop,
+            clip=(1 / 6, 0, 1 / 6, 0),
+            offset=(1 / 6, 0),
+            debug=debug_clip,
+        )
+        sep_line_2 = DashedLine(DOWN * 5, UP * 5, depth=-10).points.shift(RIGHT * 8).r.show()
+        clip_loop.show()
+        self.forward(9)
+        self.play(
+            sep_line_2.anim.points.move_to(RIGHT * self.camera.points.size[0] / 6),
+            clip_loop.anim.clip.set(left=1 / 3, right=1 / 3, x_offset=0),
+        )
+
+        tm_infinite = TMInfinite().build().to_item().show()
+        clip_infinite = TransformableFrameClip(
+            tm_infinite,
+            clip=(1 / 3, 0, 1 / 3, 0),
+            offset=(1 / 3, 0),
+            debug=debug_clip,
+        )
+        clip_infinite.show()
+        self.forward(16)
+        rect_m = Rect(20, 20, depth=-20).color.set(color=BLACK, alpha=1).r
+        self.play(
+            FadeOut(sep_line_1),
+            FadeOut(sep_line_2),
+            FadeIn(rect_m),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
