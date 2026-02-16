@@ -498,3 +498,45 @@ class HistoryGridTest(Timeline):
             self.forward(0.5)
             
         self.forward(2)
+
+class ManyCellsTest(Timeline):
+    """
+    uv run janim run test_scene.py ManyCellsTest -i
+    """
+    def construct(self):
+        def get_cell_4098(n: int = 4098):
+            res = []
+            for _ in range(n):
+                cell = TapeCell(square_size=0.075, tile_data="")
+                cell.frame.apply_style(stroke_radius=0.001)
+                res.append(cell)
+            return res
+        
+        group_cells_4098 = Group(*get_cell_4098())
+        group_cells_4098.points.arrange_in_grid(n_rows=33, n_cols=128, buff=0)
+        cell_1 = TapeCell(square_size=0.5, tile_data="1", text_scaling=0.75)
+        cell_1.depth.set(-10)
+        brace_group_cells = Brace(group_cells_4098, UP, buff=0.1).points.shift(DOWN * 0.5).r
+        text_4098 = TypstMath("4098 times")
+        cell_1.points.next_to(text_4098["times"], RIGHT, buff=0.25)
+        group_text_4098 = Group(cell_1, text_4098).points.next_to(brace_group_cells, UP, buff=0.25).r
+        
+        self.play(
+            *[
+                Write(cell) for cell in group_cells_4098
+            ],
+            lag_ratio=0.0002,
+        )
+        self.play(
+            group_cells_4098.anim.points.shift(DOWN * 0.5),
+            Write(brace_group_cells),
+            Write(group_text_4098),
+            lag_ratio=0.2,
+        )
+        self.forward(2)
+        self.play(
+            FadeOut(group_cells_4098),
+            FadeOut(brace_group_cells),
+            FadeOut(group_text_4098),
+            lag_ratio=0.2,
+        )
