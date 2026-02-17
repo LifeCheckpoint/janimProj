@@ -302,7 +302,6 @@ class s3_1(Timeline):
                 self.counting_duration = counting_duration
             
             def construct(self) -> None:
-                self.camera.points.scale(1.2)
                 tm_diy = TuringMachine(
                     turing_core=self.core,
                     showcase_radius=9,
@@ -313,7 +312,6 @@ class s3_1(Timeline):
                 )
                 tm_diy.is_table_shown = True
                 tm_diy.is_counter_shown = False
-                tm_diy.points.shift(DOWN * 1.5)
                 tm_diy.tape_item.show()
                 tm_diy.table.show()
                 tm_diy.framebox.show()
@@ -328,10 +326,10 @@ class s3_1(Timeline):
                 mask_rect = Rect(
                     frame_width,
                     frame_height,
-                    color=BLACK,
+                    color=GREY_B,
                     depth=-10,
                 )
-                mask_rect.color.set(alpha=0.9)
+                mask_rec.stroke.set(alpha=0.5)
                 text_run_step_count = Text(
                     f"<c {self.counting_color}><fs 2.5>0</fs></c>步",
                     format="rich",
@@ -351,7 +349,7 @@ class s3_1(Timeline):
                                 format="rich",
                                 font=local_font,
                                 depth=-20,
-                            ).points.move_to(mask_rect).r,
+                            ).points.move_to(mask_rect).scale(2.5).r,
                             rate_func=ease_inout_cubic,
                             duration=self.counting_duration,
                         ),
