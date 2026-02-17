@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <g id="leaf">
+      <path d="M0,0 C-8,-20 -6,-45 0,-65 C6,-45 8,-20 0,0Z" fill="#4CAF50"/>
+      <line x1="0" y1="0" x2="0" y2="-62" stroke="#2E7D32" stroke-width="0.7" opacity="0.5"/>
+    </g>
+    <g id="leaf-sm">
+      <path d="M0,0 C-6,-15 -5,-35 0,-50 C5,-35 6,-15 0,0Z" fill="#66BB6A"/>
+      <line x1="0" y1="0" x2="0" y2="-47" stroke="#388E3C" stroke-width="0.6" opacity="0.5"/>
+    </g>
+    <!-- 单根树枝模板 -->
+    <g id="branch">
+      <!-- 主干 -->
+      <path d="M0,0 C60,-20 160,-50 280,-70 C380,-85 480,-90 560,-92"
+            stroke="#4E342E" fill="none" stroke-width="10" stroke-linecap="round"/>
+      <path d="M0,0 C60,-20 160,-50 280,-70 C380,-85 480,-90 560,-92"
+            stroke="#5D4037" fill="none" stroke-width="7" stroke-linecap="round"/>
+      <path d="M0,0 C60,-20 160,-50 280,-70 C380,-85 480,-90 560,-92"
+            stroke="#6D4C41" fill="none" stroke-width="4" stroke-linecap="round"/>
+      <!-- 分枝 -->
+      <path d="M80,-15 C75,-35 70,-55 68,-75" stroke="#6D4C41" fill="none" stroke-width="3" stroke-linecap="round"/>
+      <path d="M180,-42 C175,-62 172,-80 170,-100" stroke="#795548" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M320,-75 C325,-95 328,-110 330,-130" stroke="#795548" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M440,-88 C445,-105 448,-118 450,-135" stroke="#8D6E63" fill="none" stroke-width="2" stroke-linecap="round"/>
+      <!-- 叶片 -->
+      <use href="#leaf" transform="translate(68,-75) rotate(-20)"/>
+      <use href="#leaf-sm" transform="translate(68,-75) rotate(40)"/>
+      <use href="#leaf-sm" transform="translate(80,-15) rotate(50)"/>
+      <use href="#leaf" transform="translate(170,-100) rotate(-15)"/>
+      <use href="#leaf-sm" transform="translate(170,-100) rotate(45)"/>
+      <use href="#leaf-sm" transform="translate(175,-60) rotate(-40)"/>
+      <use href="#leaf" transform="translate(130,-30) rotate(55)"/>
+      <use href="#leaf-sm" transform="translate(130,-30) rotate(-35)"/>
+      <use href="#leaf" transform="translate(330,-130) rotate(-25)"/>
+      <use href="#leaf-sm" transform="translate(330,-130) rotate(40)"/>
+      <use href="#leaf-sm" transform="translate(325,-90) rotate(50)"/>
+      <use href="#leaf" transform="translate(250,-65) rotate(-30)"/>
+      <use href="#leaf-sm" transform="translate(250,-65) rotate(45)"/>
+      <use href="#leaf" transform="translate(450,-135) rotate(-20)"/>
+      <use href="#leaf-sm" transform="translate(450,-135) rotate(50)"/>
+      <use href="#leaf-sm" transform="translate(440,-100) rotate(-35)"/>
+      <use href="#leaf-sm" transform="translate(380,-82) rotate(45)"/>
+      <use href="#leaf-sm" transform="translate(500,-92) rotate(-25)"/>
+      <use href="#leaf-sm" transform="translate(500,-92) rotate(50)"/>
+      <use href="#leaf-sm" transform="translate(540,-93) rotate(40)"/>
+    </g>
+  </defs>
+  <!-- 第1根（最底层） -->
+  <use href="#branch" transform="translate(15,340) rotate(2)" opacity="0.85"/>
+  <!-- 第2根 -->
+  <use href="#branch" transform="translate(20,310) rotate(-1)" opacity="0.9"/>
+  <!-- 第3根 -->
+  <use href="#branch" transform="translate(10,280) rotate(1.5)"/>
+  <!-- 第4根 -->
+  <use href="#branch" transform="translate(25,250) rotate(-0.5)" opacity="0.92"/>
+  <!-- 第5根 -->
+  <use href="#branch" transform="translate(12,220) rotate(1)"/>
+  <!-- 第6根 -->
+  <use href="#branch" transform="translate(22,190) rotate(-1.5)" opacity="0.88"/>
+  <!-- 第7根（最上层） -->
+  <use href="#branch" transform="translate(18,162) rotate(0.5)" opacity="0.95"/>
+</svg>

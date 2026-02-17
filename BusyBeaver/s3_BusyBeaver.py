@@ -4,6 +4,7 @@ from tools import get_typ_doc, local_font, CYAN, parse_rule_to_core, get_percept
 from turing_machine.components.tape_cell import TapeCell
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.turing_machine import TuringMachine
+from langton_ant.langton_ant_grid import LangtonAntGrid
 from typst_dfa.typst_dfa import load_dfa_typst
 import random
 
@@ -279,7 +280,7 @@ class s3_1(Timeline):
         clip_loop.hide()
         subtimeline_loop.hide()
         line_seperator.hide()
-        self.forward(7)
+        self.forward(3)
 
         class TMDIY(Timeline):
             def __init__(
@@ -302,6 +303,7 @@ class s3_1(Timeline):
                 self.counting_duration = counting_duration
             
             def construct(self) -> None:
+                self.camera.points.scale(0.9)
                 tm_diy = TuringMachine(
                     turing_core=self.core,
                     showcase_radius=9,
@@ -326,10 +328,11 @@ class s3_1(Timeline):
                 mask_rect = Rect(
                     frame_width,
                     frame_height,
-                    color=GREY_B,
+                    color=BLACK,
                     depth=-10,
                 )
-                mask_rec.stroke.set(alpha=0.5)
+                mask_rect.stroke.set(alpha=0.5)
+                mask_rect.fill.set(alpha=0.9)
                 text_run_step_count = Text(
                     f"<c {self.counting_color}><fs 2.5>0</fs></c>步",
                     format="rich",
@@ -353,6 +356,11 @@ class s3_1(Timeline):
                             rate_func=ease_inout_cubic,
                             duration=self.counting_duration,
                         ),
+                        Wait(1.5),
+                        AnimGroup(
+                            FadeOut(text_run_step_count),
+                            mask_rect.anim.color.set(alpha=1),
+                        ),
                     ),
                     at=self.counting_start_at,
                 )
@@ -368,7 +376,7 @@ class s3_1(Timeline):
             "core": parse_rule_to_core(rule)[0],
             "step_count": parse_rule_to_core(rule)[1],
         } for rule in choiced_rules]
-        DEBUG = True
+        DEBUG = False
         counting_color_gradient = get_perceptual_gradient_function([
             GREEN_B,
             YELLOW,
@@ -451,7 +459,7 @@ class s3_1(Timeline):
             ],
             rate_func=ease_inout_cubic,
         )
-        self.forward(6)
+        self.forward(8)
         for clip in clips_diy:
             clip.hide()
         for tm in tms_diy:
@@ -464,4 +472,122 @@ class s3_1(Timeline):
                 y_offset=0,
             ),
         )
-        self.forward(10)
+        self.forward(1)
+
+        svg_branch = SVGItem("resources/branch.svg").points.shift(DOWN * 6).r
+        svg_beaver_dam = SVGItem("resources/beaver_dam.svg").points.shift(DOWN * 6).r
+        
+        self.play(
+            self.camera.anim.points.shift(DOWN * 6),
+            clip_bb5.anim.clip.set(y_offset=1),
+            Write(svg_branch),
+        )
+        self.forward(0.5)
+        self.play(
+            FadeOut(svg_branch),
+            Write(svg_beaver_dam),
+        )
+        self.forward(2)
+        self.play(
+            FadeOut(svg_beaver_dam),
+            clip_bb5.anim.clip.set(y_offset=0),
+            self.camera.anim.points.shift(UP * 6),
+        )
+        self.forward(2)
+
+class s3_2(Timeline):
+    """
+    uv run janim run s3_BusyBeaver.py s3_2 -i
+    """
+    def construct(self) -> None:
+        text_state_5_steps = TypstText(
+            "$overbrace(A quad B quad C quad D quad E, \"5 状态\") quad arrow.r quad$ #text(fill: aqua)[47176870] 步",
+        ).points.scale(1.7).move_to(UP * 1.5).r
+        text_max_step = TypstDoc(get_typ_doc("why_max_step"))
+        text_max_step.points.scale(0.85).next_to(text_state_5_steps, DOWN, buff=0.5)
+        text_status_step = Text(
+            "<c RED_B>状态</c>，与膨胀的<c BLUE_B>步数</c>",
+            format="rich",
+            font=local_font,
+            depth=-10,
+        )
+        text_status_step.points.scale(1.5).move_to(UP * 3 + LEFT * 4)
+        text_status_step_2 = Text(
+            "<c RED_B>状态</c><c BLACK>，与膨胀的</c><c BLUE_B>步数</c>",
+            format="rich",
+            font=local_font,
+            depth=-10,
+        )
+        text_status_step_2.points.scale(1.5).move_to(UP * 3 + LEFT * 4)
+
+        self.forward(1)
+        self.play(Write(text_state_5_steps))
+        self.forward(1.5)
+        self.play(Write(text_max_step))
+        self.forward(2)
+        self.play(
+            FadeOut(text_max_step),
+            TransformMatchingShapes(text_state_5_steps, text_status_step),
+        )
+        self.forward(1)
+        core_bb5 = TuringMachineCore(
+            initial_tape="".join([random.choice("01") for _ in range(20)]),
+            start_state="A",
+            halt_states=["HALT"]
+        )
+        core_bb5.add_rule("A", "0", "B", "1", "R")
+        core_bb5.add_rule("A", "1", "C", "1", "L")
+        core_bb5.add_rule("B", "0", "C", "1", "R")
+        core_bb5.add_rule("B", "1", "B", "1", "R")
+        core_bb5.add_rule("C", "0", "D", "1", "R")
+        core_bb5.add_rule("C", "1", "E", "0", "L")
+        core_bb5.add_rule("D", "0", "A", "1", "L")
+        core_bb5.add_rule("D", "1", "D", "1", "L")
+        core_bb5.add_rule("E", "0", "HALT", "1", "R")
+        core_bb5.add_rule("E", "1", "A", "0", "L")
+        for _ in range(10):
+            core_bb5.step()
+        tm_bb5 = TuringMachine(
+            turing_core=core_bb5,
+            showcase_radius=10,
+            table_scaling=1.1,
+            tape_config={"center_scaling": 1},
+            table_config={"transpose": True},
+            counter_config={"max_value": 9999},
+        )
+        tm_bb5.is_table_shown = True
+        tm_bb5.is_counter_shown = False
+        tm_bb5.points.shift(DOWN * 0.75)
+        text_10x2eq20 = TypstMath("10 times 2 = 20")
+        text_10x2eq20.points.scale(2).next_to(tm_bb5.table, DOWN, buff=0.5)
+
+        self.play(Write(tm_bb5.table))
+        self.forward(0.5)
+        self.play(Write(text_10x2eq20))
+        self.forward(1.5)
+        self.play(FadeOut(text_10x2eq20))
+        self.play(
+            Write(tm_bb5.tape_item),
+            Write(tm_bb5.framebox),
+        )
+        self.forward(1.5)
+        self.play(
+            FadeOut(tm_bb5.tape_item),
+            FadeOut(tm_bb5.framebox),
+            FadeOut(tm_bb5.table),
+        )
+        grid = LangtonAntGrid(cell_size=0.25, pre_alloc=150)
+        self.play(
+            Write(grid),
+            TransformMatchingShapes(text_status_step, text_status_step_2),
+        )
+        text_status_step_2.fix_in_frame()
+        self.forward(1)
+        self.play(
+            AnimGroup(
+                grid.get_multi_step_anim(50000, duration=0.0003),
+                rate_func=ease_inout_expo,
+            ),
+            self.camera.anim.points.scale(2.0),
+        )
+        self.forward(1)

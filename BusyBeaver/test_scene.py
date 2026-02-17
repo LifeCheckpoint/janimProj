@@ -540,3 +540,30 @@ class ManyCellsTest(Timeline):
             FadeOut(group_text_4098),
             lag_ratio=0.2,
         )
+
+from langton_ant.langton_ant_grid import LangtonAntGrid
+class LangtonAntGridTest(Timeline):
+    """
+    uv run janim run test_scene.py LangtonAntGridTest -i
+    """
+    def construct(self):
+        grid = LangtonAntGrid(cell_size=0.1)
+        grid.show()
+        self.forward(0.5)
+
+        self.play(grid.get_step_anim())
+        assert grid.core.get_steps() == 1
+        self.forward(0.3)
+
+        self.play(grid.get_multi_step_anim(5))
+        assert grid.core.get_steps() == 6
+        self.forward(0.3)
+
+        grid2 = LangtonAntGrid(cell_size=0.1, pre_alloc=2)
+        grid2.points.shift(RIGHT * 3)
+        grid2.show()
+        for _ in range(20):
+            self.play(grid2.get_step_anim(duration=0.05))
+        assert len(grid2.cells) > 4
+
+        self.forward(1)
