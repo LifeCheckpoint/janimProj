@@ -7,6 +7,7 @@ from turing_machine.turing_machine import TuringMachine
 from langton_ant.langton_ant_grid import LangtonAntGrid
 from typst_dfa.typst_dfa import load_dfa_typst
 import random
+from dirty_patch import install_dirty_patch
 
 class s3_1(Timeline):
     """
@@ -500,6 +501,7 @@ class s3_2(Timeline):
     uv run janim run s3_BusyBeaver.py s3_2 -i
     """
     def construct(self) -> None:
+        install_dirty_patch()
         text_state_5_steps = TypstText(
             "$overbrace(A quad B quad C quad D quad E, \"5 状态\") quad arrow.r quad$ #text(fill: aqua)[47176870] 步",
         ).points.scale(1.7).move_to(UP * 1.5).r
@@ -585,7 +587,7 @@ class s3_2(Timeline):
         self.forward(1)
         self.play(
             AnimGroup(
-                grid.get_multi_step_anim(50000, duration=0.0003),
+                grid.get_multi_step_anim(1000, duration=0.0003),
                 rate_func=ease_inout_expo,
             ),
             self.camera.anim.points.scale(2.0),
