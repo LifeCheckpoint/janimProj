@@ -1158,3 +1158,70 @@ class s3_4(Timeline):
         )
         self.forward(1)
 
+class s3_5(Timeline):
+    """
+    uv run janim run s3_BusyBeaver.py s3_5 -i
+    """
+    def construct(self) -> None:
+        install_dirty_patch()
+        def history_grid_gen(seq: str, square_size: float = 0.25) -> Group:
+            height = len(seq.splitlines())
+            width = max([len(line) for line in seq.splitlines()])
+            group = Group()
+            for i, line in enumerate(seq.splitlines()):
+                for j, char in enumerate(line):
+                    if char == "0":
+                        group.add(
+                            Rect(square_size, square_size) \
+                                .fill.set(color=WHITE, alpha=1).r \
+                                .stroke.set(color=WHITE, alpha=1).r
+                        )
+                    else:
+                        group.add(
+                            Rect(square_size, square_size) \
+                                .fill.set(color=BLACK, alpha=1).r
+                                .stroke.set(color=WHITE, alpha=1).r
+                        )
+            group.points.arrange_in_grid(height, width, buff=0)
+            return group
+        
+        tm_types = [
+            "cycler",
+            "translated_cycler",
+            "bouncer",
+            "counter",
+            "bell",
+            "fractal",
+            "chaotic",
+        ]
+        file_txts = [
+            Path(
+                f"resources/different_tms_instances/{name}.txt") \
+                    .read_text(encoding="utf-8")
+            for name in tm_types
+        ]
+        text_diff_type = TypstDoc(get_typ_doc("different_turing_type"))
+        text_diff_type.points.scale(0.85)
+        group_types = Group(*[
+            Group(
+                text_diff_type.get_label(type_name),
+                history_grid_gen(type_txt, square_size=0.1),
+            ).points.arrange(DOWN).move_to(ORIGIN).r
+            for type_name, type_txt in zip(tm_types, file_txts)
+        ])
+        for i, item in enumerate(group_types):
+            item[1].points.next_to(item[0], DOWN, aligned_edge=LEFT, buff=0.2)
+            if i > 0 and i != 5:
+                group_types[i].points.next_to(group_types[i - 1][1], RIGHT, aligned_edge=UP, buff=0.35)
+            if i == 5:
+                group_types[i].points.next_to(group_types[1][0], RIGHT, aligned_edge=UP, buff=4.5)
+
+        group_types.points.move_to(ORIGIN)
+
+        self.play(
+            *[
+                Write(tm_type) for tm_type in group_types
+            ],
+            lag_ratio=0.75,
+            duration=5,
+        )
