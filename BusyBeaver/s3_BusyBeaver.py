@@ -515,12 +515,13 @@ class s3_2(Timeline):
         )
         text_status_step.points.scale(1.5).move_to(UP * 3 + LEFT * 4)
         text_status_step_2 = Text(
-            "<c RED_B>状态</c><c BLACK>，与膨胀的</c><c BLUE_B>步数</c>",
+            "<c RED_B>状态</c><c GREY_D>，与膨胀的</c><c BLUE_B>步数</c>",
             format="rich",
             font=local_font,
             depth=-10,
         )
         text_status_step_2.points.scale(1.5).move_to(UP * 3 + LEFT * 4)
+        text_status_step_3 = text_status_step.copy()
 
         self.forward(1)
         self.play(Write(text_state_5_steps))
@@ -583,13 +584,40 @@ class s3_2(Timeline):
             Write(grid),
             TransformMatchingShapes(text_status_step, text_status_step_2),
         )
-        text_status_step_2.fix_in_frame()
         self.forward(1)
         self.play(
             AnimGroup(
                 grid.get_multi_step_anim(1000, duration=0.0003),
-                rate_func=ease_inout_expo,
+                rate_func=ease_inout_cubic,
+                collapse=True,
             ),
-            self.camera.anim.points.scale(2.0),
+            text_status_step_2.anim.points.shift(UP * 1.5 + LEFT * 1.5).scale(1.5),
+            self.camera.anim.points.scale(1.5),
         )
+        fast_ant_anim = Succession(
+            *[
+                grid.multi_step(120, duration=0.02)
+                for _ in range(100)
+            ],
+            collapse=True,
+        )
+        self.play(fast_ant_anim)
         self.forward(1)
+        self.prepare(
+            AnimGroup(
+                *[
+                    AnimGroup(
+                        FadeOut(cell),
+                        at=random.uniform(0, 1.5),
+                    )
+                    for cell in grid.cells.values()
+                ],
+                collapse=True,
+            ),
+        )
+        self.play(
+            self.camera.anim.points.scale(2 / 3),
+            TransformMatchingShapes(text_status_step_2, text_status_step_3),
+            duration=2,
+        )
+        self.forward(2)
