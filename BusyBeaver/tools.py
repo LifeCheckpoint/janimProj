@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, Sequence
 from pathlib import Path
 import numpy as np
+import itertools
+import random
 
 local_font = ["Judou Sans Hans Bold", "Microsoft YaHei"]
 CYAN = "#00FFFF"
@@ -142,3 +144,8 @@ def get_perceptual_gradient_function(color_list: list[str]) -> Callable[[float],
         return rgb_to_hex(lin_rgb)
 
     return gradient_func
+
+def rejection_sample[T](seq: Sequence[T], k: int, cond: Callable[[T], bool]) -> list[T]:
+    """拒绝采样，筛选满足 cond 的元素，取前 k 个"""
+    gen = (x for _ in iter(int, 1) if cond(x := random.choice(seq)))
+    return list(itertools.islice(gen, k))

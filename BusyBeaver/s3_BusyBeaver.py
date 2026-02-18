@@ -1,14 +1,21 @@
 from janim.imports import * # type: ignore
 from typing import cast
-from tools import get_typ_doc, local_font, CYAN, parse_rule_to_core, get_perceptual_gradient_function
+from tools import (
+    get_typ_doc,
+    local_font,
+    CYAN,
+    parse_rule_to_core,
+    get_perceptual_gradient_function,
+    rejection_sample,
+)
 from turing_machine.components.tape_cell import TapeCell
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.turing_machine import TuringMachine
 from turing_machine.components.grid_cell import GridCell
 from langton_ant.langton_ant_grid import LangtonAntGrid
 from typst_dfa.typst_dfa import load_dfa_typst
-import random
 from dirty_patch import install_dirty_patch
+import random
 
 class s3_1(Timeline):
     """
@@ -939,3 +946,215 @@ class s3_3(Timeline):
             FadeOut(text_tms_upperbound),
         )
         self.forward(1)
+
+class s3_4(Timeline):
+    """
+    uv run janim run s3_BusyBeaver.py s3_4 -i
+    """
+    def construct(self) -> None:
+        install_dirty_patch()
+        text_many_tms = TypstDoc(get_typ_doc("many_tms"), depth=10)
+        text_many_tms.points.move_to(ORIGIN)
+        set_0_to_399 = list(range(400))
+        batch_1 = random.sample(set_0_to_399, 100)
+        rec_hl_1 = Group(*[
+            SurroundingRect(text_many_tms[f"$H_({i})$"])
+            for i in batch_1
+        ])
+        for i in batch_1:
+            set_0_to_399.remove(i)
+        batch_2 = random.sample(set_0_to_399, 150)
+        rec_hl_2 = Group(*[
+            SurroundingRect(text_many_tms[f"$H_({i})$"]).color.set(color=GREEN_B).r
+            for i in batch_2
+        ])
+        for i in batch_2:
+            set_0_to_399.remove(i)
+        # 视觉效果考虑
+        H_only = rejection_sample(
+            set_0_to_399,
+            k=1,
+            cond=lambda m: m % 20 >= 5 and m % 20 <= 15 and 120 <= m <= 280,
+        )[0]
+        set_0_to_399.remove(H_only)
+        batch_3 = set_0_to_399
+        rec_hl_3 = Group(*[
+            SurroundingRect(text_many_tms[f"$H_({i})$"]).color.set(color=RED_B).r
+            for i in batch_3
+        ])
+        text_H_beaver = TypstMath("H_(\"BusyBeaver\")")
+        text_H_beaver.points.scale(2).r.astype(VItem).color.set(color=CYAN)
+
+        class TMShow(Timeline):
+            def __init__(
+                self,
+                core: TuringMachineCore,
+                text: str = "",
+                stop_at: int = 5,
+            ):
+                self.core = core
+                self.text = text
+                self.stop_at = stop_at
+                super().__init__()
+            
+            def construct(self) -> None:
+                width = cast(float, Config.get.frame_width)
+                height = cast(float, Config.get.frame_height)
+                bg = Rect(width, height, depth=20)
+                bg.fill.set(color=BLACK, alpha=1.0)
+                frame_bg = Rect(width, height, depth=-20)
+                frame_bg.stroke.set(color=WHITE, alpha=1.0)
+                core = self.core
+                tm = TuringMachine(
+                    turing_core=core,
+                    showcase_radius=12,
+                    table_scaling=1,
+                    tape_config={"center_scaling": 1},
+                    table_config={"transpose": True},
+                    counter_config={"max_value": 9999},
+                )
+                tm.points.scale(1.3)
+                text = Text(self.text, font=local_font, format="rich").points.scale(1.8).next_to(tm.table, RIGHT, buff=0.5).r
+
+                self.play(
+                    FadeIn(bg),
+                    FadeIn(frame_bg),
+                    FadeIn(tm.table),
+                    FadeIn(tm.framebox),
+                    FadeIn(tm.tape_item),
+                )
+                self.play(Write(text))
+                for _ in range(self.stop_at):
+                    tm.step(duration=0.1).run_step_anim(self, compress=True)
+                self.forward(1)
+                self.play(
+                    FadeOut(tm.table),
+                    FadeOut(tm.framebox),
+                    FadeOut(tm.tape_item),
+                    FadeOut(bg),
+                    FadeOut(frame_bg),
+                    FadeOut(text),
+                )
+
+        self.play(Write(text_many_tms))
+        self.forward(1)
+        self.play(
+            *[
+                Write(rec) for rec in rec_hl_1
+            ],
+            lag_ratio=0.01,
+            collapse=True,
+        )
+        core_stop = TuringMachineCore(
+            initial_tape="00001",
+            start_state="A",
+            halt_states=["HALT"],
+        )
+        core_stop.add_rule("A", "0", "A", "1", "R")
+        core_stop.add_rule("A", "1", "HALT", "1", "R")
+        tm_stop = TMShow(core_stop, "停机类").build().to_item().show()
+        clip_tm_stop = TransformableFrameClip(
+            tm_stop,
+            offset=(1 / 6, 0),
+            scale=0.6,
+        ).show()
+        self.forward(5)
+        self.play(
+            FadeOut(rec_hl_1),
+            *[
+                text_many_tms[f"$H_({i})$"].astype(VItem).anim.fill.set(alpha=0.1)
+                for i in batch_1
+            ],
+            collapse=True,
+        )
+        self.forward(1.5)
+        self.play(
+            *[
+                Write(rec) for rec in rec_hl_2
+            ],
+            lag_ratio=0.005,
+            collapse=True,
+        )
+        core_loop = TuringMachineCore(
+            initial_tape="01",
+            start_state="A",
+            halt_states=["HALT"],
+        )
+        core_loop.add_rule("A", "0", "A", "0", "R")
+        core_loop.add_rule("A", "1", "A", "1", "L")
+        tm_loop = TMShow(core_loop, "配置相同类", stop_at=7).build().to_item().show()
+        clip_tm_loop = TransformableFrameClip(
+            tm_loop,
+            offset=(-1 / 6, 0),
+            scale=0.6,
+        ).show()
+        self.forward(6)
+        self.play(
+            FadeOut(rec_hl_2),
+            *[
+                text_many_tms[f"$H_({i})$"].astype(VItem).anim.fill.set(alpha=0.1)
+                for i in batch_2
+            ],
+            collapse=True,
+        )
+        self.forward(1.5)
+        self.play(
+            *[
+                Write(rec) for rec in rec_hl_3
+            ],
+            lag_ratio=0.002,
+            collapse=True,
+        )
+        core_copy = TuringMachineCore(
+            initial_tape="010101010101010101010101010",
+            start_state="A",
+            halt_states=["HALT"],
+        )
+        core_copy.add_rule("A", "0", "A", "1", "R")
+        core_copy.add_rule("A", "1", "A", "0", "R")
+        tm_copy = TMShow(core_copy, "配置自我复制类", stop_at=10).build().to_item().show()
+        clip_tm_copy = TransformableFrameClip(
+            tm_copy,
+            offset=(0, 1 / 12),
+            scale=0.6,
+        ).show()
+        self.forward(6)
+        self.play(
+            FadeOut(rec_hl_3),
+            *[
+                text_many_tms[f"$H_({i})$"].astype(VItem).anim.fill.set(alpha=0.1)
+                for i in batch_3
+            ],
+            collapse=True,
+        )
+        self.forward(1.5)
+        self.play(
+            TransformMatchingShapes(
+                text_many_tms,
+                text_H_beaver,
+            ),
+            *[
+                FadeOut(text_many_tms[f"$H_({i})$"])
+                for i in range(400) if i != H_only
+            ],
+            collapse=True,
+        )
+        self.forward(2)
+
+        image_bbchallenge = ImageItem("resources/busy_beaver_challenge.png")
+        image_bbchallenge.points.scale(2).shift(UP * 1)
+        text_bb_challenge = Text("忙碌海狸挑战赛", font=local_font)
+        text_bb_challenge.points.scale(2).next_to(image_bbchallenge, DOWN, buff=0.5)
+
+        self.play(FadeOut(text_H_beaver))
+        self.play(
+            FadeIn(image_bbchallenge),
+            Write(text_bb_challenge),
+        )
+        self.forward(2)
+        self.play(
+            FadeOut(image_bbchallenge),
+            FadeOut(text_bb_challenge),
+        )
+        self.forward(1)
+

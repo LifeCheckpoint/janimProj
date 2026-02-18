@@ -625,3 +625,20 @@ class LangtonRuleTest(Timeline):
             FadeOut(triangle_ant),
             FadeOut(triangle_ant2),
         )
+
+class ClipRatioTest(Timeline):
+    """
+    uv run janim run test_scene.py ClipRatioTest -i
+    """
+    def construct(self):
+        class AFrame(Timeline):
+            def construct(self):
+                self.play(Write(Rect(20, 20).fill.set(color=GREEN, alpha=1).r))
+
+        frame = AFrame().build().to_item().show()
+        TransformableFrameClip(
+            frame,
+            clip=(0, 0, 0, 0),
+            offset=(1 / 4, 1 / 4),
+            scale=(0.25, 0.25),
+        ).show()
