@@ -4,6 +4,7 @@ from tools import get_typ_doc, local_font, CYAN, parse_rule_to_core, get_percept
 from turing_machine.components.tape_cell import TapeCell
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.turing_machine import TuringMachine
+from turing_machine.components.grid_cell import GridCell
 from langton_ant.langton_ant_grid import LangtonAntGrid
 from typst_dfa.typst_dfa import load_dfa_typst
 import random
@@ -579,9 +580,67 @@ class s3_2(Timeline):
             FadeOut(tm_bb5.framebox),
             FadeOut(tm_bb5.table),
         )
-        grid = LangtonAntGrid(cell_size=0.25, pre_alloc=150)
+
+        rect_bl1 = Rect(1, 1)
+        rect_bl1.fill.set(color=BLACK, alpha=1).r.stroke.set(color=WHITE, alpha=1)
+        rect_bl2 = rect_bl1.copy()
+        rect_bl2.points.shift(RIGHT)
+        rect_wh1 = Rect(1, 1)
+        rect_wh1.fill.set(color=WHITE, alpha=1).r.stroke.set(color=BLACK, alpha=1)
+        rect_wh2 = rect_wh1.copy()
+        rect_wh2.points.shift(RIGHT)
+        triangle_ant = Triangle(depth=-10).points.scale(0.3).r
+        triangle_ant.points.move_to(rect_bl1)
+        triangle_ant2 = Triangle(depth=-10).points.scale(0.3).r
+        triangle_ant2.stroke.set(color=BLACK, alpha=1)
+        triangle_ant2.points.move_to(rect_bl2)
+        
         self.play(
-            Write(grid),
+            Write(rect_bl1),
+            Write(triangle_ant),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            Succession(
+                Rotate(triangle_ant, PI / 2),
+                triangle_ant.anim.points.shift(LEFT),
+            ),
+            TransformMatchingShapes(rect_bl1, rect_wh1),
+            lag_ratio=0.25,
+        )
+        self.forward(1)
+        self.play(
+            rect_wh1.anim.points.shift(LEFT),
+            triangle_ant.anim.points.shift(LEFT),
+            Write(rect_wh2),
+            Write(triangle_ant2),
+        )
+        self.forward(0.5)
+        self.play(
+            Succession(
+                Rotate(triangle_ant2, -PI / 2),
+                AnimGroup(
+                    triangle_ant2.anim.points.shift(RIGHT),
+                    triangle_ant2.anim.stroke.set(color=WHITE, alpha=1),
+                )
+            ),
+            TransformMatchingShapes(rect_wh2, rect_bl2),
+            lag_ratio=0.25,
+        )
+        self.forward(1)
+        self.play(
+            FadeOut(triangle_ant),
+            FadeOut(triangle_ant2),
+        )
+
+        grid = LangtonAntGrid(cell_size=0.25, pre_alloc=150)
+
+        self.play(
+            TransformMatchingShapes(
+                Group(rect_wh1, rect_bl2),
+                grid,
+            ),
             TransformMatchingShapes(text_status_step, text_status_step_2),
         )
         self.forward(1)
@@ -620,4 +679,263 @@ class s3_2(Timeline):
             TransformMatchingShapes(text_status_step_2, text_status_step_3),
             duration=2,
         )
+        self.forward(1)
+
+class s3_3(Timeline):
+    """
+    uv run janim run s3_BusyBeaver.py s3_3 -i
+    """
+    def construct(self) -> None:
+        install_dirty_patch()
+        text_status_step = Text(
+            "<c RED_B>状态</c>，与膨胀的<c BLUE_B>步数</c>",
+            format="rich",
+            font=local_font,
+            depth=-10,
+        )
+        text_status_step.points.scale(1.5).move_to(UP * 3 + LEFT * 4)
+        text_max_step = TypstDoc(get_typ_doc("why_max_step"))
+        text_max_step.points.scale(0.85).next_to(text_status_step, DOWN, aligned_edge=LEFT, buff=0.5)
+
+        text_status_step.show()
+        self.forward(0.5)
+        self.play(TransformMatchingDiff(text_status_step, text_max_step))
         self.forward(2)
+        self.play(FadeOut(text_max_step))
+
+        full_rules = Path("resources/turings_5.txt").read_text(encoding="utf-8").splitlines()
+        k_tms = 20
+        choiced_rules = random.choices(full_rules, k=k_tms)
+        choiced_cores = [{
+            "core": parse_rule_to_core(rule)[0],
+            "step_count": parse_rule_to_core(rule)[1],
+        } for rule in choiced_rules]
+        tms = [
+            TuringMachine(
+                turing_core=info["core"],
+                showcase_radius=15,
+                table_scaling=1.0,
+                tape_config={"center_scaling": 1},
+                table_config={"transpose": True},
+                counter_config={"max_value": 9999},
+            ) for info in choiced_cores
+        ]
+        text_set_tms = TypstMath("{" + ", ".join([f"H_{i + 1}" for i in range(k_tms)]) + ", ...}")
+        text_set_tms.points.scale(0.9).move_to(DOWN * 3.25)
+        rect_set_tms = [
+            SurroundingRect(text_set_tms[f"H_{i + 1}"])
+            for i in range(k_tms)
+        ]
+
+        self.play(Write(text_set_tms))
+        self.play(
+            Write(rect_set_tms[0]),
+            Write(tms[0].table),
+            Write(tms[0].framebox),
+            Write(tms[0].tape_item),
+        )
+        self.forward(0.5)
+        slow_anim_tms_count = 5
+        def _update_tms(i: int):
+            tms[i - 1].hide()
+            tms[i].table.show()
+            tms[i].framebox.show()
+            tms[i].tape_item.show()    
+        for i in range(1, k_tms):
+            if i < slow_anim_tms_count:
+                dur_tms = 0.25
+            else:
+                dur_tms = 0.05
+            self.play(
+                AnimGroup(
+                    TransformMatchingShapes(rect_set_tms[i - 1], rect_set_tms[i]),
+                    Wait(dur_tms / 2),
+                    Do(lambda: _update_tms(i)),
+                ),
+                duration=dur_tms,
+            )
+        self.play(FadeOut(rect_set_tms[-1]))
+        self.forward(1.5)
+        focus_table = tms[-1].table
+        self.play(
+            FadeOut(text_set_tms),
+            FadeOut(tms[-1].framebox),
+            FadeOut(tms[-1].tape_item),
+            focus_table.anim.points.move_to(ORIGIN).scale(1.2),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+
+        brace_n = Brace(focus_table, UP, buff=0.1)
+        brace_n_text = TypstMath("n").points.scale(1.75).next_to(brace_n, UP, buff=0.2).r
+        brace_2 = Brace(focus_table, LEFT, buff=0.1)
+        brace_2_text = TypstMath("2").points.scale(1.75).next_to(brace_2, LEFT, buff=0.2).r
+        brace_n_explain = Text("表头状态", font=local_font)
+        brace_n_explain.points.next_to(brace_n, UP, buff=0.2)
+        brace_2_explain = Text("格子内容", font=local_font)
+        brace_2_explain.points.next_to(brace_2, LEFT, buff=0.2)
+        grid_cell_example = GridCell(
+            state_name="",
+            write_bit="",
+            move_dir="",
+        )
+        grid_cell_example.points.scale(2).move_to(DOWN * 2 + LEFT * 5.5)
+        placeholder_grid = grid_cell_example.copy().points.scale(1.3).r
+        brace_cell = Brace(placeholder_grid, RIGHT, buff=0.1)
+        brace_cell.points.rotate(PI)
+        grid_cell_status = Group(*[
+            GridCell(
+                state_name=state,
+                write_bit="",
+                move_dir="",
+            ).points.scale(0.8).r
+            for state in ["A", "B", "C", "D", "E", "..."]
+        ])
+        grid_cell_status.points.arrange(RIGHT).next_to(brace_cell, RIGHT).shift(UP * 1)
+        text_status_count = TypstMath("times n").points.scale(1.5).r
+        text_status_count.points.next_to(grid_cell_status, RIGHT, buff=0.3)
+        grid_cell_writings = Group(*[
+            GridCell(
+                state_name="",
+                write_bit=write_bit,
+                move_dir="",
+            ).points.scale(0.8).r
+            for write_bit in ["0", "1"]
+        ])
+        grid_cell_writings.points.arrange(RIGHT).next_to(brace_cell, RIGHT)
+        text_writing_count = TypstMath("times 2").points.scale(1.5).r
+        text_writing_count.points.next_to(grid_cell_writings, RIGHT, buff=0.3)
+        grid_cell_directions = Group(*[
+            GridCell(
+                state_name="",
+                write_bit="",
+                move_dir=move_dir,
+            ).points.scale(0.8).r
+            for move_dir in ["LEFT", "RIGHT"]
+        ])
+        grid_cell_directions.points.arrange(RIGHT).next_to(brace_cell, RIGHT).shift(DOWN * 1)
+        text_direction_count = TypstMath("times 2").points.scale(1.5).r
+        text_direction_count.points.next_to(grid_cell_directions, RIGHT, buff=0.3)
+        brace_multi = Brace(
+            Group(
+                grid_cell_status, grid_cell_writings, grid_cell_directions,
+                text_status_count, text_writing_count, text_direction_count,
+            ),
+            RIGHT,
+            buff=0.3,
+        )
+        brace_multi_text = TypstMath("= 4n")
+        brace_multi_text.points.scale(1.5).next_to(brace_multi, RIGHT, buff=0.3)
+        brace_multi_text_2 = TypstMath("= 4n+1")
+        brace_multi_text_2.points.scale(1.5).next_to(brace_multi, RIGHT, buff=0.3)
+        seperator_line = DashedLine(UP * 5, DOWN * 5).points.shift(RIGHT * 7.5).r
+        text_final_status = TypstMath("(4n+1)^(2n)")
+        text_final_status.points.scale(2).move_to(RIGHT * 10.5)
+        text_tms_upperbound = Text(
+            "全部<c GREEN_A> n 状态</c>图灵机\n个数<c YELLOW>上限</c>",
+            format="rich",
+            font=local_font
+        )
+        text_tms_upperbound.points.scale(1.25).next_to(text_final_status, DOWN, buff=0.5)
+        text_n_eq_5 = TypstMath("n=5")
+        text_n_eq_5.points.scale(2).move_to(RIGHT * 17)
+        text_num_5_tm = Text("16,679,880,978,201", font=local_font)
+        text_num_5_tm.points.scale(1.8).next_to(text_n_eq_5, DOWN, buff=0.75)
+        text_num_5_tm.color.set(color=CYAN).r
+
+        self.play(
+            Write(brace_n),
+            Write(brace_n_text),
+            Write(brace_2),
+            Write(brace_2_text),
+            lag_ratio=0.35,
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingShapes(brace_n_text, brace_n_explain),
+            TransformMatchingShapes(brace_2_text, brace_2_explain),
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingShapes(brace_n_explain, brace_n_text),
+            TransformMatchingShapes(brace_2_explain, brace_2_text),
+        )
+        self.play(
+            focus_table.anim.points.shift(UP * 1.5),
+            brace_2.anim.points.shift(UP * 1.5),
+            brace_n.anim.points.shift(UP * 1.5),
+            brace_2_text.anim.points.shift(UP * 1.5),
+            brace_n_text.anim.points.shift(UP * 1.5),
+        )
+        self.play(
+            Transform(
+                focus_table.get_cell("A", "0"), # type: ignore
+                grid_cell_example,
+                hide_src=False,
+                flatten=True,
+            )
+        )
+        self.forward(1)
+        self.play(
+            Write(brace_cell),
+            Succession(
+                *[
+                    Write(cell) for cell in grid_cell_status
+                ],
+                duration=2,
+            ),
+        )
+        self.play(Write(text_status_count))
+        self.forward(1)
+        self.play(
+            Succession(
+                *[
+                    Write(cell) for cell in grid_cell_writings
+                ],
+                duration=2,
+            ),
+        )
+        self.play(Write(text_writing_count))
+        self.forward(1)
+        self.play(
+            Succession(
+                *[
+                    Write(cell) for cell in grid_cell_directions
+                ],
+                duration=2,
+            ),
+        )
+        self.play(Write(text_direction_count))
+        self.forward(2)
+        self.play(
+            Write(brace_multi),
+            Write(brace_multi_text),
+        )
+        self.forward(1)
+        self.play(TransformMatchingDiff(brace_multi_text, brace_multi_text_2))
+        self.forward(1)
+        self.play(
+            self.camera.anim.points.shift(RIGHT * 6),
+            Write(seperator_line),
+            Write(text_final_status),
+            lag_ratio=0.2,
+        )
+        self.forward(0.5)
+        self.play(Write(text_tms_upperbound))
+        self.forward(1.5)
+        self.play(
+            FadeOut(seperator_line),
+            Group(text_final_status, text_tms_upperbound).anim.points.shift(RIGHT),
+            self.camera.anim.points.shift(RIGHT * 10),
+        )
+        self.play(Write(text_n_eq_5))
+        self.forward(0.5)
+        self.play(Write(text_num_5_tm))
+        self.forward(2)
+        self.play(
+            FadeOut(text_n_eq_5),
+            FadeOut(text_num_5_tm),
+            FadeOut(text_final_status),
+            FadeOut(text_tms_upperbound),
+        )
+        self.forward(1)

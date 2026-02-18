@@ -567,3 +567,61 @@ class LangtonAntGridTest(Timeline):
         assert len(grid2.cells) > 4
 
         self.forward(1)
+
+class LangtonRuleTest(Timeline):
+    """
+    uv run janim run test_scene.py LangtonRuleTest -i
+    """
+    def construct(self):
+        rect_bl1 = Rect(1, 1)
+        rect_bl1.fill.set(color=BLACK, alpha=1).r.stroke.set(color=WHITE, alpha=1)
+        rect_bl2 = rect_bl1.copy()
+        rect_bl2.points.shift(RIGHT)
+        rect_wh1 = Rect(1, 1)
+        rect_wh1.fill.set(color=WHITE, alpha=1).r.stroke.set(color=BLACK, alpha=1)
+        rect_wh2 = rect_wh1.copy()
+        rect_wh2.points.shift(RIGHT)
+        triangle_ant = Triangle(depth=-10).points.scale(0.3).r
+        triangle_ant.points.move_to(rect_bl1)
+        triangle_ant2 = Triangle(depth=-10).points.scale(0.3).r
+        triangle_ant2.stroke.set(color=BLACK, alpha=1)
+        triangle_ant2.points.move_to(rect_bl2)
+        
+        self.play(
+            Write(rect_bl1),
+            Write(triangle_ant),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            Succession(
+                Rotate(triangle_ant, PI / 2),
+                triangle_ant.anim.points.shift(LEFT),
+            ),
+            TransformMatchingShapes(rect_bl1, rect_wh1),
+            lag_ratio=0.25,
+        )
+        self.forward(1)
+        self.play(
+            rect_wh1.anim.points.shift(LEFT),
+            triangle_ant.anim.points.shift(LEFT),
+            Write(rect_wh2),
+            Write(triangle_ant2),
+        )
+        self.forward(0.5)
+        self.play(
+            Succession(
+                Rotate(triangle_ant2, -PI / 2),
+                AnimGroup(
+                    triangle_ant2.anim.points.shift(RIGHT),
+                    triangle_ant2.anim.stroke.set(color=WHITE, alpha=1),
+                )
+            ),
+            TransformMatchingShapes(rect_wh2, rect_bl2),
+            lag_ratio=0.25,
+        )
+        self.forward(1)
+        self.play(
+            FadeOut(triangle_ant),
+            FadeOut(triangle_ant2),
+        )
