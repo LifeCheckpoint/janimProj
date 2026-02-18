@@ -22,6 +22,7 @@ class s3_1(Timeline):
     uv run janim run s3_BusyBeaver.py s3_1 -i
     """
     def construct(self) -> None:
+        install_dirty_patch()
         frame_width = cast(float, Config.get.frame_width)
         frame_height = cast(float, Config.get.frame_height)
 
