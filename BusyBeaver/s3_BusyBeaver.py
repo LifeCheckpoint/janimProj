@@ -1454,7 +1454,109 @@ class s3_5(Timeline):
 
         self.play(
             Succession(*[
-                Write(g) for g in groups_bb_info
+                Succession(
+                    Write(g),
+                    Wait(0.5),
+                ) for g in groups_bb_info
             ])
         )
         self.forward(2)
+
+        text_H5 = TypstMath("\"BB\"_5").points.scale(2).next_to(text_H1234[-1], DOWN, buff=3).r
+        text_H5.astype(VItem).color.set(color=CYAN)
+        
+        self.play(
+            Write(text_H5),
+            self.camera.anim.points.shift(DOWN * 9),
+        )
+        # TODO: BB5
+        self.play()
+        self.forward(2)
+        
+        axes = Axes(
+            x_range=(0, 6),
+            y_range=(0, 200, 25),
+            x_length=7,
+            y_length=7,
+        ).points.move_to(ORIGIN).r
+        axes(VItem).color.set(alpha=0.5)
+        pt1 = axes.coords_to_point(1, 1)
+        pt2 = axes.coords_to_point(2, 6)
+        pt3 = axes.coords_to_point(3, 21)
+        pt4 = axes.coords_to_point(4, 107)
+        pt5 = axes.coords_to_point(4, 500)
+        dot1 = Dot(pt1, radius=0.075, stroke_alpha=1, fill_alpha=0, color=GREEN_B)
+        dot2 = Dot(pt2, radius=0.075, stroke_alpha=1, fill_alpha=0, color=BLUE_B)
+        dot3 = Dot(pt3, radius=0.075, stroke_alpha=1, fill_alpha=0, color=YELLOW)
+        dot4 = Dot(pt4, radius=0.075, stroke_alpha=1, fill_alpha=0, color=RED_A)
+        dot5 = Dot(pt5, radius=0.075, stroke_alpha=1, fill_alpha=0, color=CYAN)
+        line1 = DashedLine(pt1, pt2).color.set(color=GREEN_B, alpha=0.5).r
+        line2 = DashedLine(pt2, pt3).color.set(color=BLUE_B, alpha=0.5).r
+        line3 = DashedLine(pt3, pt4).color.set(color=YELLOW, alpha=0.5).r
+        line4 = DashedLine(pt4, pt5).color.set(color=RED_A, alpha=0.5).r
+        rect_6 = SurroundingRect(
+            axes.x_axis.get_tick(6),
+            color=GREY_C,
+        )
+        quest_6 = TypstMath("\"BB\"_6 ?")
+        quest_6.points.scale(1.5).next_to(rect_6, RIGHT + UP, buff=0.1)
+        
+        text_4bbs.hide()
+        for i in range(4):
+            table_bbs[i].hide()
+            bb_grids[i].hide()
+        self.play(
+            self.camera.anim.points.shift(UP * 9),
+            Write(axes),
+            *[
+                txt.anim.points.scale(0.6).next_to(pt, UP)
+                for txt, pt in zip(text_H1234, [pt1, pt2, pt3, pt4])
+            ],
+            lag_ratio=0.2,
+        )
+        self.play(
+            Write(dot1),
+            Write(dot2),
+            Write(dot3),
+            Write(dot4),
+            Write(line1),
+            Write(line2),
+            Write(line3),
+            Write(line4),
+            lag_ratio=0.75,
+        )
+        self.forward(2)
+        self.play(
+            Write(rect_6),
+            Write(quest_6),
+        )
+        self.forward(2)
+
+        quest_6_sim = TypstMath("\"BB\"_6 approx").points.scale(1.5).move_to(ORIGIN).r
+        text_collatz = TypstDoc(get_typ_doc("collatz")).points.scale(1.5).next_to(quest_6_sim, RIGHT, buff=0.5).r
+
+        self.play(
+            FadeOut(rect_6),
+            Group(
+                axes,
+                line1, line2, line3, line4,
+                dot1, dot2, dot3, dot4,
+                *text_H1234,
+            ).anim.points.shift(LEFT * 2.5),
+            TransformMatchingShapes(quest_6, quest_6_sim),
+        )
+        self.play(Write(text_collatz))
+        self.forward(2)
+        self.play(
+            FadeOut(
+                Group(
+                    axes,
+                    line1, line2, line3, line4,
+                    dot1, dot2, dot3, dot4,
+                    *text_H1234,
+                )
+            ),
+            FadeOut(quest_6_sim),
+            FadeOut(text_collatz),
+        )
+        self.forward(1)
