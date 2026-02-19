@@ -1165,26 +1165,51 @@ class s3_5(Timeline):
     """
     def construct(self) -> None:
         install_dirty_patch()
-        def history_grid_gen(seq: str, square_size: float = 0.25) -> Group:
+        def history_grid_gen(
+            seq: str,
+            square_size: float = 0.25,
+            transpose: bool = False,
+            max_per_line: int = 75,
+        ) -> Group:
+            DEBUG = False
             height = len(seq.splitlines())
             width = max([len(line) for line in seq.splitlines()])
-            group = Group()
-            for i, line in enumerate(seq.splitlines()):
-                for j, char in enumerate(line):
-                    if char == "0":
-                        group.add(
-                            Rect(square_size, square_size) \
-                                .fill.set(color=WHITE, alpha=1).r \
-                                .stroke.set(color=WHITE, alpha=1).r
-                        )
-                    else:
-                        group.add(
-                            Rect(square_size, square_size) \
-                                .fill.set(color=BLACK, alpha=1).r
-                                .stroke.set(color=WHITE, alpha=1).r
-                        )
-            group.points.arrange_in_grid(height, width, buff=0)
-            return group
+            lines = seq.splitlines()
+            if transpose:
+                lines = list(reversed(lines))
+                
+            final_group = Group()
+            idl_total = len(lines) // max_per_line + 1
+            for idl in range(idl_total):
+                slice = lines[idl * max_per_line:(idl + 1) * max_per_line]
+                if len(slice) == 0:
+                    continue
+                group = Group()
+                for i, line in enumerate(slice):
+                    for j, char in enumerate(line):
+                        if char == "0":
+                            group.add(
+                                Rect(square_size, square_size) \
+                                    .fill.set(color=WHITE, alpha=1).r \
+                                    .stroke.set(color=WHITE, alpha=1).r
+                            )
+                        else:
+                            group.add(
+                                Rect(square_size, square_size) \
+                                    .fill.set(color=BLACK, alpha=1).r
+                                    .stroke.set(color=WHITE, alpha=1).r
+                            )
+                if DEBUG:
+                    print(f"slice {idl}: width {width}, height {height}, max_per_line {max_per_line}, actual lines {len(slice)}")
+                group.points.arrange_in_grid(height, width, buff=0)
+                if transpose:
+                    group.points.rotate(PI / 2)
+                final_group.add(group)
+            if not transpose:
+                final_group.points.arrange_in_grid(n_rows=1, buff=0.2, aligned_edge=UP).move_to(ORIGIN)
+            else:
+                final_group.points.arrange_in_grid(n_cols=1, buff=0.2, aligned_edge=LEFT).move_to(ORIGIN)
+            return final_group
         
         tm_types = [
             "cycler",
@@ -1226,3 +1251,210 @@ class s3_5(Timeline):
             lag_ratio=0.75,
             duration=5,
         )
+        self.forward(2)
+        self.play(
+            FadeOut(group_types),
+        )
+        self.forward(0.5)
+
+        self.camera.save_state()
+
+        text_10pow12 = TypstMath("10^(12) quad =>").points.scale(2).move_to(LEFT * 3).r
+        text_symmetry_compress = TypstDoc(get_typ_doc("symmetry_compress"))
+        text_symmetry_compress.points.next_to(text_10pow12, RIGHT, buff=1).scale(1.75)
+        text_lr = text_symmetry_compress.get_label("lr")
+        text_syn = text_symmetry_compress.get_label("syn")
+        text_re = text_symmetry_compress.get_label("re")
+        text_sc_other = Group(
+            text_symmetry_compress[2:8], text_symmetry_compress[24],
+            text_symmetry_compress[26:32],
+        )
+        text_many_tms = TypstDoc(get_typ_doc("many_tms"), depth=10)
+        text_many_tms.points.scale(2)
+        text_bb = TypstText("1RB1LC_1RC1RB_1RD0LE_1LA1LD_1RZ0LA")
+        text_bb.points.scale(3)
+        text_bb.astype(VItem).color.set(color=CYAN)
+        
+        self.play(Write(text_10pow12))
+        self.forward(0.5)
+        self.play(
+            Write(text_lr),
+            Write(text_syn),
+            Write(text_re),
+            Write(text_sc_other),
+            lag_ratio=0.5,
+        )
+        self.forward(2)
+        self.prepare(
+            self.camera.anim.points.scale(2),
+            duration=4,
+            rate_func=smooth,
+        )
+        self.play(
+            FadeOut(text_10pow12),
+            FadeOut(Group(
+                text_lr,
+                text_syn,
+                text_re,
+                text_symmetry_compress[2:8], text_symmetry_compress[24],
+            )),
+            text_symmetry_compress[26:32].anim.points.move_to(ORIGIN).scale(1.5).r
+        )
+        self.play(
+            Transform(
+                text_symmetry_compress[26:32],
+                text_many_tms,
+                flatten=True,
+            )
+        )
+        self.play(
+            Transform(
+                text_many_tms,
+                text_bb,
+            )
+        )
+        self.forward(1)
+        self.play(FadeOut(text_bb))
+
+        text_1962_2024 = TypstMath("1962")
+        text_1962_2024.points.scale(2.5)
+        text_4bbs = Text("4 Busy Beavers", font=local_font)
+        text_4bbs.points.scale(1.2).to_border(LEFT + UP)
+
+        self.camera.load_state()
+        self.play(FadeIn(text_1962_2024))
+        self.forward(0.5)
+        self.play(
+            ItemUpdater(
+                text_1962_2024,
+                lambda p: TypstMath(
+                    f"{1962 + int(p.alpha * (2024 - 1962))}"
+                ).points.scale(2.5 + 1.5 * p.alpha).r
+            ),
+            duration=3,
+        )
+        self.forward(1)
+        self.play(TransformMatchingShapes(
+            text_1962_2024,
+            text_4bbs,
+        ))
+        self.forward(0.5)
+
+        def get_only_table(
+                core_rulers: list[Callable[[TuringMachineCore], TuringMachineCore]] | Callable[[TuringMachineCore], TuringMachineCore],
+                table_scaling: float = 1.0,
+            ):
+            from functools import reduce
+            core = TuringMachineCore(
+                initial_tape="",
+                start_state="A",
+                halt_states=["HALT"],
+            )
+            core = core_rulers(core) if isinstance(core_rulers, Callable) else reduce(lambda c, r: r(c), core_rulers, core)
+            tm = TuringMachine(
+                turing_core=core,
+                showcase_radius=2,
+                table_scaling=table_scaling,
+                tape_config={"center_scaling": 1},
+                table_config={"transpose": True},
+                counter_config={"max_value": 9999},
+            )
+            return tm.table
+        
+        def ruler_bb1(c: TuringMachineCore):
+            c.add_rule("A", "0", "HALT", "1", "R")
+            c.add_rule("A", "1", "HALT", "1", "R")
+            return c
+        def ruler_bb2(c: TuringMachineCore):
+            c.add_rule("A", "0", "B", "1", "R")
+            c.add_rule("A", "1", "B", "1", "L")
+            c.add_rule("B", "0", "A", "1", "L")
+            c.add_rule("B", "1", "HALT", "1", "R")
+            return c
+        def ruler_bb3(c: TuringMachineCore):
+            c.add_rule("A", "0", "B", "1", "R")
+            c.add_rule("A", "1", "HALT", "1", "R")
+            c.add_rule("B", "0", "B", "1", "L")
+            c.add_rule("B", "1", "C", "0", "R")
+            c.add_rule("C", "0", "C", "1", "L")
+            c.add_rule("C", "1", "A", "1", "L")
+            return c
+        def ruler_bb4(c: TuringMachineCore):
+            c.add_rule("A", "0", "B", "1", "R")
+            c.add_rule("A", "1", "B", "1", "L")
+            c.add_rule("B", "0", "A", "1", "L")
+            c.add_rule("B", "1", "C", "0", "L")
+            c.add_rule("C", "0", "HALT", "1", "R")
+            c.add_rule("C", "1", "D", "1", "L")
+            c.add_rule("D", "0", "D", "1", "R")
+            c.add_rule("D", "1", "A", "0", "R")
+            return c
+        
+        colors = [GREEN_B, BLUE_B, YELLOW, RED_A]
+        text_H1234 = [
+            TypstMath(f"\"BB\"_{i}").points.scale(2).r
+            for i in range(1, 5)
+        ]
+        for txt, c in zip(text_H1234, colors):
+            txt.astype(VItem).color.set(color=c)
+        steps_bbs = [1, 6, 21, 107]
+        text_steps_bbs = Group(*[
+            Text(str(step), font=local_font) \
+                .points.scale(1.5).r \
+                .color.set(color=c).r
+            for step, txt_h, c in zip(steps_bbs, text_H1234, colors)
+        ])
+        table_bbs = [
+            get_only_table(ruler, table_scaling=0.7) \
+                .points.next_to(txt, RIGHT, buff=0.5).r
+            for ruler, txt in zip(
+                [ruler_bb1, ruler_bb2, ruler_bb3, ruler_bb4],
+                text_steps_bbs,
+            )
+        ]
+        seqs = [
+            Path(f"resources/bbs_track/bb{i}.txt").read_text(encoding="utf-8")
+            for i in range(1, 5)
+        ]
+        bb_grids = [
+            history_grid_gen(
+                seq,
+                square_size=0.35 - (i / 4) * 0.345,
+                transpose=True,
+                max_per_line=54,
+            )
+            for i, seq in enumerate(seqs)
+        ]
+        text_ellipsis = TypstMath("...").points.scale(1.5).r
+        bb_grids[3] = Group( # type: ignore
+            Group(
+                bb_grids[3][0],
+                text_ellipsis.copy().points.next_to(bb_grids[3][0], RIGHT).r
+            ),
+            Group(
+                text_ellipsis.copy().points.next_to(bb_grids[3][1], LEFT).r,
+                bb_grids[3][1]
+            ),
+        ).points.arrange(DOWN, buff=0.2).r
+        groups_bb_info = [
+            Group(
+                txt, table, grid
+            ).points.arrange(RIGHT, buff=0.25).r
+            for txt, table, grid in zip(text_H1234, table_bbs, bb_grids)
+        ]
+        groups_bb_info[1].points.next_to(groups_bb_info[0], RIGHT, buff=1.5)
+        group_groups_bb_info = Group(
+            Group(groups_bb_info[0], groups_bb_info[1]),
+            groups_bb_info[2], groups_bb_info[3],
+        ).points.arrange(
+            DOWN,
+            buff=0.1,
+            aligned_edge=LEFT,
+        ).next_to(text_4bbs, DOWN, aligned_edge=LEFT, buff=0.15)
+
+        self.play(
+            Succession(*[
+                Write(g) for g in groups_bb_info
+            ])
+        )
+        self.forward(2)

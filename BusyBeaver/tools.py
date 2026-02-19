@@ -149,3 +149,13 @@ def rejection_sample[T](seq: Sequence[T], k: int, cond: Callable[[T], bool]) -> 
     """拒绝采样，筛选满足 cond 的元素，取前 k 个"""
     gen = (x for _ in iter(int, 1) if cond(x := random.choice(seq)))
     return list(itertools.islice(gen, k))
+
+from janim.imports import TypstDoc
+from typing import Any
+def typst_complement(doc: TypstDoc, *patterns: TypstDoc | Any):
+    covered = set()
+    for p in patterns:
+        pat = doc.typstify(p)
+        for i in doc.indices(pat):
+            covered.update(range(i, i + len(pat)))
+    return doc[[i not in covered for i in range(len(doc))]]
