@@ -1249,7 +1249,7 @@ class s3_5(Timeline):
                 Write(tm_type) for tm_type in group_types
             ],
             lag_ratio=0.75,
-            duration=5,
+            duration=4,
         )
         self.forward(2)
         self.play(
@@ -1305,15 +1305,18 @@ class s3_5(Timeline):
                 text_symmetry_compress[26:32],
                 text_many_tms,
                 flatten=True,
-            )
+            ),
+            duration=2,
         )
+        self.forward(0.5)
         self.play(
             Transform(
                 text_many_tms,
                 text_bb,
-            )
+            ),
+            duration=2,
         )
-        self.forward(1)
+        self.forward(1.5)
         self.play(FadeOut(text_bb))
 
         text_1962_2024 = TypstMath("1962")
@@ -1452,6 +1455,14 @@ class s3_5(Timeline):
             aligned_edge=LEFT,
         ).next_to(text_4bbs, DOWN, aligned_edge=LEFT, buff=0.15)
 
+        seq_bb5 = Path("resources/bbs_track/BB5.txt").read_text(encoding="utf-8")
+        grid_bb5 = history_grid_gen(
+            seq_bb5,
+            square_size=0.01,
+            transpose=True,
+            max_per_line=100,
+        )
+
         self.play(
             Succession(*[
                 Succession(
@@ -1464,13 +1475,16 @@ class s3_5(Timeline):
 
         text_H5 = TypstMath("\"BB\"_5").points.scale(2).next_to(text_H1234[-1], DOWN, buff=3).r
         text_H5.astype(VItem).color.set(color=CYAN)
+        grid_bb5.points.scale(0.8).next_to(text_H5, DOWN, aligned_edge=LEFT, buff=0.5).r
         
         self.play(
             Write(text_H5),
             self.camera.anim.points.shift(DOWN * 9),
         )
-        # TODO: BB5
-        self.play()
+        self.play(
+            Write(grid_bb5),
+            duration=2,
+        )
         self.forward(2)
         
         axes = Axes(
@@ -1514,6 +1528,7 @@ class s3_5(Timeline):
             ],
             lag_ratio=0.2,
         )
+        grid_bb5.hide()
         self.play(
             Write(dot1),
             Write(dot2),
@@ -1524,13 +1539,14 @@ class s3_5(Timeline):
             Write(line3),
             Write(line4),
             lag_ratio=0.75,
+            duration=2,
         )
-        self.forward(2)
+        self.forward(1.5)
         self.play(
             Write(rect_6),
             Write(quest_6),
         )
-        self.forward(2)
+        self.forward(1.5)
 
         quest_6_sim = TypstMath("\"BB\"_6 approx").points.scale(1.5).move_to(ORIGIN).r
         text_collatz = TypstDoc(get_typ_doc("collatz")).points.scale(1.5).next_to(quest_6_sim, RIGHT, buff=0.5).r
@@ -1560,3 +1576,334 @@ class s3_5(Timeline):
             FadeOut(text_collatz),
         )
         self.forward(1)
+
+class s3_6(Timeline):
+    """
+    uv run janim run s3_BusyBeaver.py s3_6 -i
+    """
+    def construct(self) -> None:
+        install_dirty_patch()
+        bb6_rule = "1RB0LD_1RC0RF_1LC1LA_0LE1RZ_1LF0RB_0RC0RE"
+        text_bb6_1 = Text(
+            bb6_rule,
+            font=local_font,
+            color=GREY_C,
+        ).points.scale(1.25).to_border(UP).r
+        bb6_core = parse_rule_to_core(bb6_rule)[0]
+        tm_bb6 = TuringMachine(
+            turing_core=bb6_core,
+            showcase_radius=12,
+            table_scaling=1,
+            tape_config={"center_scaling": 1},
+            table_config={"transpose": True},
+            counter_config={"max_value": 9999},
+        )
+        tm_bb6.is_table_shown = True
+
+        self.play(Write(text_bb6_1))
+        self.play(
+            FadeIn(tm_bb6.table),
+            FadeIn(tm_bb6.framebox),
+            FadeIn(tm_bb6.tape_item),
+        )
+        self.forward(0.5)
+        
+        for _ in range(60):
+            tm_bb6.step(duration=0.01).run_step_anim(self, compress=True)
+
+        mask_rec = Rect(20, 20)
+        mask_rec.fill.set(color=BLACK, alpha=0.9).r
+        text_10_nest_pow_15 = TypstDoc(get_typ_doc("10_nest_pow_15"))
+        text_10_nest_pow_15.points.scale(1.5).move_to(ORIGIN)
+        text_10_nest_pows = [
+            text_10_nest_pow_15.get_label(f"pt{i}") \
+                .points.move_to(ORIGIN).scale(1.75).r
+            for i in range(1, 16)
+        ]
+        text_halt = Text("HALT", font=local_font, color=RED)
+        text_halt.points.scale(2.5).move_to(DOWN * 2).r
+
+        self.play(
+            Write(mask_rec),
+            FadeIn(text_10_nest_pows[0]),
+            lag_ratio=0.5,
+        )
+        for i in range(1, 15):
+            self.play(
+                TransformMatchingDiff(
+                    text_10_nest_pows[i - 1],
+                    text_10_nest_pows[i],
+                ),
+                duration=0.2,
+            )
+        self.forward(1)
+        self.play(Write(text_halt))
+        self.forward(1.5)
+
+        class SpecialConfigTape:
+            center_idx: int
+            cells: Group[TapeCell]
+            bracegroup_0infL: Group
+            bracegroup_1: Group
+            bracegroup_0n: Group
+            bracegroup_11: Group
+            bracegroup_05C: Group
+            bracegroup_0infR: Group
+            full: Group
+
+        def get_special_config_tape(n: int, empty_len: int = 15) -> SpecialConfigTape:
+            sp_c = SpecialConfigTape()
+            sp = "1" + "0" * n + "11" + "0" * 5
+            left = "0" * empty_len
+            right = "0" * (empty_len - n)
+            string = left + sp + right
+            cells = Group(*[
+                TapeCell(
+                    square_size=0.8,
+                    tile_data=t,
+                    line_color=WHITE,
+                    text_scaling=1.0,
+                ).points.scale(0.8).r
+                for t in string
+            ]).points.arrange(RIGHT, buff=0).r
+            idx_first_1 = empty_len
+            cells.points.shift(-cells[idx_first_1].points.box.center)
+
+            brace_text_scale = 1
+
+            br_0inf_L = Brace(cells[idx_first_1 - 8:idx_first_1], DOWN)
+            txt_0inf_L = TypstText("固定 $oo$ 个 $0$")
+            txt_0inf_L.points.scale(brace_text_scale).next_to(br_0inf_L, DOWN)
+            sp_c.bracegroup_0infL = Group(br_0inf_L, txt_0inf_L)
+
+            br_1 = Brace(cells[idx_first_1:idx_first_1 + 1], UP)
+            txt_1 = TypstText("固定 $1$ 个 $1$")
+            txt_1.points.scale(brace_text_scale).next_to(br_1, UP)
+            sp_c.bracegroup_1 = Group(br_1, txt_1)
+
+            max_show = 18
+            end_idx = idx_first_1 + 1 + n if n <= max_show else idx_first_1 + 1 + max_show
+            br_0n = Brace(cells[idx_first_1 + 1:end_idx], DOWN)
+            txt_0n = TypstText(f"固定 $n$ 个 $0$")
+            txt_0n["$n$"].astype(VItem).color.set(color=YELLOW).r
+            txt_0n.points.scale(brace_text_scale).next_to(br_0n, DOWN)
+            sp_c.bracegroup_0n = Group(br_0n, txt_0n)
+
+            br_11 = Brace(cells[idx_first_1 + 1 + n:idx_first_1 + 1 + n + 2], UP)
+            txt_11 = TypstText("固定 $2$ 个 $1$")
+            txt_11.points.scale(brace_text_scale).next_to(br_11, UP)
+            sp_c.bracegroup_11 = Group(br_11, txt_11)
+
+            br_05C = Brace(cells[idx_first_1 + 1 + n + 2:idx_first_1 + 1 + n + 2 + 5], DOWN)
+            txt_05C = TypstText("与表头状态相关的 $5$ 位")
+            txt_05C.points.scale(brace_text_scale).next_to(br_05C, DOWN)
+            sp_c.bracegroup_05C = Group(br_05C, txt_05C)
+
+            max_show = 5
+            end_idx = idx_first_1 + 1 + n + 2 + 5 + 3 if n <= max_show else idx_first_1 + 1 + max_show + 2 + 5 + 3
+            br_0inf_R = Brace(cells[idx_first_1 + 1 + n + 2 + 5:end_idx], UP)
+            txt_0inf_R = TypstText("固定 $oo$ 个 $0$")
+            txt_0inf_R.points.scale(brace_text_scale).next_to(br_0inf_R, UP)
+            sp_c.bracegroup_0infR = Group(br_0inf_R, txt_0inf_R)
+
+            sp_c.center_idx = idx_first_1
+            sp_c.cells = cells
+
+            sp_c.full = Group(
+                cells,
+                sp_c.bracegroup_0infL,
+                sp_c.bracegroup_1,
+                sp_c.bracegroup_0n,
+                sp_c.bracegroup_11,
+                sp_c.bracegroup_05C,
+                sp_c.bracegroup_0infR,
+            )
+
+            return sp_c
+
+        sp_4k = get_special_config_tape(5)
+        sp_4k.full.points.shift(LEFT * 3)
+        text_Cn = TypstMath("C(n)").points.scale(1.5).next_to(text_bb6_1, DOWN, buff=1).r
+        text_Cn["n"].astype(VItem).color.set(color=YELLOW)
+        text_sp_config_rules = TypstDoc(get_typ_doc("sp_config_rules"))
+        text_sp_config_rules["$ k $", ...].astype(VItem).color.set(color=BLUE_B)
+        text_sp_config_rules["$ space^k $", ...].astype(VItem).color.set(color=BLUE_B)
+        text_sp_config_rules.points.scale(1.25)
+        text_group_sp_rules = Group(*[
+            text_sp_config_rules.get_label(f"R{i}")
+            for i in range(4)
+        ])
+        text_group_sp_rules.points.arrange_in_grid(
+            n_rows=2,
+            n_cols=2,
+            h_buff=1.5,
+            v_buff=0.5,
+        ).to_border(DOWN)
+        text_R1_2 = text_sp_config_rules.get_label("R1.2").points.move_to(text_group_sp_rules[1]).r
+        text_R1_3 = text_sp_config_rules.get_label("R1.3").points.move_to(text_group_sp_rules[1]).r
+        text_R1_4 = text_sp_config_rules.get_label("R1.4").points.move_to(text_group_sp_rules[1]).r
+
+        self.play(
+            FadeOut(mask_rec),
+            FadeOut(text_halt),
+            FadeOut(text_10_nest_pows[-1]),
+            FadeOut(tm_bb6.table),
+            FadeOut(tm_bb6.tape_item),
+            FadeOut(tm_bb6.framebox),
+        )
+        self.play(
+            TransformMatchingShapes(tm_bb6.tape_item.cells_group, sp_4k.cells)
+        )
+        self.play(
+            Succession(
+                Write(sp_4k.bracegroup_0infL),
+                Write(sp_4k.bracegroup_1),
+                Write(sp_4k.bracegroup_0n),
+                Write(sp_4k.bracegroup_11),
+                Write(sp_4k.bracegroup_05C),
+                Write(sp_4k.bracegroup_0infR),
+            ),
+            duration=4,
+        )
+        self.play(Write(text_Cn))
+        self.forward(2)
+        self.play(
+            sp_4k.full.anim.points.shift(UP * 1),
+            text_Cn.anim.points.shift(UP * 0.75),
+            Write(text_group_sp_rules),
+            duration=1.5,
+        )
+        self.forward(2)
+
+        rect_neq5 = SurroundingRect(
+            Group(*sp_4k.cells[sp_4k.center_idx + 1, sp_4k.center_idx + 5]),
+            color=RED,
+            buff=0.1,
+        )
+        rect_neq5.fill.set(color=RED, alpha=0.3)
+        text_neq5 = TypstMath("n=5").points.scale(1.3).next_to(rect_neq5, UP).r
+        text_neq5["n"].astype(VItem).color.set(color=YELLOW)
+        text_4kp1eq5 = TypstMath("4k+1=5").points.scale(1.3).next_to(rect_neq5, UP).r
+        text_4kp1eq5["k"].astype(VItem).color.set(color=BLUE_B)
+        text_keq1 = TypstMath("k=1").points.scale(1.3).next_to(rect_neq5, UP).r
+        text_keq1["k"].astype(VItem).color.set(color=BLUE_B)
+        rect_R1 = SurroundingRect(
+            text_group_sp_rules[1],
+            color=RED,
+        )
+
+        self.play(Write(rect_neq5))
+        self.play(Write(text_neq5))
+        self.forward(1.5)
+        self.play(
+            TransformMatchingDiff(
+                text_neq5,
+                text_4kp1eq5,
+            )
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_4kp1eq5,
+                text_keq1,
+            )
+        )
+        self.forward(1)
+        self.play(
+            Write(rect_R1),
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_group_sp_rules[1],
+                text_R1_2,
+            )
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_R1_2,
+                text_R1_3,
+            )
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_R1_3,
+                text_R1_4,
+            )
+        )
+        self.forward(2)
+
+        sp_35 = get_special_config_tape(35)
+        sp_35.full.points.move_to(sp_4k.full, aligned_edge=LEFT)
+        rect_neq35 = SurroundingRect(
+            Group(*sp_35.cells[sp_35.center_idx + 1, sp_35.center_idx + 18]),
+            color=RED,
+            buff=0.1,
+        )
+        rect_neq35.fill.set(color=RED, alpha=0.3)
+        text_n_eq_35 = TypstMath("n=35")
+        text_n_eq_35.points.scale(1.3).next_to(rect_neq35, UP).r
+        text_n_eq_35["n"].astype(VItem).color.set(color=YELLOW)
+        text_explodes = Group.from_iterable(
+            text_sp_config_rules.get_label(f"RC.{i}") \
+                .points.move_to(UP * 2).scale(1.5).r
+            for i in range(1, 8)
+        )
+        
+        self.play(
+            Transform(rect_neq5, rect_neq35),
+            FadeOut(sp_4k.cells),
+            FadeIn(sp_35.cells),
+            Transform(sp_4k.bracegroup_0infL, sp_35.bracegroup_0infL),
+            Transform(sp_4k.bracegroup_1, sp_35.bracegroup_1),
+            Transform(sp_4k.bracegroup_0n, sp_35.bracegroup_0n),
+            Transform(sp_4k.bracegroup_05C, sp_35.bracegroup_05C),
+            Transform(sp_4k.bracegroup_11, sp_35.bracegroup_11),
+            sp_4k.bracegroup_0infR.anim.points.shift(RIGHT * 20),
+            Transform(text_keq1, text_n_eq_35),
+            duration=2,
+        )
+        self.forward(0.5)
+        self.play(
+            TransformMatchingDiff(
+                text_R1_4,
+                text_group_sp_rules[1],
+            ),
+            FadeOut(rect_R1),
+        )
+        self.forward(2)
+        sp_35.full.remove(sp_35.bracegroup_0infR)
+        self.play(
+            FadeOut(sp_35.full),
+            FadeOut(text_n_eq_35),
+            FadeOut(rect_neq35),
+            FadeOut(text_Cn),
+            text_group_sp_rules.anim.points.move_to(DOWN * 1),
+            Write(text_explodes[0]),
+        )
+        self.forward(0.5)
+        for i in range(1, 7):
+            self.play(
+                TransformMatchingDiff(
+                    text_explodes[i - 1],
+                    text_explodes[i],
+                ),
+                duration=0.75,
+            )
+            self.forward(1)
+
+        
+        rec_r0 = SurroundingRect(
+            text_group_sp_rules[0],
+            color=RED,
+        )
+        text_stop_condition = TypstText("停止条件 $n equiv 0 space (mod 4)$")
+        text_stop_condition.points.scale(1.25).next_to(rec_r0, UP, buff=0.1).r
+        text_stop_condition.astype(VItem).color.set(color=RED_B)
+        
+        self.forward(1)
+        self.play(Write(rec_r0))
+        self.play(Write(text_stop_condition))
+        self.forward(2)
