@@ -1902,8 +1902,167 @@ class s3_6(Timeline):
         text_stop_condition = TypstText("停止条件 $n equiv 0 space (mod 4)$")
         text_stop_condition.points.scale(1.25).next_to(rec_r0, UP, buff=0.1).r
         text_stop_condition.astype(VItem).color.set(color=RED_B)
+        text_stop_condition_2 = text_stop_condition.copy()
+        text_stop_condition_2.points.scale(1.25)
         
         self.forward(1)
         self.play(Write(rec_r0))
         self.play(Write(text_stop_condition))
         self.forward(2)
+
+        text_Cs = Group.from_iterable(
+            TypstMath(f"C(#text(fill: rgb(\"#87CEEB\"))[{m}])").points.scale(1.5).r
+            for m in ["5", "35", "88574", "1062300...696959", "..."]
+        ).points.arrange(DOWN, aligned_edge=LEFT).move_to(ORIGIN).r
+        self.play(FadeOut(text_group_sp_rules))
+        self.play(
+            FadeOut(rec_r0),
+            FadeOut(text_stop_condition),
+            TransformMatchingDiff(text_explodes[-1].copy(), text_Cs[0]),
+            TransformMatchingDiff(text_explodes[-1].copy(), text_Cs[1]),
+            TransformMatchingDiff(text_explodes[-1].copy(), text_Cs[2]),
+            TransformMatchingDiff(text_explodes[-1].copy(), text_Cs[3]),
+            TransformMatchingDiff(text_explodes[-1], text_Cs[4]),
+        )
+        text_stop_condition_2.points.next_to(text_Cs[0], UP, aligned_edge=LEFT, buff=0.35)
+        self.play(FadeIn(text_stop_condition_2))
+        self.forward(1)
+
+        list_formulas_table = [
+            ["n", "A_n space \"formula\"", "A_n space (mod 2^m)", "k_n", "r_n"],
+            ["0", "", "5", "1", "1"],
+            ["1", "A_1 = (3^(k_0+3)-11)/2=", "35", "8", "3"],
+            ["2", "A_2 = (3^(k_1+3)+1)/2=", "88574", "22143", "2"],
+            ["3", "A_3 = (3^(k_2+3)-11)/2=", "255 space (mod 2^(14))", "63 space (mod 2^(12))", "3"],
+            ["4", "A_4 = (3^(k_3+3)+1)/2=", "4741 space (mod 2^(13))", "1185 space (mod 2^(11))", "1"],
+            ["5", "A_5 = (3^(k_4+3)-11)/2=", "2147 space (mod 2^(12))", "536 space (mod 2^(10))", "3"],
+            ["6", "A_6 = (3^(k_5+3)+1)/2=", "990 space (mod 2^(11))", "247 space (mod 2^9)", "2"],
+            ["7", "A_7 = (3^(k_6+3)-11)/2=", "175 space (mod 2^(10))", "43 space (mod 2^8)", "3"],
+            ["8", "A_8 = (3^(k_7+3)+1)/2=", "253 space (mod 2^9)", "63 space (mod 2^7)", "1"],
+            ["9", "A_9 = (3^(k_8+3)-11)/2=", "127 space (mod 2^8)", "31 space (mod 2^6)", "3"],
+            ["10", "A_10 = (3^(k_9+3)+1)/2=", "69 space (mod 2^7)", "17 space (mod 2^5)", "1"],
+            ["11", "A_11 = (3^(k_10+3)-11)/2=", "3 space (mod 2^6)", "0 space (mod 2^4)", "3"],
+            ["12", "A_12 = (3^(k_11+3)+1)/2=", "14 space (mod 2^5)", "3 space (mod 2^3)", "2"],
+            ["13", "A_13 = (3^(k_12+3)-11)/2=", "7 space (mod 2^4)", "1 space (mod 2^2)", "3"],
+            ["14", "A_14 = (3^(k_13+3)+1)/2=", "1 space (mod 2^3)", "0 space (mod 2^1)", "1"],
+            ["15", "A_15 = (3^(k_14+3)-11)/2=", "0 space (mod 2^2)", "", "0"]
+        ]
+        from functools import reduce
+        flatten_formulas_table = reduce(lambda a, b: a + b, list_formulas_table)
+        group_formulas_table = Group.from_iterable(
+            TypstMath(cell).points.scale(1.2).r
+            for cell in flatten_formulas_table
+        ).points.arrange_in_grid(
+            n_cols=5,
+            v_buff=0.1,
+            aligned_edge=LEFT,
+        ).r
+        group_f_t_col_n = Group(*group_formulas_table[0::5])
+        group_f_t_col_An = Group(*group_formulas_table[1::5])
+        group_f_t_col_An_mod = Group(*group_formulas_table[2::5])
+        group_f_t_col_kn = Group(*group_formulas_table[3::5])
+        group_f_t_col_rn = Group(*group_formulas_table[4::5])
+        group_f_t_col_n.points.next_to(group_f_t_col_An, LEFT, buff=0.3).shift(UP * 0.075)
+        group_f_t_col_n.astype(VItem).color.set(color=GREY_D)
+        group_f_t_col_An_mod.astype(VItem).color.set(color=YELLOW)
+        group_f_t_col_kn.astype(VItem).color.set(color=BLUE_B)
+        group_f_t_col_rn.astype(VItem).color.set(color=RED)
+        group_formulas_table.points.move_to(ORIGIN).to_border(UP, buff=2.5)
+        rec_stop_condition = SurroundingRect(
+            text_stop_condition_2,
+            color=RED,
+        )
+        rec_rn = SurroundingRect(
+            group_f_t_col_rn,
+            color=RED,
+        )
+        arrow_stop_con_rn = Arrow(
+            text_stop_condition_2.points.box.right,
+            rec_rn.points.box.top,
+            buff=0.5,
+            color=RED,
+        )
+        rec_halt = SurroundingRect(
+            group_f_t_col_rn[-1],
+            color=RED,
+        )
+        rec_15 = SurroundingRect(
+            group_f_t_col_n[-1],
+            color=GREY_A,
+        )
+        text_rec_halt = Text("到达终止条件", font=local_font)
+        text_rec_halt2 = Text("15 轮 C(n) 迭代到达终止条件", font=local_font)
+        text_rec_halt.points.next_to(rec_halt, LEFT, buff=0.2)
+        text_rec_halt2.points.next_to(rec_halt, LEFT, buff=0.2)
+        text_10_pow_tower_15 = TypstMath("10 arrow.t arrow.t 15")
+        text_10_pow_tower_15.points.scale(3)
+
+        self.play(FadeOut(text_Cs))
+        self.play(Write(group_formulas_table))
+        self.forward(2)
+        self.play(
+            Write(rec_stop_condition),
+            Write(arrow_stop_con_rn),
+            Write(rec_rn),
+            lag_ratio=0.5,
+        )
+        self.forward(2)
+        self.prepare(
+            FadeOut(rec_rn),
+            FadeOut(arrow_stop_con_rn),
+        )
+        self.play(
+            self.camera.anim.points.shift(DOWN * 14),
+            duration=5.0,
+        )
+        self.forward(1.5)
+        self.play(Write(rec_halt))
+        self.play(Write(text_rec_halt))
+        self.forward(1)
+        self.play(Write(rec_15))
+        self.play(TransformMatchingDiff(
+            text_rec_halt,
+            text_rec_halt2,
+        ))
+        self.forward(2)
+        self.play(self.camera.anim.points.shift(UP * 14))
+        self.play(FadeOutToPoint(group_formulas_table, DOWN * 10))
+        self.play(FadeIn(text_10_pow_tower_15))
+        self.forward(1.5)
+        self.play(FadeOut(text_10_pow_tower_15))
+        self.play(
+            FadeOut(rec_stop_condition),
+            FadeOut(text_stop_condition_2),
+            text_bb6_1.anim.points.move_to(ORIGIN)
+        )
+
+        text_x = Text("×", font=local_font).points.scale(3).r
+        text_x.astype(VItem).color.set(color=RED_B)
+        text_x.points.next_to(text_bb6_1, RIGHT, buff=0.5)
+        bb6_rule_2 = "1RB1RA_1RC1RZ_1LD0RF_1RA0LE_0LD1RC_1RA0RE"
+        text_bb6_2 = Text(
+            bb6_rule_2,
+            font=local_font,
+            color=GREY_A,
+        )
+        text_bb6_2.points.scale(1.25)
+        text_2_pow_nested_3_5 = TypstMath("2 arrow.t arrow.t arrow.t 5")
+        text_2_pow_nested_3_5.points.scale(3.5).next_to(text_bb6_2, DOWN, buff=0.5)
+        text_2_pow_nested_3_5.astype(VItem).color.set(color=LIGHT_PINK)
+        
+        self.forward(2)
+        self.play(Write(text_x))
+        self.forward(1)
+        self.play(
+            FadeOut(text_x),
+            TransformMatchingDiff(text_bb6_1, text_bb6_2),
+            lag_ratio=0.25,
+        )
+        self.forward(1)
+        self.play(Write(text_2_pow_nested_3_5))
+        self.forward(2)
+        self.play(
+            FadeOut(text_bb6_2),
+            FadeOut(text_2_pow_nested_3_5),
+        )
+        self.forward(1)
