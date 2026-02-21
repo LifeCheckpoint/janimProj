@@ -642,3 +642,122 @@ class ClipRatioTest(Timeline):
             offset=(1 / 4, 1 / 4),
             scale=(0.25, 0.25),
         ).show()
+
+def tri_positions(radius, angle_offset=0):
+    """计算等边三角形三个顶点的坐标（朝上）"""
+    return [
+        np.array([
+            radius * math.cos(angle_offset + i * TAU / 3 + PI / 2),
+            radius * math.sin(angle_offset + i * TAU / 3 + PI / 2),
+            0.0
+        ])
+        for i in range(3)
+    ]
+
+
+def make_double_line(p1, p2, offset=0.06, color=WHITE):
+    """创建两条平行线（双实线效果）"""
+    d = p2 - p1
+    length = np.linalg.norm(d)
+    if length < 1e-6:
+        return Group()
+    n = np.array([-d[1], d[0], 0.0]) / length
+    return Group(
+        Line(p1 + n * offset, p2 + n * offset, color=color),
+        Line(p1 - n * offset, p2 - n * offset, color=color),
+    )
+
+
+class TriangleGraphTest(Timeline):
+    """
+    uv run janim run test_scene.py TriangleGraphTest -i
+    """
+    def construct(self):
+        # ===== 参数 =====
+        OUTER_R = 2.8  # 外层三角形半径
+        INNER_R = 1.2       # 内层三角形半径
+        BIG_CIRCLE_R = 0.4  # 大圆半径
+        SMALL_CIRCLE_R = 0.2  # 小圆半径
+        LINE_OFFSET = 0.06  # 双线间距
+
+        # 外层固定位置
+        outer_pos = tri_positions(OUTER_R, 0)
+
+        # ===== ValueTracker 控制内层旋转角度 =====
+        angle_tr = ValueTracker(0)
+
+        # ===== 创建6 个圆 =====
+        outer_circles = [
+            Circle(radius=BIG_CIRCLE_R, color=WHITE, fill_color=BLACK, fill_alpha=1)
+            for _ in range(3)
+        ]
+        for i, c in enumerate(outer_circles):
+            c.points.move_to(outer_pos[i])
+
+        inner_circles = [
+            Circle(radius=SMALL_CIRCLE_R, color=WHITE, fill_color=BLACK, fill_alpha=1)
+            for _ in range(3)
+        ]
+        inner_pos_init = tri_positions(INNER_R, 0)
+        for i, c in enumerate(inner_circles):
+            c.points.move_to(inner_pos_init[i])
+
+        # 显示所有圆（圆在线的前面，depth更小）
+        for c in outer_circles + inner_circles:
+            c.show()
+
+        # ===== DataUpdater: 内层圆跟随角度旋转 =====
+        for idx in range(3):
+            self.prepare(
+                DataUpdater(
+                    inner_circles[idx],
+                    lambda data, p, i=idx: data.points.move_to(
+                        tri_positions(INNER_R, angle_tr.current().get_value())[i]
+                    ),
+                    duration=FOREVER
+                )
+            )
+
+        # ===== ItemUpdater: 动态绘制所有连线 =====
+        def build_lines(p):
+            ang = angle_tr.current().get_value()
+            ipos = tri_positions(INNER_R, ang)
+            opos = outer_pos
+            items = []
+
+            # 1) 大圆-大圆 双实线 (3对)
+            for i in range(3):
+                for j in range(i + 1, 3):
+                    items.append(make_double_line(opos[i], opos[j], LINE_OFFSET))
+
+            # 2) 小圆-小圆 双实线 (3对)
+            for i in range(3):
+                for j in range(i + 1, 3):
+                    items.append(make_double_line(ipos[i], ipos[j], LINE_OFFSET * 0.8))
+
+            # 3) 最近的大小圆 双实线
+            # 4) 最远的大小圆 虚线
+            for oi in range(3):
+                dists = [np.linalg.norm(opos[oi] - ipos[ii]) for ii in range(3)]
+                nearest = int(np.argmin(dists))
+                farthest = int(np.argmax(dists))
+                items.append(make_double_line(opos[oi], ipos[nearest], LINE_OFFSET * 0.8))
+                items.append(DashedLine(
+                    opos[oi], ipos[farthest],
+                    color=GOLD_D, dash_length=0.15, dashed_ratio=0.5
+                ))
+
+            g = Group(*items)
+            g.depth.set(1)  # 线在圆的后面
+            return g
+
+        self.prepare(ItemUpdater(None, build_lines, duration=FOREVER))
+
+        # ===== 动画序列 =====
+        self.forward(2)
+        #旋转内层三角形 120°
+        self.play(angle_tr.anim.set_value(TAU / 3), duration=3) # type: ignore
+        self.forward(1)
+        # 继续旋转一整圈回到原位
+        self.play(angle_tr.anim.set_value(TAU), duration=4) # type: ignore
+        self.forward(1)

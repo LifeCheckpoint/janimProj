@@ -9,9 +9,11 @@ from turing_machine.components.tape_cell import TapeCell
 from turing_machine.logic.turingcore import TuringMachineCore
 from turing_machine.turing_machine import TuringMachine
 from turing_machine.components.grid_cell import GridCell
+from turing_machine.components.grid_table import GridTable, Transition
 from langton_ant.langton_ant_grid import LangtonAntGrid
 from dirty_patch import install_dirty_patch
 import random
+import math
 
 class s4_1(Timeline):
     """
@@ -231,3 +233,158 @@ class s4_1(Timeline):
         self.play(FadeOut(group_ges))
         self.forward(1)
 
+class s4_2(Timeline):
+    """
+    uv run janim run s4_ConcreteComparison.py s4_2 -i
+    """
+    def construct(self) -> None:
+        all_states = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        symbols = ["0", "1"]
+
+        def make_table(n):
+            states = all_states[:n]
+            return GridTable(
+                states=states,
+                symbols=symbols,
+                transitions={
+                    (st, sy): Transition(
+                        next_state="", write_symbol="", direction="R",
+                    ) for st in states for sy in symbols
+                },
+                transpose=True,
+            )
+
+        def make_brace_label(table, n):
+            brace = Brace(table, UP, buff=0.1)
+            label = TypstMath(f"\"BB\"({n})").points.scale(1.5).next_to(brace, UP, buff=0.2).r
+            label[f"\"BB\"({n})"].astype(VItem).color.set(color=YELLOW)
+            return brace, label
+
+        cur = make_table(1)
+        cur.points.scale(1.35)
+        cur_brace, cur_label = make_brace_label(cur, 1)
+        self.play(Write(cur), Write(cur_brace), Write(cur_label))
+
+        for n in range(2, 9):
+            nxt = make_table(n)
+            nxt.points.scale(1.35)
+            nxt_brace, nxt_label = make_brace_label(nxt, n)
+            prev_states = all_states[:n - 1]
+
+            shared_cur = Group.from_iterable(
+                cur.get_cell(st, sy) for st in prev_states for sy in symbols
+            )
+            shared_nxt = Group.from_iterable(
+                nxt.get_cell(st, sy) for st in prev_states for sy in symbols
+            )
+
+            dur = 0.75 / (n - 1)
+
+            self.forward(dur)
+            self.play(
+                *[
+                    TransformMatchingShapes(c, nx) # type: ignore
+                    for c, nx in zip(shared_cur, shared_nxt)
+                ],
+                FadeOut(Group.from_iterable(
+                    t for t in cur if t not in shared_cur
+                )),
+                FadeIn(Group.from_iterable(
+                    t for t in nxt if t not in shared_nxt
+                )),
+                TransformMatchingDiff(cur_brace, nxt_brace),
+                TransformMatchingDiff(cur_label, nxt_label),
+                duration=dur,
+            )
+            cur = nxt
+            cur_brace = nxt_brace
+            cur_label = nxt_label
+
+        self.forward(1)
+        self.play(
+            FadeOut(cur),
+            FadeOut(cur_brace),
+            FadeOut(cur_label),
+        )
+
+        axes = Axes(
+            x_range=(0, 6, 1),
+            y_range=(0, 150, 25),
+            x_length=8,
+            y_length=6,
+        ).points.move_to(ORIGIN).r
+        axes(VItem).color.set(alpha=0.5)
+
+        seqs = {
+            "n^2": ([i**2 for i in range(6)], BLUE_B),
+            "2^n": ([2**i for i in range(6)], GREEN_B),
+            "n!": ([math.factorial(i) for i in range(6)], RED_B),
+        }
+
+        def make_seq_vis(vals, color):
+            pts = [axes.coords_to_point(i, v) for i, v in enumerate(vals)]
+            return Group(
+                *[Line(pts[i], pts[i + 1]).color.set(color=color, alpha=0.7).r for i in range(len(pts) - 1)],
+                *[Dot(pt, radius=0.05, fill_alpha=1, color=color) for pt in pts],
+            ), pts
+
+        seq_groups = {}
+        seq_labels = {}
+        for name, (vals, color) in seqs.items():
+            grp, pts = make_seq_vis(vals, color)
+            seq_groups[name] = grp
+            lbl = TypstMath(name).points.scale(1.2).r
+            lbl.astype(VItem).color.set(color=color)
+            lbl.points.next_to(pts[-1], RIGHT, buff=0.2)
+            seq_labels[name] = lbl
+
+        # BB(0)~BB(4)
+        bb_vals = [0, 1, 6, 21, 107]
+        bb_pts = [axes.coords_to_point(i, v) for i, v in enumerate(bb_vals)]
+        bb_dots = Group(*[
+            Dot(pt, radius=0.08, stroke_alpha=1, fill_alpha=0, color=YELLOW)
+            for pt in bb_pts
+        ])
+        bb_lines = Group(*[
+            DashedLine(bb_pts[i], bb_pts[i + 1]).color.set(color=YELLOW, alpha=0.5).r
+            for i in range(4)
+        ])
+        label_bb = TypstMath("\"BB\"(n)").points.scale(1.2).r
+        label_bb.astype(VItem).color.set(color=YELLOW)
+        label_bb.points.next_to(bb_pts[-1], UP, buff=0.2)
+
+        self.play(Write(axes), duration=0.5)
+        for name in ["n^2", "2^n", "n!"]:
+            self.play(Write(seq_groups[name]), Write(seq_labels[name]), duration=0.5)
+        self.play(
+            *[Write(d) for d in bb_dots],
+            *[Write(l) for l in bb_lines],
+            Write(label_bb),
+            lag_ratio=0.2,
+            duration=0.75,
+        )
+        self.forward(1)
+
+        bb4_top = np.array(bb_pts[-1]).copy()
+        bb4_top[1] = axes.coords_to_point(0, 150)[1]
+        line_vert = DashedLine(bb_pts[-1], bb4_top).color.set(color=YELLOW, alpha=0.7).r
+        arrow_up = Arrow(
+            bb4_top, bb4_top + UP * 0.8,
+            color=YELLOW, buff=0,
+        )
+        text_bb5_val = TypstMath("\"BB\"(5) = 47176870").points.scale(1.2).r
+        text_bb5_val.astype(VItem).color.set(color=YELLOW)
+        text_bb5_val.points.next_to(arrow_up, LEFT, buff=0.3)
+
+        self.play(Write(line_vert), Write(arrow_up), duration=0.75)
+        self.play(Write(text_bb5_val), duration=0.5)
+        self.forward(1.5)
+
+        self.play(FadeOut(Group(
+            axes, bb_dots, bb_lines, label_bb,
+            line_vert, arrow_up, text_bb5_val,
+            *seq_groups.values(), *seq_labels.values(),
+        )))
+        self.forward(0.5)
+
+        
