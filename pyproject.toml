@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-janim = { git = "https://github.com/jkjkil4/JAnim.git" }
+janim = { git = "https://github.com/jkjkil4/JAnim" }

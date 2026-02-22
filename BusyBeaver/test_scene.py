@@ -761,3 +761,19 @@ class TriangleGraphTest(Timeline):
         # 继续旋转一整圈回到原位
         self.play(angle_tr.anim.set_value(TAU), duration=4) # type: ignore
         self.forward(1)
+
+class TestMatching1(Timeline):
+    """
+    uv run janim run test_scene.py TestMatching1 -i
+    """
+    def construct(self):
+        t = TypstText("运行步数 $\"steps\">= 2f(n)$")
+        t.points.scale(1.25).move_to(DOWN * 3)
+        t.show()
+
+        def try_match(x: str):
+            t[x]
+
+        try_match("运行步数")
+        try_match("$\"steps\">= 2f(n)$")
+        try_match("运行步数 $\"steps\">= 2f(n)$")

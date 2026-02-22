@@ -387,4 +387,372 @@ class s4_2(Timeline):
         )))
         self.forward(0.5)
 
+class s4_3(Timeline):
+    """
+    uv run janim run s4_ConcreteComparison.py s4_3 -i
+    """
+    def construct(self) -> None:
+        text_calculable = Text("可计算", font=local_font, color=WHITE)
+        text_calculable.points.scale(1.5)
+        text_definable = Text("可定义", font=local_font, color=WHITE)
+        text_definable.points.scale(1.5).next_to(text_calculable, DOWN, buff=0.5)
+        Group(text_calculable, text_definable).points.move_to(ORIGIN)
+        rec_calculable = SurroundingRect(text_calculable, depth=10)
+        rec_calculable.color.set(color=RED, alpha=1)
+        rec_definable = SurroundingRect(text_definable, depth=10)
+        rec_definable.color.set(color=GREEN, alpha=1)
+        group_calculable = Group(text_calculable, rec_calculable)
+        group_definable = Group(text_definable, rec_definable)
+        list_seq_an = [
+            "1", "2", "3", "4", "5", "6", "7", "8", "...",
+            "1", "4", "9", "16", "25", "36", "49", "64", "...",
+        ]
+        table_seq_an = Group.from_iterable(
+            TypstMath(item).points.scale(1.5).r for item in list_seq_an
+        ).points.arrange_in_grid(
+            n_rows=2, n_cols=9,
+            h_buff=0.75, v_buff=0.25,
+            aligned_edge=LEFT,
+        ).r
+        group_seq_n = Group.from_iterable(table_seq_an[0:9])
+        group_seq_an = Group.from_iterable(table_seq_an[9:])
+        group_seq_an.astype(VItem).color.set(color=BLUE)
+        group_seq_an.astype(VItem).color.set(color=YELLOW)
+        text_seq_n = TypstMath("n").points.scale(1.5).r
+        text_seq_an = TypstMath("f(n)=n^2").points.scale(1.5).r
+        text_seq_an.astype(VItem).color.set(color=YELLOW)
+        Group(text_seq_n, text_seq_an).points.arrange(DOWN, buff=0.25, aligned_edge=LEFT) \
+            .next_to(table_seq_an, LEFT, buff=0.75)
+        Group(table_seq_an, text_seq_n, text_seq_an).points.move_to(DOWN * 0.5)
+        group_example = Group(group_seq_n[1], group_seq_an[1])
+        rect_example = SurroundingRect(group_example, color=CYAN, buff=0.25)
+
+        self.play(
+            Write(text_calculable),
+            Transform(
+                Rect(0.01, rec_calculable.points.box.height) \
+                    .points.move_to(rec_calculable.points.box.left).r,
+                rec_calculable,
+            ),
+        )
+        self.forward(0.5)
+        self.play(
+            Write(text_definable),
+            Transform(
+                Rect(0.01, rec_definable.points.box.height) \
+                    .points.move_to(rec_definable.points.box.left).r,
+                rec_definable,
+            ),
+        )
+        self.forward(2)
+        self.play(
+            group_calculable.anim.points.move_to(LEFT * 5.5 + UP * 3),
+            group_definable.anim.points.move_to(LEFT * 3.5 + UP * 3),
+        )
+        self.play(Write(group_seq_n), Write(text_seq_n))
+        self.play(Write(group_seq_an), Write(text_seq_an))
+        self.forward(1.5)
+
+        data_1_original = ["...", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "..."]
+        data_2_write_n = ["...", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "..."]
+        data_3_write_an = ["...", "0", "0", "0", "1", "1", "1", "1", "1", "1", "0", "0", "0", "..."]
+        data_4_clear_all = ["...", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "..."]
+        tapes = [
+            Group.from_iterable(
+                TapeCell(square_size=1, tile_data=data)
+                for data in datas
+            ).points.arrange(RIGHT, buff=0).move_to(DOWN * 2).r
+            for datas in [data_1_original, data_2_write_n, data_3_write_an, data_4_clear_all]
+        ]
+        tape_center_idx = 4
+        tape_frame = SVGItem("turing_machine/svgs/choice_frame.svg")
+        tape_frame.points.scale(0.35).move_to(tapes[0][tape_center_idx].points.box.center).r
+        grid_chain_n = Group.from_iterable(
+            GridCell(
+                state_name=f"A<fs 0.6>{i}</fs>",
+                write_bit="1",
+                move_dir="RIGHT",
+            ) for i in range(1, 3)
+        ).points.arrange(RIGHT, buff=0.1).to_border(LEFT).shift(UP * 1).r
+        brace_grid_chain_n = Brace(grid_chain_n, UP)
+        label_grid_chain_n = TypstText("$n$ 个").points.scale(1.25).next_to(brace_grid_chain_n, UP).r
+        grid_chain_fn = Group.from_iterable(
+            GridCell(
+                state_name=name,
+                write_bit="1",
+                move_dir="RIGHT",
+            ) for i, name in enumerate(
+                ["F<fs 0.6>1</fs>", "F<fs 0.6>2</fs>", "F<fs 0.6>3</fs>", "...", "F<fs 0.6>m</fs>"]
+            )
+        ).points.arrange(RIGHT, buff=0.1).next_to(grid_chain_n, RIGHT, buff=0.75).r
+        brace_grid_chain_fn = Brace(grid_chain_fn, UP)
+        label_grid_chain_fn = TypstText("常数 $F_m$ 个").points.scale(1.25).next_to(brace_grid_chain_fn, UP).r
+        label_grid_chain_fn["$F_m$"].astype(VItem).color.set(color=ORANGE)
+        grid_chain_constant = Group.from_iterable(
+            GridCell(
+                state_name=f"C<fs 0.6>{i}</fs>",
+                write_bit="0",
+                move_dir="RIGHT" if i < 3 else "STOP",
+            ) for i in range(3)
+        ).points.arrange(RIGHT, buff=0.1).next_to(grid_chain_fn, RIGHT, buff=0.75).r
+        brace_grid_chain_constant = Brace(grid_chain_constant, UP)
+        label_grid_chain_constant = TypstText("常数 $c$ 个").points.scale(1.25).next_to(brace_grid_chain_constant, UP).r
+        label_grid_chain_constant["$c$"].astype(VItem).color.set(color=ORANGE)
+        brace_tape_n = Brace(tapes[1][tape_center_idx:tape_center_idx + 2], DOWN)
+        brace_tape_an = Brace(tapes[1][tape_center_idx + 2:tape_center_idx + 6], DOWN)
+        label_tape_n = TypstMath("n=2").points.scale(1.5).next_to(brace_tape_n, DOWN, buff=0.2).r
+        label_tape_an = TypstMath("a_n=4").points.scale(1.5).next_to(brace_tape_an, DOWN, buff=0.2).r
+        label_tape_an.astype(VItem).color.set(color=YELLOW)
+
+        self.play(
+            Write(tapes[0]),
+            Write(tape_frame),
+        )
+        self.play(Write(rect_example))
+        self.forward(1.5)
+        self.play(
+            Write(grid_chain_n),
+            Write(brace_grid_chain_n),
+            Write(label_grid_chain_n),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            Succession(
+                TransformMatchingShapes(
+                    tapes[0][tape_center_idx],
+                    tapes[1][tape_center_idx],
+                ),
+                tape_frame.anim.points.move_to(tapes[1][tape_center_idx + 1]),
+                TransformMatchingShapes(
+                    tapes[0][tape_center_idx + 1],
+                    tapes[1][tape_center_idx + 1],
+                ),
+                duration=1,
+            )
+        )
+        self.play(
+            Write(brace_tape_n),
+            Write(label_tape_n),
+            lag_ratio=0.2,
+        )
+        self.forward(2)
+        self.play(
+            Write(grid_chain_fn), 
+            Write(brace_grid_chain_fn),
+            Write(label_grid_chain_fn),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            Succession(
+                tape_frame.anim.points.move_to(tapes[2][tape_center_idx + 2]),
+                TransformMatchingShapes(
+                    tapes[1][tape_center_idx + 2],
+                    tapes[2][tape_center_idx + 2],
+                ),
+                tape_frame.anim.points.move_to(tapes[2][tape_center_idx + 3]),
+                TransformMatchingShapes(
+                    tapes[1][tape_center_idx + 3],
+                    tapes[2][tape_center_idx + 3],
+                ),
+                tape_frame.anim.points.move_to(tapes[2][tape_center_idx + 4]),
+                TransformMatchingShapes(
+                    tapes[1][tape_center_idx + 4],
+                    tapes[2][tape_center_idx + 4],
+                ),
+                tape_frame.anim.points.move_to(tapes[2][tape_center_idx + 5]),
+                TransformMatchingShapes(
+                    tapes[1][tape_center_idx + 5],
+                    tapes[2][tape_center_idx + 5],
+                ),
+                duration=1.5,
+            )
+        )
+        self.play(
+            Write(brace_tape_an),
+            Write(label_tape_an),
+            lag_ratio=0.2,
+        )
+        self.forward(2)
+        self.play(
+            Write(grid_chain_constant),
+            Write(brace_grid_chain_constant),
+            Write(label_grid_chain_constant),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingShapes(
+                tapes[2][tape_center_idx + 5],
+                tapes[3][tape_center_idx + 5],
+            ),
+            duration=0.5,
+        )
+        for i in range(4, -1, -1):
+            self.play(
+                Succession(
+                    tape_frame.anim.points.move_to(tapes[3][tape_center_idx + i]),
+                    TransformMatchingShapes(
+                        tapes[2][tape_center_idx + i],
+                        tapes[3][tape_center_idx + i],
+                    ),
+                    duration=0.5,
+                )
+            )
+        self.forward(2)
+
+        text_steps = TypstText("运行步数 $>= overbrace(f(n), \"Write\")+overbrace(f(n), \"Clear\")$")
+        text_steps.points.scale(1.25).move_to(DOWN * 3)
+        text_steps["$f(n)$", ...].astype(VItem).color.set(color=YELLOW)
+        text_steps_2 = TypstText("运行步数 $\"steps\">= 2f(n)$")
+        text_steps_2.points.scale(1.25).move_to(DOWN * 3)
+        text_steps_2["$f(n)$"].astype(VItem).color.set(color=YELLOW)
+        text_steps_2["$\"steps\"$"].astype(VItem).color.set(color=BLUE_B)
+        brace_all_states = Brace(Group(grid_chain_n, grid_chain_fn, grid_chain_constant), UP)
+        label_all_states = TypstText("共 $n+F_m+c$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
+        label_all_states["$F_m$"].astype(VItem).color.set(color=ORANGE)
+        label_all_states["$c$"].astype(VItem).color.set(color=ORANGE)
+        label_all_states_2 = TypstText("共 $n+c$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
+        label_all_states_2["$c$"].astype(VItem).color.set(color=ORANGE)
+        text_most_bb = TypstText("共 $n+c$ 个状态 $=>$ 最大可达 $\"BB\"(n+c) \"steps\"$")
+        text_most_bb.points.scale(1.25).next_to(brace_all_states, UP)
+        text_most_bb["$c$", ...].astype(VItem).color.set(color=ORANGE)
+        text_most_bb["$\"steps\"$"].astype(VItem).color.set(color=BLUE_B)
+        text_bb_ge_2f = TypstMath("\"BB\"(n+c) >= 2f(n)")
+        text_bb_ge_2f["c"].astype(VItem).color.set(color=ORANGE)
+        text_bb_ge_2f["f"].astype(VItem).color.set(color=YELLOW)
+        text_bb_ge_2f.points.scale(1.5).move_to(text_steps_2)
+
+        Group(tapes[0][4:10], tapes[1][4:10]).hide()
+        self.play(
+            FadeOut(Group(group_seq_n, group_seq_an, text_seq_n, text_seq_an, rect_example)),
+            Group(
+                tapes[0][0:4], tapes[3][4:10], tapes[0][10:],
+                tape_frame,
+                brace_tape_n, brace_tape_an, label_tape_n, label_tape_an,
+            ).anim.points.move_to(DOWN * 1),
+        )
+        self.forward(1)
+        self.play(Write(text_steps))
+        self.forward(1)
+        self.play(TransformMatchingDiff(text_steps, text_steps_2))
+        self.forward(1)
+        self.play(
+            Transform(
+                Group(brace_grid_chain_n, brace_grid_chain_fn, brace_grid_chain_constant),
+                Group(brace_all_states),
+            )
+        )
+        self.play(
+            *[
+                TransformMatchingDiff(lb, label_all_states)
+                for lb in [label_grid_chain_n, label_grid_chain_fn, label_grid_chain_constant]
+            ]
+        )
+        self.forward(1)
+        self.play(TransformMatchingDiff(label_all_states, label_all_states_2))
+        self.forward(1)
+        self.play(TransformMatchingDiff(label_all_states_2, text_most_bb))
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                Group(text_most_bb, text_steps_2),
+                text_bb_ge_2f,
+            ),
+            FadeOut(brace_all_states),
+        )
+        self.forward(1.5)
+
+        rect_n_1 = SurroundingRect(
+            text_bb_ge_2f["n", 0],
+            color=GREEN_A,
+            buff=0.05,
+        )
+        rect_n_2 = SurroundingRect(
+            text_bb_ge_2f["n", 1],
+            color=GREEN_A,
+            buff=0.05,
+        )
+        rect_c = SurroundingRect(
+            text_bb_ge_2f["c"],
+            color=ORANGE,
+            buff=0.05,
+        )
+        text_bb_ge_2f_ge_fnpc = TypstMath("\"BB\"(n+c) >= 2f(n) >= f(n+c)")
+        text_bb_ge_2f_ge_fnpc["c", ...].astype(VItem).color.set(color=ORANGE)
+        text_bb_ge_2f_ge_fnpc["f", ...].astype(VItem).color.set(color=YELLOW)
+        text_bb_ge_2f_ge_fnpc.points.scale(1.5).move_to(text_steps_2)
+        text_bb_ge_fnpc = TypstMath("\"BB\"(n+c) >= f(n+c)")
+        text_bb_ge_fnpc["c", ...].astype(VItem).color.set(color=ORANGE)
+        text_bb_ge_2f_ge_fnpc["f", ...].astype(VItem).color.set(color=YELLOW)
+        text_bb_ge_fnpc.points.scale(1.5).move_to(text_steps_2)
+        text_bb_ge_fnpc["f"].astype(VItem).color.set(color=YELLOW)
+        text_bb_ge_fn = TypstMath("\"BB\"(n)>=f(n)").points.scale(1.5).move_to(text_steps_2).r
+        text_bb_ge_fn["f"].astype(VItem).color.set(color=YELLOW)
+        text_bb_gg_fn = TypstMath("\"BB\"(n) >> f(n)").points.scale(1.5).move_to(text_steps_2).r
+        text_bb_gg_fn["f"].astype(VItem).color.set(color=YELLOW)
+        text_bb_gg_fn[">>"].astype(VItem).color.set(color=RED)
+        rec_bb_gg_fn = SurroundingRect(
+            text_bb_gg_fn,
+            color=RED,
+            buff=0.25,
+        )
         
+        self.play(
+            Write(rect_n_1),
+            Write(rect_n_2),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(Write(rect_c))
+        self.forward(1)
+        self.play(FadeOut(Group(
+            rect_n_1,
+            rect_n_2,
+            rect_c,
+        )))
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_bb_ge_2f,
+                text_bb_ge_2f_ge_fnpc,
+            )
+        )
+        self.forward(1.5)
+        self.play(
+            TransformMatchingDiff(
+                text_bb_ge_2f_ge_fnpc,
+                text_bb_ge_fnpc,
+            )
+        )
+        self.forward(1.5)
+        self.play(
+            TransformMatchingDiff(
+                text_bb_ge_fnpc,
+                text_bb_ge_fn,
+            )
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_bb_ge_fn,
+                text_bb_gg_fn,
+            ),
+            Write(rec_bb_gg_fn),
+        )
+        self.forward(2)
+        self.play(
+            FadeOut(Group(
+                text_bb_gg_fn, rec_bb_gg_fn,
+                label_tape_n,
+                label_tape_an,
+                tapes[0][0:4], tapes[3][4:10], tapes[0][10:],
+                brace_tape_an, brace_tape_n,
+                tape_frame,
+                grid_chain_n, grid_chain_fn, grid_chain_constant,
+                rec_calculable, rec_definable,
+                text_calculable, text_definable,
+            ))
+        )
+        self.forward(1)
