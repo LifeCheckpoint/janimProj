@@ -2,7 +2,7 @@
 
 #automaton(
   (
-    A: (A: "0|1,R, 1|0,L"),
+    A: (A: "0|0,R, 1|1,L"),
     HALT: none,
   ),
 

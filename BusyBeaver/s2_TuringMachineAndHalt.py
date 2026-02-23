@@ -451,6 +451,9 @@ class s2_2(Timeline):
         brace_5_1_text = brace_5_1.points.create_text("a+b=5").points.shift(UP * 0.1).r
         dfa_aplusb = load_dfa_typst("a_plus_b").dfa_main_item
         dfa_aplusb.points.move_to(RIGHT * 4 + UP * 1).scale(0.65)
+        helper_rect = Rect(0.5, 0.05, depth=10, color=GREEN).points.move_to(DOWN * 3).r
+        helper_rect.fill.set(alpha=1)
+        helper_rect.stroke.set(alpha=0)
 
         self.play(
             Write(svg_algorithm),
@@ -493,9 +496,22 @@ class s2_2(Timeline):
             self.camera.anim.points.shift(UP * 0.5),
             Write(text_algo_addition),
             Write(dfa_aplusb),
+            FadeIn(helper_rect),
             lag_ratio=0.2,
         )
         self.forward(1)
+        self.play(
+            DataUpdater(
+                helper_rect,
+                lambda data, _: \
+                    data.points.next_to(
+                        tm_aplusb.tape_item.cells_group[13].current(),
+                        DOWN,
+                        buff=0.05
+                    ),
+                duration=FOREVER,
+            ),
+        )
         self.play(
             Write(brace_3_1),
             Write(brace_3_1_text),
@@ -529,6 +545,7 @@ class s2_2(Timeline):
                 dfa_aplusb,
                 brace_5_1,
                 brace_5_1_text,
+                helper_rect,
             )
         ))
 
@@ -679,8 +696,8 @@ class s2_4(Timeline):
                     start_state="A",
                     halt_states=["HALT"],
                 )
-                core.add_rule("A", "0", "A", "1", "R")
-                core.add_rule("A", "1", "A", "0", "L")
+                core.add_rule("A", "0", "A", "0", "R")
+                core.add_rule("A", "1", "A", "1", "L")
                 tm = TuringMachine(
                     core,
                     showcase_radius=12,
