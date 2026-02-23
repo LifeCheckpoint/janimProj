@@ -120,8 +120,8 @@ class s2_1(Timeline):
         text_infinity = TypstMath("oo", depth=-40).points.scale(1.5).to_border(DOWN).shift(DOWN * 0.2).r
 
         text_heading_instruction = TypstDoc(get_typ_doc("heading_instruction"), depth=-30).points.scale(0.5).r
-        text_heading_instruction.points.move_to(RIGHT * 4.2 + DOWN * 0.5)
-        text_heading_instruction.points.scale(1.5)
+        text_heading_instruction.points.move_to(RIGHT * 4 + UP * 0.25)
+        text_heading_instruction.points.scale(1.7)
         group_reading_example = Group(
             TapeCell(tile_data="1", square_size=0.6, text_scaling=0.6) \
                 .points.move_to(ORIGIN).r \
@@ -130,7 +130,7 @@ class s2_1(Timeline):
                 .points.move_to(ORIGIN).scale(0.2).r \
                 .depth.set(-45).r,
         )
-        group_reading_example.points.next_to(text_heading_instruction.get_label("reading"), LEFT, buff=0.65)
+        group_reading_example.points.next_to(text_heading_instruction.get_label("reading"), RIGHT, buff=0.65)
         temp_writing_tape_cell = TapeCell(tile_data="1", square_size=0.6, text_scaling=0.6) \
                 .points.move_to(ORIGIN).r \
                 .depth.set(-40).r
@@ -141,7 +141,7 @@ class s2_1(Timeline):
                 .points.move_to(ORIGIN).scale(0.2).r \
                 .depth.set(-45).r,
         )
-        group_writing_example.points.next_to(text_heading_instruction.get_label("writing"), LEFT, buff=0.65)
+        group_writing_example.points.next_to(text_heading_instruction.get_label("writing"), RIGHT, buff=0.65)
         group_changing_state_example = Group(
             SVGItem(
                 file_path=str(Path(__file__).parent / "turing_machine" / "svgs" / "pointer.svg"),
@@ -157,7 +157,7 @@ class s2_1(Timeline):
                 depth=-45,
             ),
         )
-        group_changing_state_example.points.next_to(text_heading_instruction.get_label("state_changing"), RIGHT, buff=0.45)
+        group_changing_state_example.points.next_to(text_heading_instruction.get_label("state_changing"), RIGHT, buff=0.65)
         group_changing_state_example[0].points.shift(DOWN * 0.08)
         group_moving_example = Group(
             SVGItem(
@@ -170,7 +170,7 @@ class s2_1(Timeline):
         )
         group_moving_example[2].points.next_to(group_moving_example[1], RIGHT, buff=0)
         group_moving_example[0].points.next_to(group_moving_example[0], UP, buff=0.05)
-        group_moving_example.points.next_to(text_heading_instruction.get_label("moving"), RIGHT, buff=0.35)
+        group_moving_example.points.next_to(text_heading_instruction.get_label("moving"), RIGHT, buff=0.55)
 
         self.play(FadeIn(tm.tape_item))
         self.play(tm.show_counter_anim(), tm.show_table_anim())
