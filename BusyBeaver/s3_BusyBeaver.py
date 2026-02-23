@@ -21,12 +21,18 @@ class s3_1(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_1 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         frame_width = cast(float, Config.get.frame_width)
         frame_height = cast(float, Config.get.frame_height)
 
         class TMLoop(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 self.camera.points.scale(1.2)
                 core_loop = TuringMachineCore(
@@ -85,6 +91,9 @@ class s3_1(Timeline):
                     hl_rect_state.points.move_to(dfa_tm_loop.get_label(cur_tag).points.box.center)
 
         class TMBB5(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 self.camera.points.scale(1.2)
                 core_bb5 = TuringMachineCore(
@@ -293,6 +302,9 @@ class s3_1(Timeline):
         self.forward(3)
 
         class TMDIY(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def __init__(
                 self,
                 core: TuringMachineCore,
@@ -509,6 +521,9 @@ class s3_2(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_2 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         text_state_5_steps = TypstText(
@@ -697,6 +712,9 @@ class s3_3(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_3 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         text_status_step = Text(
@@ -956,6 +974,9 @@ class s3_4(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_4 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         text_many_tms = TypstDoc(get_typ_doc("many_tms"), depth=10)
@@ -991,6 +1012,9 @@ class s3_4(Timeline):
         text_H_beaver.points.scale(2).r.astype(VItem).color.set(color=CYAN)
 
         class TMShow(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def __init__(
                 self,
                 core: TuringMachineCore,
@@ -1167,6 +1191,9 @@ class s3_5(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_5 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         def history_grid_gen(
@@ -1585,6 +1612,9 @@ class s3_6(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_6 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         bb6_rule = "1RB0LD_1RC0RF_1LC1LA_0LE1RZ_1LF0RB_0RC0RE"

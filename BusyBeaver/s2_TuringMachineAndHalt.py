@@ -9,6 +9,9 @@ class s2_1(Timeline):
     """
     uv run janim run s2_TuringMachineAndHalt.py s2_1 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         text_turing_machine = Text("图灵机", font=local_font).points.scale(1.5).r
         text_turing_machine_en = Text("Turing Machine", font=local_font).points.scale(0.75).r
@@ -409,6 +412,9 @@ class s2_2(Timeline):
     """
     uv run janim run s2_TuringMachineAndHalt.py s2_2 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         svg_algorithm = SVGItem(str(Path(__file__).parent / "resources" / "algorithm.svg")).points.scale(0.75).shift(RIGHT).r
         text_algo_algo = Text("算法", font=local_font).points.scale(1).move_to(svg_algorithm[8:10]).r
@@ -553,6 +559,9 @@ class s2_3(Timeline):
     """
     uv run janim run s2_TuringMachineAndHalt.py s2_3 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         text_four_ops = TypstMath("+ space - times div").points.scale(3).move_to(DOWN * PI).r
         video_3a = Video("resources/艾尔登法环_clip.mp4").points.move_to(DOWN * 3 * PI).r
@@ -631,9 +640,15 @@ class s2_4(Timeline):
     """
     uv run janim run s2_TuringMachineAndHalt.py s2_4 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         # 不同子 Timeline 演示不同内容
         class TMFinal(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 text_final = Text("停机", font=local_font).points.scale(1.5).move_to(UP * 3.75).r
                 dfa = load_dfa_typst("tm_final").dfa_main_item
@@ -679,6 +694,9 @@ class s2_4(Timeline):
                 self.forward(30)
         
         class TMLoop(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 text_loop = Text("循环", font=local_font).points.scale(1.5).move_to(UP * 3.75).r
                 dfa = load_dfa_typst("tm_loop").dfa_main_item
@@ -725,6 +743,9 @@ class s2_4(Timeline):
                 self.forward(30)
 
         class TMInfinite(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 text_infinite = Text("无限", font=local_font).points.scale(1.5).move_to(UP * 3.75).r
                 dfa = load_dfa_typst("tm_infinite").dfa_main_item
@@ -818,6 +839,9 @@ class s2_5(Timeline):
     """
     uv run janim run s2_TuringMachineAndHalt.py s2_5 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         text_halt = Text("HALT", font=local_font).points.scale(2).r
         text_halt.color.set(color=YELLOW)

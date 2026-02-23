@@ -5,7 +5,9 @@ class s1_2(Timeline):
     """
     uv run janim run s1_NestedSequence.py s1_2 -i
     """
-
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self):
         text_n100 = TypstMath(R"n^(100)").points.shift(LEFT * 3).scale(3).r
         axes1 = Axes(
@@ -301,6 +303,9 @@ class s1_3(Timeline):
     """
     uv run janim run s1_NestedSequence.py s1_3 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self):
         text_2n = TypstMath("2^n").points.shift(LEFT * 2).scale(2).r
         text_2n.astype(VItem).color.set(color=GREEN_A).r
@@ -373,6 +378,9 @@ class s1_4(Timeline):
     """
     uv run janim run s1_NestedSequence.py s1_4 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self):
         def tansform_matching_diff_in_segments(
             item_from: Item,

@@ -15,6 +15,9 @@ class s4_1(Timeline):
     """
     uv run janim run s4_ConcreteComparison.py s4_1 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         quest_6_sim = TypstMath("\"BB\"_6 approx").points.scale(1.5).move_to(ORIGIN).r
@@ -233,6 +236,9 @@ class s4_2(Timeline):
     """
     uv run janim run s4_ConcreteComparison.py s4_2 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         all_states = ["A", "B", "C", "D", "E", "F", "G", "H"]
         symbols = ["0", "1"]
@@ -387,6 +393,9 @@ class s4_3(Timeline):
     """
     uv run janim run s4_ConcreteComparison.py s4_3 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         text_calculable = Text("可计算", font=local_font, color=WHITE)
         text_calculable.points.scale(1.5)
@@ -757,6 +766,9 @@ class s4_4(Timeline):
     """
     uv run janim run s4_ConcreteComparison.py s4_4 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self) -> None:
         install_dirty_patch()
         text_H = TypstMath("H").points.scale(1.5).r
@@ -874,6 +886,9 @@ class s4_4(Timeline):
         self.play(FadeOut(video_bb))
 
         class BBLine(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 def window_num(nums: Iterable[int], k: int):
                     return sorted(x + d for x in nums for d in range(-k, k + 1) if x + d > 0)
@@ -948,6 +963,9 @@ class s4_4(Timeline):
         self.forward(1)
 
         class BBLine2(Timeline):
+            CONFIG = Config(
+                typst_shared_preamble=get_typ_doc("preamble")
+            )
             def construct(self) -> None:
                 w = 0.06
                 lh = 0.05
