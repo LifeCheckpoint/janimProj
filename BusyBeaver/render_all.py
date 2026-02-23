@@ -22,6 +22,11 @@ TASKS = [
     ("s3_BusyBeaver.py", "s3_3"),
     ("s3_BusyBeaver.py", "s3_4"),
     ("s3_BusyBeaver.py", "s3_5"),
+    ("s3_BusyBeaver.py", "s3_6"),
+    ("s4_ConcreteComparison.py", "s4_1"),
+    ("s4_ConcreteComparison.py", "s4_2"),
+    ("s4_ConcreteComparison.py", "s4_3"),
+    ("s4_ConcreteComparison.py", "s4_4"),
 ]
 
 def render(task):
@@ -40,7 +45,7 @@ def render(task):
     return (file, scene, r.returncode)
 
 if __name__ == "__main__":
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
         results = list(pool.map(render, TASKS))
     failed = [f"{f} {s}" for f, s, rc in results if rc != 0]
     print(f"\n全部完成: {len(results) - len(failed)}/{len(results)} 成功")
