@@ -2,17 +2,13 @@ from janim.imports import * # type: ignore
 from tools import (
     get_typ_doc,
     local_font,
-    parse_rule_to_core,
     CYAN,
 )
 from turing_machine.components.tape_cell import TapeCell
-from turing_machine.logic.turingcore import TuringMachineCore
-from turing_machine.turing_machine import TuringMachine
 from turing_machine.components.grid_cell import GridCell
 from turing_machine.components.grid_table import GridTable, Transition
-from langton_ant.langton_ant_grid import LangtonAntGrid
+from turing_machine.effects.lens import LensEffect
 from dirty_patch import install_dirty_patch
-import random
 import math
 
 class s4_1(Timeline):
@@ -756,3 +752,283 @@ class s4_3(Timeline):
             ))
         )
         self.forward(1)
+
+class s4_4(Timeline):
+    """
+    uv run janim run s4_ConcreteComparison.py s4_4 -i
+    """
+    def construct(self) -> None:
+        install_dirty_patch()
+        text_H = TypstMath("H").points.scale(1.5).r
+        text_use_finite_steps_calc = Text(
+            "可以用有限步骤进行计算",
+            font=local_font,
+            format="rich"
+        ).points.scale(1.5).r
+        Group(text_H, text_use_finite_steps_calc).points.arrange(RIGHT, buff=0.5).move_to(ORIGIN)
+        rec_finite_steps = SurroundingRect(
+            text_use_finite_steps_calc[0][3:7],
+            color=GREEN,
+            buff=0,
+            depth=10,
+        ).color.set(alpha=1).r
+        rec_finite_steps.points.set_height(rec_finite_steps.points.box.height * 1.2, stretch=True)
+        rec_calculate = SurroundingRect(
+            text_use_finite_steps_calc[0][9:],
+            color=RED,
+            buff=0,
+            depth=10,
+        ).color.set(alpha=1).r
+        rec_calculate.points.set_height(rec_calculate.points.box.height * 1.2, stretch=True)
+
+        self.play(Write(text_H))
+        self.play(Write(text_use_finite_steps_calc))
+        self.forward(1)
+        self.play(
+            Transform(
+                Rect(0.01, rec_finite_steps.points.box.height) \
+                    .points.move_to(rec_finite_steps.points.box.left).r,
+                rec_finite_steps,
+            ),
+            Transform(
+                Rect(0.01, rec_calculate.points.box.height) \
+                    .points.move_to(rec_calculate.points.box.left).r,
+                rec_calculate,
+            ),
+            lag_ratio=0.5
+        )
+        self.forward(2)
+        self.play(Uncreate(Group(
+            text_H,
+            text_use_finite_steps_calc,
+            rec_finite_steps,
+            rec_calculate,
+        )))
+        self.forward(2)
+
+        text_fastest = Text("增长最快数列", font=local_font).points.scale(1.5).r
+        text_no_fastest = Text("不存在增长最快数列", font=local_font).points.scale(1.5).r
+        rec_no_fastest = Rect(
+            text_no_fastest[0][0:3].points.box.width,
+            0.02,
+            color=RED,
+        ).points.move_to(text_no_fastest[0][0:3].points.box.bottom + DOWN * 0.05).r
+        formulas = [
+            "1", "alpha(n)", "log^(***)(n)", "log^(**)(n)", "log^*(n)", "log(log(log(log(n))))", "log(log(log(n)))", "log(log(n))", "sqrt(log(n))", "log(n)",
+            "(log(n))^2", "(log(n))^3", "e^(sqrt(log(n)))", "n^(1/log(log(n)))", "n^0.1", "sqrt(n)", "n/log(n)", "n", "n log(n)", "n (log(n))^2",
+            "n^1.5", "n^2", "n^3", "n^(log(log(n)))", "n^(log(n))", "e^(sqrt(n))", "n^(sqrt(n))", "e^(n/log(n))", "(sqrt(2))^n", "2^n",
+            "e^n", "3^n", "n!", "n^n", "product_(k=1)^n k^k", "n^(n^2)", "2^(2^n)", "3^(3^n)", "e^(e^n)", "2^(2^(2^n))",
+            "n^(n^n)", "n^(n^(n^n))", "2 arrow.t.double n", "3 arrow.t.double n", "n arrow.t.double n", "n arrow.t.double (n+1)", "2 arrow.t.triple n", "n arrow.t.triple n", "2 arrow.t^4 n", "n arrow.t^4 n",
+            "n arrow.t^5 n", "A(n, n)", "A(n, A(n, n))", "f_(omega+1)(n)", "f_(omega+2)(n)", "f_(omega dot 2)(n)", "f_(omega dot 3)(n)", "f_(omega^2)(n)", "f_(omega^3)(n)", "f_(omega^omega)(n)",
+            "n -> n -> n -> n", "n -> n -> n -> n -> 2", "n -> n -> n -> n -> 3", "n -> n -> n -> n -> n", "f_(omega^(omega^omega))(n)", "f_(epsilon_0)(n)", "G(n)", "f_(epsilon_0+1)(n)", "f_(epsilon_0+omega)(n)", "f_(epsilon_1)(n)",
+            "f_(epsilon_2)(n)", "f_(epsilon_omega)(n)", "f_(epsilon_(epsilon_0))(n)", "f_(zeta_0)(n)", "f_(eta_0)(n)", "f_(Gamma_0)(n)", "f_(Gamma_1)(n)", "f_(Gamma_(Gamma_0))(n)", "f_(\"LVO\")(n)", "f_(\"BHO\")(n)",
+            "\"TREE\"(n)", "f_(psi(Omega^(Omega^omega)))(n)", "\"SSCG\"(n)", "\"SCG\"(n)", "f_(psi_0(Omega_omega))(n)", "f_(psi_0(Omega_Omega))(n)",
+        ]
+        text_formulas = Group.from_iterable(
+            TypstMath(formula)
+            for formula in formulas
+        )
+        standard_width = text_no_fastest.points.box.width / 3 * 2
+        for t in text_formulas:
+            t.depth.set(10)
+            t.points.scale(standard_width / t.points.box.width).move_to(ORIGIN)
+            t.astype(VItem).color.set(color=GREY_A, alpha=0.2)
+            t.astype(VItem).stroke.set(alpha=0)
+        def get_formula_by_alpha(alpha: float):
+            plateau: Callable[[float, float], float] = lambda x, e: \
+                (t := max(0, min(1, x/e)))*t*(3-2*t) * (s := max(0, min(1, (1-x)/e)))*s*(3-2*s)
+            last_idx = len(formulas) - 1
+            idx = int(alpha * last_idx)
+            transparent_beta = plateau(alpha, 0.05) * 0.06
+            text_formulas[idx].astype(VItem).color.set(alpha=transparent_beta)
+            return text_formulas[idx]
+        text_2_pow_bb = TypstMath("2^\"BB\"(n)").points.scale(1.5).move_to(DOWN * 1).r
+        text_2_pow_bb_gt_bb = TypstMath("2^\"BB\"(n) > \"BB\"(n)").points.scale(1.5).move_to(DOWN * 1).r
+        video_bb = Video("resources/bb.mp4", depth=-10).points.scale(1.5).r
+
+        self.prepare(
+            ItemUpdater(
+                get_formula_by_alpha(0),
+                lambda p: get_formula_by_alpha(p.alpha),
+            ),
+            duration=16,
+            rate_func=linear,
+        )
+        self.play(FadeIn(text_fastest))
+        self.play(
+            TransformMatchingDiff(text_fastest, text_no_fastest),
+            Write(rec_no_fastest),
+            duration=1.5,
+        )
+        self.forward(2)
+        self.play(Write(text_2_pow_bb))
+        self.forward(1)
+        self.play(TransformMatchingDiff(text_2_pow_bb, text_2_pow_bb_gt_bb))
+        video_bb.start()
+        self.forward(2)
+        self.play(FadeIn(video_bb))
+        rec_no_fastest.hide()
+        text_no_fastest.hide()
+        text_2_pow_bb_gt_bb.hide()
+        self.forward(5)
+        self.play(FadeOut(video_bb))
+
+        class BBLine(Timeline):
+            def construct(self) -> None:
+                def window_num(nums: Iterable[int], k: int):
+                    return sorted(x + d for x in nums for d in range(-k, k + 1) if x + d > 0)
+                group_text_bbs = NamedGroup(
+                    **{
+                        f"{n}": TypstMath(f"\"BB\"({n})").points.scale(1.5).r
+                        for n in window_num([0, 15, 27, 744, 7918], k=20)
+                    }
+                ).points.arrange(DOWN, aligned_edge=LEFT, buff=0.25).to_border(LEFT + UP, buff=1).shift(RIGHT * 2).r
+                for t in group_text_bbs:
+                    t.astype(VItem).color.set(color=GREY_C)
+                group_text_bbs["15"].astype(VItem).color.set(color=WHITE)
+                group_text_bbs["27"].astype(VItem).color.set(color=WHITE)
+                group_text_bbs["744"].astype(VItem).color.set(color=WHITE)
+                group_text_bbs["7918"].astype(VItem).color.set(color=WHITE)
+                text_erdos = TypstText("- #block[Erdős $2^n$ 三进制猜想 \\ Stérin & Woods]").points.scale(1.3).r
+                text_goldbach = TypstText("- #block[Goldbach 猜想 \\ Aaronson 等]").points.scale(1.3).r
+                text_riemann = TypstText("- #block[Riemann 猜想 \\ Aaronson 等]").points.scale(1.3).r
+                text_ZFC_independent = TypstText("- #block[ZFC 独立性验证 \\ Yedidia & Aaronson]").points.scale(1.3).r
+                text_erdos.points.next_to(group_text_bbs["15"], RIGHT, aligned_edge=UP, buff=0.75)
+                text_goldbach.points.next_to(group_text_bbs["27"], RIGHT, aligned_edge=UP, buff=0.75)
+                text_riemann.points.next_to(group_text_bbs["744"], RIGHT, aligned_edge=UP, buff=0.75)
+                text_ZFC_independent.points.next_to(group_text_bbs["7918"], RIGHT, aligned_edge=UP, buff=0.75)
+                group_all_bbs = Group(
+                    group_text_bbs,
+                    text_erdos, text_goldbach, text_riemann, text_ZFC_independent,
+                )
+
+                self.play(FadeIn(group_text_bbs))
+                self.forward(1)
+                self.play(
+                    group_all_bbs.anim.points.shift(
+                        group_text_bbs["5"].points.box.left - group_text_bbs["15"].points.box.left
+                    ),
+                    duration=2,
+                )
+                self.forward(0.5)
+                self.play(
+                    group_all_bbs.anim.points.shift(
+                        group_text_bbs["15"].points.box.left - group_text_bbs["27"].points.box.left
+                    ),
+                    rate_func=ease_inout_cubic,
+                    duration=1.5,
+                )
+                self.forward(0.5)
+                self.play(
+                    group_all_bbs.anim.points.shift(
+                        group_text_bbs["27"].points.box.left - group_text_bbs["744"].points.box.left
+                    ),
+                    rate_func=ease_inout_cubic,
+                    duration=1,
+                )
+                self.forward(0.5)
+                self.play(
+                    group_all_bbs.anim.points.shift(
+                        group_text_bbs["744"].points.box.left - group_text_bbs["7918"].points.box.left
+                    ),
+                    rate_func=ease_inout_cubic,
+                    duration=1,
+                )
+                self.forward(2)
+                self.play(FadeOut(group_all_bbs))
+
+        timeline_bb_line = BBLine().build().to_item().show()
+        clip_bb_line = TransformableFrameClip(timeline_bb_line).show()
+        effect_bb_line = LensEffect(
+            clip_bb_line,
+            lens_strength=0.75,
+            lens_radius=1.75,
+        ).show()
+        self.forward(12)
+        self.forward(1)
+
+        class BBLine2(Timeline):
+            def construct(self) -> None:
+                w = 0.06
+                lh = 0.05
+                k = 8
+                lens = 8
+                pieces = 100
+                exp_map = lambda x: 1 - 1 / (1 + x) ** k
+                ratio = exp_map(6 / pieces)
+                rect_green = Rect(lens * ratio, w, color=GREEN, depth=-10)
+                rect_green.fill.set(alpha=1)
+                rect_green.stroke.set(alpha=0)
+                rect_red = Rect(lens * (1 - ratio), w, color=RED, depth=-10)
+                rect_red.fill.set(alpha=1)
+                rect_red.stroke.set(alpha=0)
+                rect_group = Group(rect_green, rect_red).points.arrange(RIGHT, buff=0).move_to(DOWN * 0.5).r
+                s1 = rect_group.points.box.left + UP * w / 2
+                s2 = rect_group.points.box.right + UP * w / 2
+                smid = rect_green.points.box.right + UP * w / 2
+                lines = Group.from_iterable(
+                    Line(
+                        start=s2 * p + (1 - p) * s1,
+                        end=s2 * p + (1 - p) * s1 + UP * lh,
+                        color=GREY_B,
+                        depth=10,
+                    ).radius.set(radius=0.01).r
+                    for p in exp_map(np.linspace(0, 1, pieces))
+                )
+                group_axes = Group(
+                    rect_group,
+                    lines,
+                )
+                triangle_pointer = Triangle()
+                triangle_pointer.points.rotate(PI).scale(0.1).move_to(s1, aligned_edge=DOWN)
+                triangle_pointer.radius.set(radius=0.01)
+                triangle_pointer.color.set(color=WHITE, alpha=1)
+                text_bb_x = TypstMath("")
+                text_quote = Text("对于不可言说之物，\n我们必须保持沉默。\n—— Ludwig Wittgenstein", font=local_font, depth=-20)
+                text_quote[1].points.next_to(text_quote[0], DOWN, aligned_edge=LEFT)
+                text_quote[2].points.scale(0.7).next_to(text_quote[1], DOWN, aligned_edge=RIGHT)
+                text_quote.points.scale(1.5).move_to(ORIGIN)
+
+                self.play(Write(group_axes))
+                self.forward(0.5)
+                self.play(Write(triangle_pointer))
+                self.play(
+                    DataUpdater(
+                        triangle_pointer,
+                        lambda item, p: item.points.move_to(smid * p.alpha + (1 - p.alpha) * s1, aligned_edge=DOWN)
+                    ),
+                    ItemUpdater(
+                        text_bb_x,
+                        lambda p: TypstMath(f"\"BB\"({int(p.alpha * 6 + 0.01)})") \
+                            .points.scale(0.75).next_to(triangle_pointer.current(), UP, buff=0.1).r
+                    ),
+                    duration=2,
+                    rate_func=ease_inout_cubic,
+                )
+                self.forward(2)
+                self.play(
+                    AnimGroup(
+                        rect_red.anim.points.set_height(20, stretch=True),
+                        rect_red.anim.points.set_width(20, stretch=True),
+                    ),
+                    rect_red.anim.color.set(BLUE_B),
+                    Write(text_quote),
+                    duration=3,
+                    lag_ratio=0.5,
+                )
+                self.forward(2)
+                
+
+        timeline_bb_line_2 = BBLine2().build().to_item().show()
+        clip_bb_line_2 = TransformableFrameClip(timeline_bb_line_2).show()
+        effect_bb_line_2 = LensEffect(
+            clip_bb_line_2,
+            lens_strength=0.85,
+            lens_radius=1.75,
+        ).show()
+        self.forward(9)
+        self.play(DataUpdater(
+            effect_bb_line_2,
+            lambda item, p: item.apply_uniforms_set(lens_strength=0.85 * (1 - p.alpha))
+        ))
+        self.forward(2)
