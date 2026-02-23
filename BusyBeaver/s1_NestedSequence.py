@@ -695,6 +695,9 @@ class s1_5(Timeline):
     """
     uv run janim run s1_NestedSequence.py s1_5 -i
     """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
     def construct(self):
         text_a1 = TypstMath("a_1 = 3 arrow.t 3").points.scale(2).r
         text_a1_a2 = TypstMath("a_1 = 3 arrow.t 3 quad a_2 = 3 arrow.t arrow.t 3").points.scale(1.7).r

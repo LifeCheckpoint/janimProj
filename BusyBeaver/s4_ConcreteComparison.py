@@ -149,7 +149,7 @@ class s4_1(Timeline):
             group_ges.add(t)
         group_ges.points.arrange(DOWN, buff=0.5, aligned_edge=LEFT).to_border(RIGHT)
         arxiv_bb27 = TypstDoc(get_typ_doc("arxiv_bb27")).points.scale(0.75).r
-        arxiv_bb27.points.move_to(LEFT * 6)
+        arxiv_bb27.points.move_to(LEFT * 7)
         group_arxiv_hl = Group(
             arxiv_bb27.get_label("par1"),
             arxiv_bb27.get_label("par2"),
@@ -167,7 +167,7 @@ class s4_1(Timeline):
             for txt in group_arxiv_hl
         )
         blog_riemann = TypstDoc(get_typ_doc("bb_744_blog")).points.scale(0.75).r
-        blog_riemann.points.move_to(LEFT * 6.5)
+        blog_riemann.points.move_to(LEFT * 7)
         group_riemann_hl = Group(
             blog_riemann.get_label("par1"),
             blog_riemann.get_label("par2"),
