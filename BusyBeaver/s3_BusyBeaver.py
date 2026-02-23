@@ -1486,14 +1486,6 @@ class s3_5(Timeline):
             aligned_edge=LEFT,
         ).next_to(text_4bbs, DOWN, aligned_edge=LEFT, buff=0.15)
 
-        seq_bb5 = Path("resources/bbs_track/BB5.txt").read_text(encoding="utf-8")
-        grid_bb5 = history_grid_gen(
-            seq_bb5,
-            square_size=0.01,
-            transpose=True,
-            max_per_line=100,
-        )
-
         self.play(
             Succession(*[
                 Succession(
@@ -1506,17 +1498,29 @@ class s3_5(Timeline):
 
         text_H5 = TypstMath("\"BB\"_5").points.scale(2).next_to(text_H1234[-1], DOWN, buff=3).r
         text_H5.astype(VItem).color.set(color=CYAN)
-        grid_bb5.points.scale(0.8).next_to(text_H5, DOWN, aligned_edge=LEFT, buff=0.5).r
+        img_bb5_grid = ImageItem("resources/bbs_track/bb5_grid.png")
+        target_height = Config.get.frame_height * 0.75 # type: ignore
+        img_bb5_grid.points.scale(target_height / img_bb5_grid.points.box.height)
+        img_bb5_grid.points.next_to(text_H5, DOWN, aligned_edge=LEFT, buff=0.5).r
         
         self.play(
             Write(text_H5),
             self.camera.anim.points.shift(DOWN * 9),
         )
         self.play(
-            Write(grid_bb5),
+            Write(img_bb5_grid),
+            duration=1,
+        )
+        self.camera.save_state()
+        self.play(
+            self.camera.anim.points.shift(RIGHT * 100),
+            duration=5,
+        )
+        self.forward(1)
+        self.play(
+            self.camera.anim.load_state(),
             duration=2,
         )
-        self.forward(2)
         
         axes = Axes(
             x_range=(0, 6),
@@ -1559,7 +1563,7 @@ class s3_5(Timeline):
             ],
             lag_ratio=0.2,
         )
-        grid_bb5.hide()
+        img_bb5_grid.hide()
         self.play(
             Write(dot1),
             Write(dot2),
