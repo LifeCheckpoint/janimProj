@@ -607,8 +607,9 @@ class s3_2(Timeline):
             Write(rect_bl1),
             Write(triangle_ant),
             lag_ratio=0.2,
+            duration=0.5,
         )
-        self.forward(1)
+        self.forward(0.5)
         self.play(
             Succession(
                 Rotate(triangle_ant, PI / 2),
@@ -616,13 +617,15 @@ class s3_2(Timeline):
             ),
             TransformMatchingShapes(rect_bl1, rect_wh1),
             lag_ratio=0.25,
+            duration=0.5,
         )
-        self.forward(1)
+        self.forward(0.5)
         self.play(
             rect_wh1.anim.points.shift(LEFT),
             triangle_ant.anim.points.shift(LEFT),
             Write(rect_wh2),
             Write(triangle_ant2),
+            duration=0.5,
         )
         self.forward(0.5)
         self.play(
@@ -635,6 +638,7 @@ class s3_2(Timeline):
             ),
             TransformMatchingShapes(rect_wh2, rect_bl2),
             lag_ratio=0.25,
+            duration=0.5,
         )
         self.forward(1)
         self.play(
