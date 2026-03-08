@@ -14,7 +14,6 @@ from turing_machine.turing_machine import TuringMachine
 from turing_machine.components.grid_cell import GridCell
 from langton_ant.langton_ant_grid import LangtonAntGrid
 from typst_dfa.typst_dfa import load_dfa_typst
-from dirty_patch import install_dirty_patch
 import random
 
 class s3_1(Timeline):
@@ -25,7 +24,7 @@ class s3_1(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         frame_width = cast(float, Config.get.frame_width)
         frame_height = cast(float, Config.get.frame_height)
 
@@ -525,7 +524,7 @@ class s3_2(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         text_state_5_steps = TypstText(
             "$overbrace(A quad B quad C quad D quad E, \"5 状态\") quad arrow.r quad$ #text(fill: aqua)[47176870] 步",
         ).points.scale(1.7).move_to(UP * 1.5).r
@@ -716,7 +715,7 @@ class s3_3(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         text_status_step = Text(
             "<c RED_B>状态</c>，与膨胀的<c BLUE_B>步数</c>",
             format="rich",
@@ -978,7 +977,7 @@ class s3_4(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         text_many_tms = TypstDoc(get_typ_doc("many_tms"), depth=10)
         text_many_tms.points.move_to(ORIGIN)
         set_0_to_399 = list(range(400))
@@ -1195,7 +1194,7 @@ class s3_5(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         def history_grid_gen(
             seq: str,
             square_size: float = 0.25,
@@ -1620,7 +1619,7 @@ class s3_6(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         bb6_rule = "1RB0LD_1RC0RF_1LC1LA_0LE1RZ_1LF0RB_0RC0RE"
         text_bb6_1 = Text(
             bb6_rule,

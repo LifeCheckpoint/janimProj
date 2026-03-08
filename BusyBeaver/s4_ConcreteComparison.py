@@ -8,7 +8,6 @@ from turing_machine.components.tape_cell import TapeCell
 from turing_machine.components.grid_cell import GridCell
 from turing_machine.components.grid_table import GridTable, Transition
 from turing_machine.effects.lens import LensEffect
-from dirty_patch import install_dirty_patch
 import math
 
 class s4_1(Timeline):
@@ -19,7 +18,7 @@ class s4_1(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         quest_6_sim = TypstMath("\"BB\"_6 approx").points.scale(1.5).move_to(ORIGIN).r
         quest_6_sim["\"BB\"_6"].astype(VItem).color.set(color=GREY_B)
         text_collatz = TypstDoc(get_typ_doc("collatz")).points.scale(1.5).next_to(quest_6_sim, RIGHT, buff=0.5).r
@@ -770,7 +769,7 @@ class s4_4(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        install_dirty_patch()
+        
         text_H = TypstMath("H").points.scale(1.5).r
         text_use_finite_steps_calc = Text(
             "可以用有限步骤进行计算",

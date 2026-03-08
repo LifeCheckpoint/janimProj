@@ -150,8 +150,8 @@ wheels = [
 
 [[package]]
 name = "janim"
-version = "4.0.0rc1"
-source = { git = "https://github.com/jkjkil4/JAnim#f57ea2cf2613c101f4dbb36f0ce21735cb7d658c" }
+version = "4.0.0rc3"
+source = { git = "https://github.com/jkjkil4/JAnim#638ef3fd523d9fa6363a14e52ddbd7b654610e20" }
 dependencies = [
     { name = "attrs" },
     { name = "colour" },
