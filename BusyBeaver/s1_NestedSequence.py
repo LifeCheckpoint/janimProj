@@ -507,6 +507,11 @@ class s1_4(Timeline):
         text_A_knuth_B = TypstMath("A arrow.t B").points.scale(2.5).r
         text_A_knuth_B_eq_A_pow_B = TypstMath("A arrow.t B = A^B").points.scale(2.5).r
         text_pow_2_nest_10_cpy = text_pow_2_nest_10.copy()
+        text_pow_2_nest_9_t_1 = TypstMath("2^underbrace(2^(2^(2^(2^(2^(2^(2^(2^2))))))), 9)").points.scale(2.5).r
+        text_pow_2_t_1 = TypstMath("2^(2 arrow.t arrow.t 9)").points.scale(2.5).r
+        text_pow_2_t_2 = TypstMath("2^(2^(2 arrow.t arrow.t 8))").points.scale(2.5).r
+        text_pow_2_t_3 = TypstMath("2^(2^(2^(2 arrow.t arrow.t 7)))").points.scale(2.5).r
+        text_pow_2_t_4 = TypstMath("2^(2^(2^(2^(2 arrow.t arrow.t 6))))").points.scale(2.5).r
         surround_10 = SurroundingRect(text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"])
         surround_2 = SurroundingRect(text_pow_2_nest_10_cpy["2"]).color.set(color=BLUE_A).r
         text_2_knuth_2nest_n_eq_pow_2_nest_n = TypstMath("2 arrow.t arrow.t n = underbrace(2^(2^(2^(dots.up ^ 2))), n)").points.scale(2.5).r
@@ -572,47 +577,93 @@ class s1_4(Timeline):
             FadeOut(text_A_knuth_B_eq_A_pow_B)
         )
         self.forward(1)
+
+        # fix 1 start
+        # self.play(Write(text_pow_2_nest_10_cpy))
+        # self.forward(1)
+        # self.play(Write(surround_10))
+        # self.forward(1.5)
+        # temp_pos_2nests = text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"].points.box.center
+        # self.play(
+        #     FadeOut(surround_10),
+        #     FadeOut(text_pow_2_nest_10_cpy["2"]),
+        #     FadeOut(text_pow_2_nest_10_cpy[10:13]),
+        #     text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"].anim.points.move_to(ORIGIN),
+        #     lag_ratio=0.4,
+        # )
+        # self.forward(1.5)
+        # self.play(
+        #     FadeIn(text_pow_2_nest_10_cpy["2"]),
+        #     FadeIn(text_pow_2_nest_10_cpy[10:13]),
+        #     text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"].anim.points.move_to(temp_pos_2nests),
+        # )
+        # self.play(Write(surround_2))
+        # self.forward(1.5)
+        # self.play(FadeOut(surround_2))
+        # self.play(TransformMatchingDiff(text_pow_2_nest_10_cpy, text_2_knuth_2nest_n_eq_pow_2_nest_n))
+        # self.forward(2)
+        # self.play(
+        #     FadeIn(text_2_knuth_2nest_n),
+        #     text_2_knuth_2nest_n_eq_pow_2_nest_n.anim.points.shift(UP * 1),
+        # )
+        # self.forward(1)
+        # self.play(
+        #     TransformMatchingDiff(
+        #         text_2_knuth_2nest_n,
+        #         text_2_knuth_2nest_n_explain,
+        #         path_arc=PI / 2,
+        #     ),
+        #     rate_func=smooth,
+        # )
+        # self.forward(2)
+        # self.play(
+        #     FadeOut(text_2_knuth_2nest_n_explain),
+        #     FadeOut(text_2_knuth_2nest_n_eq_pow_2_nest_n),
+        # )
+
         self.play(Write(text_pow_2_nest_10_cpy))
         self.forward(1)
-        self.play(Write(surround_10))
-        self.forward(1.5)
-        temp_pos_2nests = text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"].points.box.center
-        self.play(
-            FadeOut(surround_10),
-            FadeOut(text_pow_2_nest_10_cpy["2"]),
-            FadeOut(text_pow_2_nest_10_cpy[10:13]),
-            text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"].anim.points.move_to(ORIGIN),
-            lag_ratio=0.4,
-        )
-        self.forward(1.5)
-        self.play(
-            FadeIn(text_pow_2_nest_10_cpy["2"]),
-            FadeIn(text_pow_2_nest_10_cpy[10:13]),
-            text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"].anim.points.move_to(temp_pos_2nests),
-        )
-        self.play(Write(surround_2))
-        self.forward(1.5)
-        self.play(FadeOut(surround_2))
-        self.play(TransformMatchingDiff(text_pow_2_nest_10_cpy, text_2_knuth_2nest_n_eq_pow_2_nest_n))
-        self.forward(2)
-        self.play(
-            FadeIn(text_2_knuth_2nest_n),
-            text_2_knuth_2nest_n_eq_pow_2_nest_n.anim.points.shift(UP * 1),
-        )
+        self.play(TransformMatchingDiff(
+            text_pow_2_nest_10_cpy,
+            text_pow_2_t_1,
+        ))
         self.forward(1)
         self.play(
             TransformMatchingDiff(
-                text_2_knuth_2nest_n,
-                text_2_knuth_2nest_n_explain,
-                path_arc=PI / 2,
+                text_pow_2_t_1,
+                text_pow_2_t_2,
             ),
-            rate_func=smooth,
+            duration=0.75
         )
-        self.forward(2)
+        self.forward(0.75)
         self.play(
-            FadeOut(text_2_knuth_2nest_n_explain),
-            FadeOut(text_2_knuth_2nest_n_eq_pow_2_nest_n),
+            TransformMatchingDiff(
+                text_pow_2_t_2,
+                text_pow_2_t_3,
+            ),
+            duration=0.75
         )
+        self.forward(0.75)
+        self.play(
+            TransformMatchingDiff(
+                text_pow_2_t_3,
+                text_pow_2_t_4,
+            ),
+            duration=0.75
+        )
+        self.forward(0.75)
+        self.play(
+            TransformMatchingDiff(
+                text_pow_2_t_4,
+                text_2_knuth_2nest_n_eq_pow_2_nest_n,
+            ),
+            duration=0.75
+        )
+        self.forward(1.5)
+        self.play(FadeOut(text_2_knuth_2nest_n_eq_pow_2_nest_n))
+        self.forward(1)
+
+        # fix 1 end
 
         text_A_knuth_3nest_B = TypstMath("A arrow.t arrow.t arrow.t B").points.scale(2.5).r
         text_3_knuth_3nest_3 = TypstMath("3 arrow.t arrow.t arrow.t 3").points.scale(2.5).r
