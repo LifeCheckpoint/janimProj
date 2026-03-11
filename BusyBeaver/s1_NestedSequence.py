@@ -665,11 +665,27 @@ class s1_4(Timeline):
 
         # fix 1 end
 
-        text_A_knuth_3nest_B = TypstMath("A arrow.t arrow.t arrow.t B").points.scale(2.5).r
-        text_3_knuth_3nest_3 = TypstMath("3 arrow.t arrow.t arrow.t 3").points.scale(2.5).r
-        text_3_knuth_3nest_3_eq_3_2nest_2nest_3 = TypstMath("3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (3 arrow.t arrow.t 3)").points.scale(2.5).r
-        text_3_knuth_3nest_3_eq_3_2nest_7dot6 = TypstMath("3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (7625597484987)").points.scale(2.5).r
-        text_3_knuth_3nest_3_eq_3_count_n = TypstMath("3 arrow.t arrow.t arrow.t 3 = underbrace(3^(3^(3^(3^(3^(dots.up^(3)))))), #[#box[$7625597484987$] <num>])").points.scale(2.5).r
+        text_A_knuth_3nest_B = TypstMath(
+            "A arrow.t arrow.t arrow.t B"
+        ).points.scale(2.5).r
+        text_3_knuth_3nest_3 = TypstMath(
+            "3 arrow.t arrow.t arrow.t 3"
+        ).points.scale(2.5).r
+        text_3_knuth_3nest_3_eq_3_2nest_2nest_3 = TypstMath(
+            "3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (3 arrow.t arrow.t 3)"
+        ).points.scale(2.5).r
+        text_3_knuth_3nest_3_eq_3_2nest_333 = TypstMath(
+            "3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (3^(3^3))"
+        ).points.scale(2.5).r
+        text_3_knuth_3nest_3_eq_3_2nest_27 = TypstMath(
+            "3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (3^(27))"
+        ).points.scale(2.5).r
+        text_3_knuth_3nest_3_eq_3_2nest_7dot6 = TypstMath(
+            "3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (7625597484987)"
+        ).points.scale(2.5).r
+        text_3_knuth_3nest_3_eq_3_count_n = TypstMath(
+            "3 arrow.t arrow.t arrow.t 3 = underbrace(3^(3^(3^(3^(3^(dots.up^(3)))))), #[#box[$7625597484987$] <num>])"
+        ).points.scale(2.5).r
         text_3_knuth_3nest_3_eq_3_2nest_7dot6["7625597484987"].astype(VItem).color.set(color=RED_A)
         text_3_knuth_3nest_3_eq_3_count_n.get_label("num").astype(VItem).color.set(color=RED_A)
         pow_tower_len = 200
@@ -707,7 +723,24 @@ class s1_4(Timeline):
         self.play(
             TransformMatchingDiff(
                 text_3_knuth_3nest_3_eq_3_2nest_2nest_3,
+                text_3_knuth_3nest_3_eq_3_2nest_333,
+                path_arc=PI / 2,
+            ),
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_3_knuth_3nest_3_eq_3_2nest_333,
+                text_3_knuth_3nest_3_eq_3_2nest_27,
+                path_arc=PI / 2,
+            ),
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_3_knuth_3nest_3_eq_3_2nest_27,
                 text_3_knuth_3nest_3_eq_3_2nest_7dot6,
+                path_arc=PI / 2,
             ),
         )
         self.forward(1)
@@ -720,25 +753,25 @@ class s1_4(Timeline):
         )
         self.forward(1.5)
         self.play(
-            TransformMatchingDiff(
-                text_3_knuth_3nest_3_eq_3_count_n,
-                text_3_knuth_3nest_3_eq_3_pow_nearest_inf,
+            Succession(
+                FadeOut(text_3_knuth_3nest_3_eq_3_count_n),
+                FadeIn(text_3_knuth_3nest_3_eq_3_pow_nearest_inf),
                 duration=1,
             ),
             DataUpdater(
                 self.camera,
                 lambda item, p: item.points.scale(1 - 0.5 * p.alpha) \
-                                    .move_to((UP * 30 + RIGHT * 55) * p.alpha),
-                at=0.25,
-                rate_func=ease_inout_expo,
-                duration=1.5,
+                                    .move_to((UP * 40 + RIGHT * 72) * p.alpha),
+                at=1.5,
+                rate_func=ease_in_circ,
+                duration=4.5,
             ),
             FadeOut(
                 text_3_knuth_3nest_3_eq_3_pow_nearest_inf,
-                at=0.8,
-                duration=1,
+                at=5.5,
+                duration=0.5,
             ),
-            duration=4,
+            duration=6,
         )
         self.forward(2)
 
