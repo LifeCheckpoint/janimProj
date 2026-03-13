@@ -196,7 +196,7 @@ class TuringMachine(Group):
             FadeOut(self.transform, duration=duration)
         )
         
-    def step(self, duration: float = 1.0):
+    def step(self, duration: float = 1.0, tape_shift_ratefunc: Optional[Callable[[float], float]] = None):
         """
         执行一步图灵机操作并返回动画序列
 
@@ -216,6 +216,9 @@ class TuringMachine(Group):
             anim_tape_shift: Animation | None = None
             anim_counter_update: Animation | None = None
             anim_pointer_text_update: Animation | None = None
+
+            # 元数据
+            shift_vect: np.ndarray | None = None
 
             def __repr__(self) -> str:
                 return "<TuringMachineStepAnim>"
@@ -245,6 +248,9 @@ class TuringMachine(Group):
                         else:
                             timeline.play(anim, duration=duration)
                         after_step_idx(i)
+
+        if not tape_shift_ratefunc:
+            tape_shift_ratefunc = ease_inout_cubic
 
         pre_info = self.core.current_info
         self.core.step()
@@ -310,17 +316,21 @@ class TuringMachine(Group):
             # 纸带移动动画
             direction = pre_info.transition_applied.direction
             if direction == "R":
-                shift_tape_anim = self.tape_item.tape_shift_left(duration=duration * 2)
+                shift_tape_anim = self.tape_item.tape_shift_left(duration=duration * 2, rate_func=tape_shift_ratefunc)
+                shift_vect = RIGHT * self.tape_item.cells_group[0].points.box.width
             elif direction == "L":
-                shift_tape_anim = self.tape_item.tape_shift_right(duration=duration * 2)
+                shift_tape_anim = self.tape_item.tape_shift_right(duration=duration * 2, rate_func=tape_shift_ratefunc)
+                shift_vect = LEFT * self.tape_item.cells_group[0].points.box.width
             else:
                 shift_tape_anim = AnimGroup()
+                shift_vect = ORIGIN
 
             anims.anim_tape_shift = Succession(
                 FadeOut(self.framebox, duration=duration / 4),
                 shift_tape_anim,
                 FadeIn(self.framebox, duration=duration / 4),
             )
+            anims.shift_vect = shift_vect
 
         # 更新计数器
         anims.anim_counter_update = self.counter.anim_set_value(self.core._step_count, duration=duration)

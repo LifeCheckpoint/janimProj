@@ -499,7 +499,7 @@ class s2_2(Timeline):
             Write(tm_aplusb.tape_item),
             Write(tm_aplusb.framebox),
             Write(tm_aplusb.table),
-            Write(tm_aplusb.counter),
+            # Write(tm_aplusb.counter),
             self.camera.anim.points.shift(UP * 0.5),
             Write(text_algo_addition),
             Write(dfa_aplusb),
@@ -533,9 +533,27 @@ class s2_2(Timeline):
             FadeOut(brace_3_1_text),
             FadeOut(brace_2_1),
             FadeOut(brace_2_1_text),
+            dfa_aplusb.anim.points.shift(UP * 1.5 + RIGHT * 1.5),
+            self.camera.anim.points.shift(RIGHT * 1.5),
+            text_algo_addition.anim.points.shift(RIGHT * 1.5),
+            tm_aplusb.table.anim.points.shift(RIGHT * 1.5),
         )
         for i in range(11):
-            tm_aplusb.step(duration=0.2).run_step_anim(self, compress=True)
+            def relative_moving(idx: int, shift_vect: np.ndarray | None):
+                if idx == 4:
+                    shift_vect = -shift_vect if shift_vect is not None else ORIGIN
+                    # 相对移动
+                    self.prepare(
+                        self.camera.anim.points.shift(shift_vect),
+                        tm_aplusb.table.anim.points.shift(shift_vect),
+                        dfa_aplusb.anim.points.shift(shift_vect),
+                        text_algo_addition.anim.points.shift(shift_vect),
+                        duration=0.16,
+                        at=0.02,
+                    )
+
+            tu_anims = tm_aplusb.step(duration=0.2, tape_shift_ratefunc=linear)
+            tu_anims.run_step_anim(self, compress=True, after_step_idx=lambda idx: relative_moving(idx, tu_anims.shift_vect))
             self.forward(0.25)
         self.play(
             Write(brace_5_1),
@@ -547,7 +565,7 @@ class s2_2(Timeline):
                 tm_aplusb.tape_item,
                 tm_aplusb.framebox,
                 tm_aplusb.table,
-                tm_aplusb.counter,
+                # tm_aplusb.counter,
                 text_algo_addition,
                 dfa_aplusb,
                 brace_5_1,

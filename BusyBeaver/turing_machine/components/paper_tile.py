@@ -203,7 +203,7 @@ class InfinityTapeItem(Group):
             Do(update_text_ref)
         )
 
-    def tape_shift_right(self, duration: float = 1.0) -> Succession:
+    def tape_shift_right(self, duration: float = 1.0, rate_func: Callable[[float], float] = ease_inout_cubic) -> Succession:
         """
         将格子整体向右移动一个位置
         """
@@ -254,12 +254,12 @@ class InfinityTapeItem(Group):
                 self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
                 self.cells_group[self.showcase_radius - 1].anim.points.scale(self.center_scaling), # type: ignore
                 duration=duration,
-                rate_func=ease_inout_cubic,
+                rate_func=rate_func,
             ),
             Do(update_refs),
         )
     
-    def tape_shift_left(self, duration: float = 1.0) -> Succession:
+    def tape_shift_left(self, duration: float = 1.0, rate_func: Callable[[float], float] = ease_inout_cubic) -> Succession:
         """
         将格子整体向左移动一个位置
         """
@@ -309,7 +309,7 @@ class InfinityTapeItem(Group):
                 self.cells_group[self.showcase_radius].anim.points.scale(1 / self.center_scaling), # type: ignore
                 self.cells_group[self.showcase_radius + 1].anim.points.scale(self.center_scaling), # type: ignore
                 duration=duration,
-                rate_func=ease_inout_cubic,
+                rate_func=rate_func,
             ),
             Do(update_refs),
         )
