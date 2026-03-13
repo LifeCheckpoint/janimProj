@@ -260,6 +260,10 @@ class s2_1(Timeline):
             ),
             depth=-60,
         ).points.shift(UP * 1).r
+        rec_grid_A0 = SurroundingRect(
+            grid_new[("A", "0")],
+            depth=-60
+        ).points.shift(UP * 1).r
         rec_grid_row2 = SurroundingRect(
             Group(
                 grid_new[("A", "1")],
@@ -367,10 +371,16 @@ class s2_1(Timeline):
                         if idx == 1: self.prepare(
                             Write(rec_grid_row1),
                         )
-                        if idx == 3: self.prepare(
-                            Transform(rec_grid_row1, rec_grid_row2),
+                        if idx == 5: self.prepare(
+                            Transform(rec_grid_row1, rec_grid_A0),
                         )
                     tm.step(duration=0.5).run_step_anim(self, case11ops)
+                case 12:
+                    def case12ops(idx):
+                        if idx == 5: self.prepare(
+                            Transform(rec_grid_A0, rec_grid_row2),
+                        )
+                    tm.step(duration=0.5).run_step_anim(self, case12ops)
                     self.prepare(
                         Succession(
                             Wait(1.5),
