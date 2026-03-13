@@ -450,6 +450,7 @@ class s2_2(Timeline):
         )
         tm_aplusb.counter.points.shift(RIGHT * 0.25 + UP * 0.25)
         tm_aplusb.is_table_shown = True
+        tm_aplusb.is_counter_shown = True
         brace_3_1 = Brace(tm_aplusb.tape_item.cells_group[20:23], DOWN, buff=0)
         brace_3_1_text = brace_3_1.points.create_text("a=3").points.shift(UP * 0.1).r
         brace_2_1 = Brace(tm_aplusb.tape_item.cells_group[24:26], DOWN, buff=0)
@@ -499,7 +500,7 @@ class s2_2(Timeline):
             Write(tm_aplusb.tape_item),
             Write(tm_aplusb.framebox),
             Write(tm_aplusb.table),
-            # Write(tm_aplusb.counter),
+            Write(tm_aplusb.counter),
             self.camera.anim.points.shift(UP * 0.5),
             Write(text_algo_addition),
             Write(dfa_aplusb),
@@ -565,7 +566,7 @@ class s2_2(Timeline):
                 tm_aplusb.tape_item,
                 tm_aplusb.framebox,
                 tm_aplusb.table,
-                # tm_aplusb.counter,
+                tm_aplusb.counter,
                 text_algo_addition,
                 dfa_aplusb,
                 brace_5_1,
@@ -663,6 +664,26 @@ class s2_4(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
+        def relative_moving(
+            idx: int,
+            shift_vect: np.ndarray | None,
+            moving_things: list[Item],
+            timeline: Timeline,
+            full_duration: float,
+            at_and_end: float,
+        ):
+            if idx == 4:
+                shift_vect = -shift_vect if shift_vect is not None else ORIGIN
+                # 相对移动
+                timeline.prepare(
+                    *[
+                        thing.astype(VItem).anim.points.shift(shift_vect)
+                        for thing in moving_things
+                    ],
+                    duration=full_duration - 2 * at_and_end,
+                    at=at_and_end,
+                )
+
         # 不同子 Timeline 演示不同内容
         class TMFinal(Timeline):
             CONFIG = Config(
@@ -696,6 +717,7 @@ class s2_4(Timeline):
                     counter_config={"max_value": 3},
                 )
                 tm.is_table_shown = True
+                tm.is_counter_shown = True
                 
                 self.play(
                     Write(text_final),
@@ -706,7 +728,23 @@ class s2_4(Timeline):
                 )
                 self.forward(1)
                 for _ in range(3):
-                    tm.step(duration=0.25).run_step_anim(self, compress=True)
+                    tm_anim = tm.step(duration=0.25, tape_shift_ratefunc=linear)
+                    tm_anim.run_step_anim(
+                        self,
+                        compress=True,
+                        after_step_idx=lambda idx: relative_moving(
+                            idx, tm_anim.shift_vect,
+                            moving_things=[
+                                self.camera,
+                                text_final,
+                                tm.table,
+                                dfa,
+                            ],
+                            timeline=self,
+                            full_duration=0.25,
+                            at_and_end=0.025,
+                        )
+                    )
                     self.forward(0.5)
                 self.forward(1)
                 self.play(FadeOut(tm.counter))
@@ -744,6 +782,7 @@ class s2_4(Timeline):
                     counter_config={"max_value": 100000},
                 )
                 tm.is_table_shown = True
+                tm.is_counter_shown = True
                 
                 self.play(
                     Write(text_loop),
@@ -754,7 +793,23 @@ class s2_4(Timeline):
                 )
                 self.forward(1)
                 for idx in range(15):
-                    tm.step(duration=0.25).run_step_anim(self, compress=True)
+                    tm_anim = tm.step(duration=0.25, tape_shift_ratefunc=linear)
+                    tm_anim.run_step_anim(
+                        self,
+                        compress=True,
+                        after_step_idx=lambda idx: relative_moving(
+                            idx, tm_anim.shift_vect,
+                            moving_things=[
+                                self.camera,
+                                text_loop,
+                                tm.table,
+                                dfa,
+                            ],
+                            timeline=self,
+                            full_duration=0.25,
+                            at_and_end=0.025,
+                        )
+                    )
                     if idx == 4:
                         tm.is_counter_shown = False
                         self.play(FadeOut(tm.counter))
@@ -802,8 +857,24 @@ class s2_4(Timeline):
                     Write(tm.table),
                 )
                 self.forward(1)
-                for _ in range(20):
-                    tm.step(duration=0.25).run_step_anim(self, compress=True)
+                for run_step in range(20):
+                    tm_anim = tm.step(duration=0.25, tape_shift_ratefunc=linear)
+                    tm_anim.run_step_anim(
+                        self,
+                        compress=True,
+                        after_step_idx=(lambda idx: relative_moving(
+                            idx, tm_anim.shift_vect,
+                            moving_things=[
+                                self.camera,
+                                text_infinite,
+                                tm.table,
+                                dfa,
+                            ],
+                            timeline=self,
+                            full_duration=0.25,
+                            at_and_end=0.025,
+                        )) if run_step <= 2 else lambda idx: None
+                    )
                     self.forward(0.5)
                 self.forward(30)
 
