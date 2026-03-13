@@ -234,9 +234,9 @@ class TuringMachine(Group):
                     self.anim_table_cancel_highlight,
                     self.anim_table_highlight,
                     self.anim_update_tape_object,
+                    self.anim_pointer_text_update,
                     self.anim_tape_shift,
                     self.anim_counter_update if machine_self.is_counter_shown else None,
-                    self.anim_pointer_text_update,
                 ]
                 for i, anim in enumerate(anims):
                     if anim:
