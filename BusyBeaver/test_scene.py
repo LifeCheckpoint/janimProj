@@ -767,13 +767,16 @@ class TestMatching1(Timeline):
     uv run janim run test_scene.py TestMatching1 -i
     """
     def construct(self):
-        t = TypstText("运行步数 $\"steps\">= 2f(n)$")
-        t.points.scale(1.25).move_to(DOWN * 3)
+        t = TypstMath(
+            "a_1 = 3 arrow.t 3 quad a_2 = "
+            "3 arrow.t arrow.t 3 quad a_3 = "
+            "3 arrow.t arrow.t arrow.t 3quad ... quad a_n = "
+            "3 underbrace(arrow.t ... arrow.t, n) 3"
+        ).points.scale(1.3).r
         t.show()
 
         def try_match(x: str):
             t[x]
 
-        try_match("运行步数")
-        try_match("$\"steps\">= 2f(n)$")
-        try_match("运行步数 $\"steps\">= 2f(n)$")
+        try_match("a_n")
+        try_match("underbrace(arrow.t ... arrow.t, n)")
