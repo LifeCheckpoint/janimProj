@@ -41,7 +41,7 @@ class TapeCell(Group):
         self.center = center
         self.index_ = index
 
-        self._build_tiles()
+        self._build_tiles(tile_data)
 
         self.glowing_effect = ChromaticEffect(
             self.frame, self.word,
@@ -50,15 +50,21 @@ class TapeCell(Group):
             intensity=0.0,
         )
 
-    def _build_tiles(self):
+    def _build_tiles(self, tile_data: None | str):
         """
         构建纸带方格组件
         """
+        if tile_data is not None and tile_data == "0":
+            frame_color = "#2F334A"
+        elif tile_data is not None and tile_data == "1":
+            frame_color = "#3C4385"
+        else:
+            frame_color = "#262628"
         self.frame = RoundedRect(
             self.square_size,
             self.square_size,
             corner_radius=0.1,
-            fill_color="#1E2130",
+            fill_color=frame_color,
             fill_alpha=1,
             stroke_color=self.line_color,
         )
@@ -116,6 +122,13 @@ class TapeCell(Group):
         ).points.scale(self.text_scaling * center_scaling * extra_text_scaling).r \
          .points.move_to(self.word).r
         
+        if value is not None and value == "0":
+            frame_color = "#2F334A"
+        elif value is not None and value == "1":
+            frame_color = "#3B46A4"
+        else:
+            frame_color = "#262628"
+        
         return Succession(
             DataUpdater(
                 self.frame,
@@ -123,10 +136,13 @@ class TapeCell(Group):
                 duration=glow_time,
             ),
             Wait(wait_time),
-            Transform(
-                self.word,
-                new_word,
-                duration=transform_time,
+            AnimGroup(
+                TransformMatchingDiff(
+                    self.word,
+                    new_word,
+                    duration=transform_time,
+                ),
+                self.frame.anim.fill.set(color=frame_color),
             ),
             Wait(wait_time),
             DataUpdater(
