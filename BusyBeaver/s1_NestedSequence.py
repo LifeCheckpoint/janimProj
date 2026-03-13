@@ -786,7 +786,7 @@ class s1_5(Timeline):
         text_a1 = TypstMath("a_1 = 3 arrow.t 3").points.scale(2).r
         text_a1_a2 = TypstMath("a_1 = 3 arrow.t 3 quad a_2 = 3 arrow.t arrow.t 3").points.scale(1.7).r
         text_a1_a3 = TypstMath("a_1 = 3 arrow.t 3 quad a_2 = 3 arrow.t arrow.t 3 quad a_3 = 3 arrow.t arrow.t arrow.t 3").points.scale(1.4).r
-        text_a1_an = TypstMath("a_1 = 3 arrow.t 3 quad a_2 = 3 arrow.t arrow.t 3 quad a_3 = 3 arrow.t arrow.t arrow.t 3quad ... quad a_n = 3 underbrace(arrow.t ... arrow.t, n) 3").points.scale(1.1).r
+        text_a1_an = TypstMath("a_1 = 3 arrow.t 3 quad a_2 = 3 arrow.t arrow.t 3 quad a_3 = 3 arrow.t arrow.t arrow.t 3quad ... quad a_n = 3 underbrace(arrow.t ... arrow.t, n) 3").points.scale(1.2).r
         for t in [text_a1, text_a1_a2, text_a1_a3, text_a1_an]:
             t["a_1"].astype(VItem).color.set(color="#C5F0F1")
             t["arrow.t", ...].astype(VItem).color.set(color="#FFB6B6")
@@ -830,24 +830,24 @@ class s1_5(Timeline):
         )
         self.forward(1.5)
         self.play(
-            text_a1_an.anim.points.shift(UP * 2),
-            Write(text_ackermann_function.get_label("intro").points.shift(DOWN * 0.5).r),
+            text_a1_an.anim.points.shift(UP * 1),
+            Write(text_ackermann_function.get_label("intro").points.shift(DOWN * 1.5).r),
         )
         self.forward(2)
         self.play(
-            Write(text_ackermann_function.get_label("calc"))
+            Write(text_ackermann_function.get_label("calc").points.shift(DOWN * 0.5).r)
         )
         self.forward(2)
-        self.play(
-            Succession(
-                text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0.5),
-                text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0),
-                text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0.5),
-                text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0),
-                duration=2,
-            )
-        )
-        self.forward(2)
+        # self.play(
+        #     Succession(
+        #         text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0.5),
+        #         text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0),
+        #         text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0.5),
+        #         text_ackermann_function.get_label("GDef").anim.astype(VItem).glow.set(color=WHITE, alpha=0),
+        #         duration=2,
+        #     )
+        # )
+        # self.forward(2)
         self.play(
             FadeOut(text_a1_an),
             FadeOut(text_ackermann_function)

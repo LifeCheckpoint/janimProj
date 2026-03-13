@@ -5,7 +5,7 @@
     #[
       #show math.equation: set align(left)
       #show math.equation: set block(inset: (left: 0em))
-      #text(fill: color.rgb("#FFB6B6"))[Ackermann 函数] (Ackermann function)
+      #text(fill: color.rgb("#FFB6B6"))[Ackermann 函数]
 
       $ A(m, n) = cases(
           n+1 quad & m = 0,
@@ -13,8 +13,6 @@
           A(m-1\, A(m\, n-1)) quad & m>0\, n>0
       ) $
     ]
-
-    对于足够大的 $m, n$，$A(m,n)>>underbrace(m^m^dots.up^m,n 个)$
   ] <intro>
 
   #colbreak()
@@ -25,7 +23,7 @@
       align: center + horizon,
       inset: (x: 1.0em, y: 0.2em),
       rows: 2em,
-      stroke: white,
+      stroke: none,
 
       [$ g_1 = 3 arrow.t arrow.t arrow.t arrow.t 3 = 3 arrow.t^4 3 $ ],
       [$ g_2 = 3 arrow.t^(g_1) 3 $],
