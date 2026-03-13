@@ -83,6 +83,7 @@ class s2_1(Timeline):
                                                 .fill.set(color="#FFDDCF").r
         )
         surrounding_group_heading_cpy = surrounding_group_heading.copy()
+        surrounding_group_heading_cpy = surrounding_group_heading_cpy[:-2]
         surrounding_rect_table = SurroundingRect(tm.table, buff=0.2, depth=-20)
         surrounding_rect_table.color.set(color=BLUE_A)
         surrounding_rect_table.glow.set(color=BLUE_A, alpha=0.5)
