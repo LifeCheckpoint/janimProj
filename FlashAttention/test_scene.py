@@ -5,6 +5,7 @@ with reloads():
     from components.utils import get_typ_doc
     from components.grid_matrix import create_grid_matrix_cell
     from components.memory_bar import MemoryBar
+    from components.stride_background import create_stride_background
 
 class TestGridMatrixCell(Timeline):
     CONFIG = Config(
@@ -48,4 +49,22 @@ class TestMemoryBar(Timeline):
         )
         self.forward(1)
         self.play(FadeOut(memory_bar.item))
+        self.forward(1)
+
+class TestStrideBackground(Timeline):
+    CONFIG = Config(
+        background_color=Color(FAColor.background)
+    )
+    def construct(self) -> None:
+        stripes, mask = create_stride_background(
+            width=6.0,
+            height=3.0,
+            gap=0.3,
+        )
+        text = TypstText("显存")
+        text.points.scale(1.5).next_to(mask, DOWN, buff=0.5)
+
+        self.play(Write(stripes), Write(text))
+        self.forward(2)
+        self.play(FadeOut(stripes), FadeOut(text))
         self.forward(1)
