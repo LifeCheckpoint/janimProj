@@ -45,7 +45,7 @@ def render(task):
     return (file, scene, r.returncode)
 
 if __name__ == "__main__":
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         results = list(pool.map(render, TASKS))
     failed = [f"{f} {s}" for f, s, rc in results if rc != 0]
     print(f"\n全部完成: {len(results) - len(failed)}/{len(results)} 成功")
