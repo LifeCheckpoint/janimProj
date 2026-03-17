@@ -12,9 +12,11 @@ class FAColor:
     - 1 个结构色 5%
     - 1 个警示色 5%
     """
-    background: str = "#282C34"
+    background_dark: str = "#282C34"
+    background_light: str = "#FDF6E3"
 
-    light_text: str = "#F5EFEB"
+    light_text: str = "#FDF6E3"
+    dark_text: str = "#2C2325"
 
     c_bohe_cyan: str = "#56B6C2"
     c_huibai_gray: str = "#ABB2BF"
@@ -26,9 +28,12 @@ class FAColor:
     c_xiangyu_perple: str = "#C678DD"
     c_yinghua_pink: str = "#E5989B"
 
-    query_fill: str = "#B2D1D6"
-    key_fill: str = "#FF917A"
-    value_fill: str = "#FCC439"
+    query_fill: str = c_wumai_blue
+    query_fill_highlight: str = "#CEE7EA"
+    key_fill: str = c_shanhu_red
+    key_fill_highlight: str = "#FFE0D9"
+    value_fill: str = c_luori_orange
+    value_fill_highlight: str = "#FDF1D0"
     mask_fill: str = "#86CDB2"
 
     highlight_fill: str = c_shanhu_red
@@ -37,7 +42,7 @@ class FAColor:
     comment_fill: str = c_shuweicao_green
     rect_important_stroke: str = c_maisui_yellow
 
-    memory_bar_fill_start: str = GREEN_A
-    memory_bar_fill_end: str = c_shanhu_red
+    memory_bar_fill_start: str = GREEN_B
+    memory_bar_fill_end: str = c_luori_orange
     memory_bar_fill_overflow: str = RED
     memory_bar_bg_fill: str = c_wumai_blue

@@ -1,5 +1,6 @@
 from janim.imports import * # type: ignore
 from typing import cast
+from .colors import FAColor
 
 def create_grid_matrix_cell(
     value: str,
@@ -72,4 +73,83 @@ def get_cells_at(grid_matrix: Group[Group], cols: int, row_range: tuple[int, int
             cells.add(cell)
     return cells
 
+
+def create_grid_query(
+    rows: int,
+    cols: int,
+    names: Callable[[int, int], str] = lambda row, col: f"Q_({row}, {col})",
+    buff: float = 0,
+):
+    return create_grid_matrix(
+        rows=rows,
+        cols=cols,
+        create_cell_fn_by_2d=lambda row, col: create_grid_matrix_cell(
+            names(row, col),
+            text_scaling=1.1,
+            fill=FAColor.query_fill,
+            stroke=WHITE,
+            text_color=FAColor.dark_text,
+        ),
+        buff=buff,
+    )
+
+
+def create_grid_key(
+    rows: int,
+    cols: int,
+    names: Callable[[int, int], str] = lambda row, col: f"K_({row}, {col})",
+    buff: float = 0,
+):
+    return create_grid_matrix(
+        rows=rows,
+        cols=cols,
+        create_cell_fn_by_2d=lambda row, col: create_grid_matrix_cell(
+            names(row, col),
+            text_scaling=1.1,
+            fill=FAColor.key_fill,
+            stroke=WHITE,
+            text_color=FAColor.dark_text,
+        ),
+        buff=buff,
+    )
+
+
+def create_grid_value(
+    rows: int,
+    cols: int,
+    names: Callable[[int, int], str] = lambda row, col: f"V_({row}, {col})",
+    buff: float = 0,
+):
+    return create_grid_matrix(
+        rows=rows,
+        cols=cols,
+        create_cell_fn_by_2d=lambda row, col: create_grid_matrix_cell(
+            names(row, col),
+            text_scaling=1.1,
+            fill=FAColor.value_fill,
+            stroke=WHITE,
+            text_color=FAColor.dark_text,
+        ),
+        buff=buff,
+    )
+
+
+def create_grid_mask(
+    rows: int,
+    cols: int,
+    names: Callable[[int, int], str] = lambda row, col: f"M_({row}, {col})",
+    buff: float = 0,
+):
+    return create_grid_matrix(
+        rows=rows,
+        cols=cols,
+        create_cell_fn_by_2d=lambda row, col: create_grid_matrix_cell(
+            names(row, col),
+            text_scaling=1.1,
+            fill=FAColor.mask_fill,
+            stroke=WHITE,
+            text_color=FAColor.dark_text,
+        ),
+        buff=buff,
+    )
 

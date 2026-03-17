@@ -21,6 +21,7 @@ class MemoryBar:
         height: float = 0.1,
         value: float = 0.0,
         tip_text: str = "GPU 显存占用量",
+        text_color: str = FAColor.dark_text,
         overflow_max: float = 1.2,
     ):
         self.item = Group()
@@ -77,7 +78,7 @@ class MemoryBar:
                             FAColor.memory_bar_fill_end,
                             FAColor.memory_bar_fill_overflow
                         ]
-                    )(cur_val),
+                    )((cur_val - 1) / (overflow_max - 1)),
                     alpha=ref_alpha,
                 )
         
@@ -117,7 +118,7 @@ class MemoryBar:
             stat_text.points.scale(0.9)
             stat_text.points.next_to(self.triangle.current(), DOWN, buff=0.1)
             ref_alpha = self.triangle.current().fill.get()[0][-1]
-            stat_text.astype(VItem).fill.set(alpha=ref_alpha)
+            stat_text.astype(VItem).fill.set(color=text_color, alpha=ref_alpha)
 
             # 继承显隐
             if p:
@@ -146,5 +147,6 @@ class MemoryBar:
         
         self.tip = TypstText(tip_text)
         self.tip.points.next_to(self.bg, UP, aligned_edge=LEFT, buff=0.1)
+        self.tip.astype(VItem).color.set(text_color)
 
         self.item.add(self.bg, self.bar, self.triangle, self.stat_text, self.tip)

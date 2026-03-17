@@ -5,7 +5,7 @@ def create_stride_background(
     width: float = 3.0,
     height: float = 3.0,
     color_1: str = FAColor.c_wumai_blue,
-    color_2: str = FAColor.background,
+    color_2: str = FAColor.background_dark,
     angle: float = PI / 6,
     gap: float = 0.5,
 ):

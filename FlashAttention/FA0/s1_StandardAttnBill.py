@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 class s1_1(Timeline):
     CONFIG = Config(
-        background_color=Color(FAColor.background),
+        background_color=Color(FAColor.background_dark),
         typst_shared_preamble=get_typ_doc("preamble"),
     )
     def construct(self) -> None:
