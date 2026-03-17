@@ -153,3 +153,28 @@ def create_grid_mask(
         buff=buff,
     )
 
+
+def transform_group(group: Group, cols: int):
+    """
+    转置
+    """
+    rows = len(group) // cols
+    res = []
+    for i in range(rows):
+        res.extend(group[i::rows])
+    return Group.from_iterable(res)
+
+def wave_reorder(arr: Group, rows=None, cols=None):
+    if rows is None or cols is None:
+        rows = int(math.sqrt(len(arr)))
+        cols = len(arr) // rows
+    res = []
+    for s in range(rows + cols - 1):
+        max_r = min(s, rows - 1)
+        min_r = max(0, s - cols + 1)
+        
+        for r in range(max_r, min_r - 1, -1):
+            c = s - r
+            res.append(arr[r * cols + c])
+            
+    return Group.from_iterable(res)

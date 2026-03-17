@@ -48,7 +48,7 @@ class MemoryBar:
                 height,
                 stretch=True,
             )
-            bar.points.align_to(self.bg, LEFT)
+            bar.points.move_to(self.bg.current().points.box.left, aligned_edge=LEFT)
 
             # 继承显隐
             if p:
@@ -148,5 +148,16 @@ class MemoryBar:
         self.tip = TypstText(tip_text)
         self.tip.points.next_to(self.bg, UP, aligned_edge=LEFT, buff=0.1)
         self.tip.astype(VItem).color.set(text_color)
+        
+        def arrange_tip(tip: TypstText, p: UpdaterParams | None):
+            tip.points.next_to(self.bg.current(), UP, aligned_edge=LEFT, buff=0.1)
 
-        self.item.add(self.bg, self.bar, self.triangle, self.stat_text, self.tip)
+        arrange_tip(self.tip, None)
+
+        timeline.play(
+            DataUpdater(self.tip, arrange_tip, duration=FOREVER)
+        )
+
+        self.item.add(
+            self.bg, self.bar, self.triangle, self.stat_text, self.tip
+        )

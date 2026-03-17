@@ -35,6 +35,9 @@ class FAColor:
     value_fill: str = c_luori_orange
     value_fill_highlight: str = "#FDF1D0"
     mask_fill: str = "#86CDB2"
+    score_fill: str = "#e49bb8"
+    probability_fill: str = "#72f399"
+    output_fill: str = "#72edf3"
 
     highlight_fill: str = c_shanhu_red
     tip_fill: str = c_maisui_yellow

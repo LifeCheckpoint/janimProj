@@ -7,6 +7,7 @@ def create_stride_background(
     color_1: str = FAColor.c_wumai_blue,
     color_2: str = FAColor.background_dark,
     angle: float = PI / 6,
+    use_stroke: bool = True,
     gap: float = 0.5,
 ):
     """
@@ -14,10 +15,12 @@ def create_stride_background(
 
     返回斜纹背景与遮罩
     """
+    MAX_BORDER = 40
+
     stripes = Group()
-    n_stripes = int(20 // gap) + 2
+    n_stripes = int(MAX_BORDER // gap) + 2
     for i in range(n_stripes):
-        stripe = Rect(20, gap)
+        stripe = Rect(MAX_BORDER, gap)
         stripe.fill.set(color=color_1 if i % 2 == 0 else color_2, alpha=1.0)
         stripe.stroke.set(alpha=0.0)
         stripes.add(stripe)
@@ -31,8 +34,11 @@ def create_stride_background(
 
     stroke_rect = Rect(width, height)
     stroke_rect.fill.set(alpha=0.0)
-    stroke_rect.stroke.set(color=FAColor.c_huibai_gray, alpha=1.0)
-    stroke_rect.radius.set(0.03)
+    if use_stroke:
+        stroke_rect.stroke.set(color=FAColor.c_huibai_gray, alpha=1.0)
+        stroke_rect.radius.set(0.03)
+    else:
+        stroke_rect.stroke.set(alpha=0.0)
     stripes.add(stroke_rect)
 
     return stripes, mask
