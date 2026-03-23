@@ -7,6 +7,7 @@ with reloads():
     from components.grid_matrix import *
     from components.memory_bar import MemoryBar
     from components.stride_background import create_stride_background
+    from components.gpu_a100_architecture import *
 if TYPE_CHECKING:
     from components.colors import FAColor
     from components.utils import get_typ_doc
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from components.grid_matrix import *
     from components.memory_bar import MemoryBar
     from components.stride_background import create_stride_background
+    from components.gpu_a100_architecture import *
 
 class TestGridMatrixCell(Timeline):
     CONFIG = Config(
@@ -107,3 +109,30 @@ class TestMask(Timeline):
         self.play(FadeIn(mask1))
         self.play(FadeIn(mask2))
         self.forward(1)
+
+
+class TestGPUA100Architecture(Timeline):
+    CONFIG = Config(
+        background_color=Color(FAColor.background_dark),
+        typst_shared_preamble=get_typ_doc("preamble"),
+    )
+    def construct(self) -> None:
+        a100_arch = create_GPU_A100_architecture()
+        a100_arch.item.points.move_to(DOWN * 0.05)
+
+        self.camera.points.scale(1.3)
+        self.play(Write(a100_arch.item))
+        self.forward(2)
+
+
+class TestGPUA100SM(Timeline):
+    CONFIG = Config(
+        background_color=Color(FAColor.background_dark),
+        typst_shared_preamble=get_typ_doc("preamble"),
+    )
+    def construct(self) -> None:
+        a100_sm = create_GPU_A100_SM()
+
+        self.camera.points.scale(1.5)
+        self.play(Write(a100_sm.item))
+        self.forward(2)

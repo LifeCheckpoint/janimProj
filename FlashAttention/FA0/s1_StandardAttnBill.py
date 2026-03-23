@@ -11,12 +11,14 @@ with reloads():
     from components.grid_matrix import *
     from components.memory_bar import *
     from components.stride_background import *
+    from components.gpu_a100_architecture import *
 if TYPE_CHECKING:
     from components.utils import *
     from components.colors import FAColor
     from components.grid_matrix import *
     from components.memory_bar import *
     from components.stride_background import *
+    from components.gpu_a100_architecture import *
 
 class s1_1(Timeline):
     CONFIG = Config(
@@ -535,3 +537,17 @@ class s1_1(Timeline):
             ))
         )
         self.forward(0.5)
+
+
+class s1_2(Timeline):
+    CONFIG = Config(
+        background_color=Color(FAColor.background_dark),
+        typst_shared_preamble=get_typ_doc("preamble"),
+    )
+    def construct(self) -> None:
+        a100_arch = create_GPU_A100_architecture()
+        a100_arch.item.points.move_to(DOWN * 0.05)
+
+        self.camera.points.scale(1.3)
+        self.play(Write(a100_arch.item))
+        self.forward(2)
