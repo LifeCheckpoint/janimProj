@@ -795,12 +795,16 @@ class s3_3(Timeline):
         )
         self.forward(1)
 
-        brace_n = Brace(focus_table, UP, buff=0.1)
-        brace_n_text = TypstMath("n").points.scale(1.75).next_to(brace_n, UP, buff=0.2).r
+        brace_n = Brace(Group(focus_table.get_cell("A", "0"), focus_table.get_cell("E", "0")), UP)
+        brace_n_text = TypstMath("n")
+        brace_n_plus_1 = Brace(focus_table, UP, buff=0.1)
+        brace_n_plus_1_text = TypstMath("n+1").points.scale(1.75).next_to(brace_n_plus_1, UP, buff=0.2).r
+        brace_n.points.align_to(brace_n_plus_1, UP)
+        brace_n_text.points.scale(1.75).next_to(brace_n, UP, buff=0.2).r
         brace_2 = Brace(focus_table, LEFT, buff=0.1)
         brace_2_text = TypstMath("2").points.scale(1.75).next_to(brace_2, LEFT, buff=0.2).r
         brace_n_explain = Text("表头状态", font=local_font)
-        brace_n_explain.points.next_to(brace_n, UP, buff=0.2)
+        brace_n_explain.points.next_to(brace_n_plus_1, UP, buff=0.2)
         brace_2_explain = Text("格子内容", font=local_font)
         brace_2_explain.points.next_to(brace_2, LEFT, buff=0.2)
         grid_cell_example = GridCell(
@@ -854,11 +858,11 @@ class s3_3(Timeline):
             buff=0.3,
         )
         brace_multi_text = TypstMath("= 4n")
-        brace_multi_text.points.scale(1.5).next_to(brace_multi, RIGHT, buff=0.3)
-        brace_multi_text_2 = TypstMath("= 4n+1")
-        brace_multi_text_2.points.scale(1.5).next_to(brace_multi, RIGHT, buff=0.3)
+        brace_multi_text.points.scale(1.4).next_to(brace_multi, RIGHT, buff=0.2)
+        brace_multi_text_2 = TypstMath("= 4(n+1)")
+        brace_multi_text_2.points.scale(1.4).next_to(brace_multi, RIGHT, buff=0.2)
         seperator_line = DashedLine(UP * 5, DOWN * 5).points.shift(RIGHT * 7.5).r
-        text_final_status = TypstMath("(4n+1)^(2n)")
+        text_final_status = TypstMath("(4(n+1))^(2n)")
         text_final_status.points.scale(2).move_to(RIGHT * 10.5)
         text_tms_upperbound = Text(
             "全部<c GREEN_A> n 状态</c>图灵机\n个数<c YELLOW>上限</c>",
@@ -875,26 +879,31 @@ class s3_3(Timeline):
         self.play(
             Write(brace_n),
             Write(brace_n_text),
+        )
+        self.forward(1)
+        self.play(
+            Transform(brace_n, brace_n_plus_1),
+            TransformMatchingDiff(brace_n_text, brace_n_plus_1_text),
             Write(brace_2),
             Write(brace_2_text),
             lag_ratio=0.35,
         )
         self.forward(1)
         self.play(
-            TransformMatchingShapes(brace_n_text, brace_n_explain),
+            TransformMatchingShapes(brace_n_plus_1_text, brace_n_explain),
             TransformMatchingShapes(brace_2_text, brace_2_explain),
         )
         self.forward(1)
         self.play(
-            TransformMatchingShapes(brace_n_explain, brace_n_text),
+            TransformMatchingShapes(brace_n_explain, brace_n_plus_1_text),
             TransformMatchingShapes(brace_2_explain, brace_2_text),
         )
         self.play(
             focus_table.anim.points.shift(UP * 1.5),
             brace_2.anim.points.shift(UP * 1.5),
-            brace_n.anim.points.shift(UP * 1.5),
+            brace_n_plus_1.anim.points.shift(UP * 1.5),
             brace_2_text.anim.points.shift(UP * 1.5),
-            brace_n_text.anim.points.shift(UP * 1.5),
+            brace_n_plus_1_text.anim.points.shift(UP * 1.5),
         )
         self.play(
             Transform(
