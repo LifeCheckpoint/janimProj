@@ -13,7 +13,7 @@ class s1_2(Timeline):
         axes1 = Axes(
             x_range=(0, 11, 11 / 10),
             y_range=(0, 250, 25),
-            x_length=5,
+            x_length=4.5,
             y_length=4.5,
         ).points.next_to(LEFT * 3 + UP * 3, DOWN, buff=1).r
         axes1(VItem).color.set(alpha=0.5)
@@ -22,15 +22,15 @@ class s1_2(Timeline):
         log_tag_2 = log_tag_1.copy()
         graph_n100 = axes1.get_graph(
             lambda x: 100 * np.log(x),
-            x_range=(1, 10),
+            x_range=(1, 11),
         )
         graph_n100(VItem).color.set(color=BLUE_B).r
         points_n100 = Group(*[
-            Dot(axes1.c2p(x, 100 * np.log(x))).points.scale(0.9).r \
+            Dot(axes1.c2p(x * 11 / 10, 100 * np.log(x * 11 / 10))).points.scale(0.9).r \
                                               .color.set(color=YELLOW).r
             for x in range(1, 11)
         ])
-        point_dynamic_n100 = Dot(axes1.c2p(1, 0)).points.scale(1.5).r \
+        point_dynamic_n100 = Dot(axes1.c2p(11 / 10, 0)).points.scale(1.5).r \
                                                  .color.set(color=YELLOW).r \
                                                  .fill.set(alpha=0).r \
                                                  .stroke.set(alpha=1).r
@@ -40,21 +40,21 @@ class s1_2(Timeline):
         axes2 = Axes(
             x_range=(0, 11, 11 / 10),
             y_range=(0, 250, 25),
-            x_length=5,
+            x_length=4.5,
             y_length=4.5,
         ).points.next_to(RIGHT * 3 + UP * 3, DOWN, buff=1).r
         axes2.astype(VItem).color.set(alpha=0.5)
         graph_2n = axes2.get_graph(
             lambda x: np.log(2) * x,
-            x_range=(1, 10),
+            x_range=(1, 11),
         )
         graph_2n.astype(VItem).color.set(color=GREEN_A)
         points_2n = Group(*[
-            Dot(axes2.c2p(x, np.log(2) * x)).points.scale(0.9).r \
+            Dot(axes2.c2p(x * 11 / 10, np.log(2) * x * 11 / 10)).points.scale(0.9).r \
                                             .color.set(color=RED_A).r
             for x in range(1, 11)
         ])
-        point_dynamic_2n = Dot(axes2.c2p(1, 0)).points.scale(1.5).r \
+        point_dynamic_2n = Dot(axes2.c2p(11 / 10, 0)).points.scale(1.5).r \
                                                .color.set(color=RED_A).r \
                                                .fill.set(alpha=0).r \
                                                .stroke.set(alpha=1).r
@@ -62,6 +62,27 @@ class s1_2(Timeline):
 
         log_tag_1.points.next_to(axes1.get_axes()[1].get_tick(250), LEFT, buff=0.1)
         log_tag_2.points.next_to(axes2.get_axes()[1].get_tick(250), LEFT, buff=0.1)
+
+        tick_tags_y_1 = Group.from_iterable(
+            TypstMath(f"10^({y_truth})").points \
+                .scale(0.75) \
+                .next_to(axes1.get_axes()[1].get_tick(y_coord), LEFT, buff=0.1) \
+                .r
+            for y_truth, y_coord in zip(range(11, 110, 11), range(25, 250, 25))
+        )
+        tick_tags_y_1.astype(VItem).fill.set(alpha=0.5)
+        tick_tags_y_2 = tick_tags_y_1.copy()
+        tick_tags_y_2.points.shift(axes2.points.box.center - axes1.points.box.center)
+        tick_tags_x_1 = Group.from_iterable(
+            TypstMath(f"{x}").points \
+                .scale(0.75) \
+                .next_to(axes1.get_axes()[0].get_tick(x * 11 / 10), DOWN, buff=0.1) \
+                .r
+            for x in range(1, 11)
+        )
+        tick_tags_x_1.astype(VItem).fill.set(alpha=0.5)
+        tick_tags_x_2 = tick_tags_x_1.copy()
+        tick_tags_x_2.points.shift(axes2.points.box.center - axes1.points.box.center)
 
         self.play(Write(text_n100))
         self.play(Write(text_2n))
@@ -75,6 +96,10 @@ class s1_2(Timeline):
             Write(axes2),
             Write(log_tag_1),
             Write(log_tag_2),
+            Write(tick_tags_y_1),
+            Write(tick_tags_x_1),
+            Write(tick_tags_y_2),
+            Write(tick_tags_x_2),
         )
         self.play(Write(graph_n100))
         self.play(Write(graph_2n))
@@ -91,13 +116,13 @@ class s1_2(Timeline):
             DataUpdater(
                 point_dynamic_n100,
                 lambda data, p: data.points.move_to(
-                    axes1.c2p(p.alpha * 9 + 1, 100 * np.log(p.alpha * 9 + 1))
+                    axes1.c2p(p.alpha * 10 + 1, 100 * np.log(p.alpha * 10 + 1))
                 )
             ),
             DataUpdater(
                 point_dynamic_2n,
                 lambda data, p: data.points.move_to(
-                    axes2.c2p(p.alpha * 9 + 1, np.log(2) * (p.alpha * 9 + 1))
+                    axes2.c2p(p.alpha * 10 + 1, np.log(2) * (p.alpha * 10 + 1))
                 )
             ),
             ItemUpdater(
@@ -138,10 +163,10 @@ class s1_2(Timeline):
         axes1_l = Axes(
             x_range=(0, 11, 20),
             y_range=(0, 250, 25),
-            x_length=5,
+            x_length=4.5,
             y_length=4.5,
         ).points.next_to(LEFT * 3 + UP * 3, DOWN, buff=1).r
-        axes1_l(VItem).color.set(alpha=0.5)
+        axes1_l(VItem).color.set(alpha=0.5) 
         axes1_l_new_ticks = Group(
             *[
                 axes1_l.get_axes()[0].get_tick(lt)
@@ -149,6 +174,16 @@ class s1_2(Timeline):
             ],
             inf_tick := axes1_l.get_axes()[0].get_tick(graph_full_length),
         )
+        axes1_l_new_ticks_text = Group.from_iterable(
+            TypstMath(f"10^({x_truth})").points \
+                .scale(0.5) \
+                .next_to(tick, DOWN, buff=0.1).r
+            for x_truth, tick in zip(
+                range(0, 31, 10),
+                axes1_l_new_ticks[0:-1:10]
+            )
+        )
+        axes1_l_new_ticks_text.astype(VItem).fill.set(alpha=0.5)
         inf_tick_text_1 = TypstMath("infinity").points.scale(0.75).next_to(inf_tick, DOWN, buff=0.1).r
         graph_n100_l = axes1_l.get_graph(
             lambda x: np.clip(100 * np.log(unmap_x_ticks(x)) / 100, -100, 500),
@@ -159,7 +194,7 @@ class s1_2(Timeline):
         axes2_l = Axes(
             x_range=(0, 11, 20),
             y_range=(0, 250, 25),
-            x_length=5,
+            x_length=4.5,
             y_length=4.5,
         ).points.next_to(RIGHT * 3 + UP * 3, DOWN, buff=1).r
         axes2_l(VItem).color.set(alpha=0.5)
@@ -170,6 +205,16 @@ class s1_2(Timeline):
             ],
             inf_tick := axes2_l.get_axes()[0].get_tick(graph_full_length),
         )
+        axes2_l_new_ticks_text = Group.from_iterable(
+            TypstMath(f"10^({x_truth})").points \
+                .scale(0.5) \
+                .next_to(tick, DOWN, buff=0.1).r
+            for x_truth, tick in zip(
+                range(0, 31, 10),
+                axes2_l_new_ticks[0:-1:10]
+            )
+        )
+        axes2_l_new_ticks_text.astype(VItem).fill.set(alpha=0.5)
         inf_tick_text_2 = TypstMath("infinity").points.scale(0.75).next_to(inf_tick, DOWN, buff=0.1).r
         graph_2n_l = axes2_l.get_graph(
             lambda x: np.clip(np.log(2) * unmap_x_ticks(x) / 100, -100, 500),
@@ -178,20 +223,31 @@ class s1_2(Timeline):
         graph_2n_l(VItem).color.set(color=GREEN_A).r
 
         self.play(
-            TransformMatchingDiff(axes1, axes1_l),
-            TransformMatchingDiff(axes2, axes2_l),
-            rate_func=smooth,
-        )
-        self.play(
-            FadeIn(axes1_l_new_ticks, lag_ratio=0.2),
-            Write(inf_tick_text_1),
-            Transform(graph_n100, graph_n100_l),
+            AnimGroup(
+                TransformMatchingDiff(axes1, axes1_l),
+                FadeOut(tick_tags_x_1),
+            ),
+            AnimGroup(
+                FadeIn(axes1_l_new_ticks, lag_ratio=0.2),
+                Write(inf_tick_text_1),
+                Transform(graph_n100, graph_n100_l),
+            ),
+            FadeIn(axes1_l_new_ticks_text),
+            lag_ratio=0.2,
             duration=2,
         )
         self.play(
-            FadeIn(axes2_l_new_ticks, lag_ratio=0.2),
-            Write(inf_tick_text_2),
-            Transform(graph_2n, graph_2n_l),
+            AnimGroup(
+                TransformMatchingDiff(axes2, axes2_l),
+                FadeOut(tick_tags_x_2),
+            ),
+            AnimGroup(
+                FadeIn(axes2_l_new_ticks, lag_ratio=0.2),
+                Write(inf_tick_text_2),
+                Transform(graph_2n, graph_2n_l),
+            ),
+            FadeIn(axes2_l_new_ticks_text),
+            lag_ratio=0.2,
             duration=2,
         )
         self.forward(2)
@@ -202,22 +258,26 @@ class s1_2(Timeline):
             axes1_l_new_ticks.anim.points.shift(RIGHT * 3),
             inf_tick_text_1.anim.points.shift(RIGHT * 3),
             inf_tick_text_2.anim.points.shift(LEFT * 3),
+            tick_tags_y_1.anim.points.shift(RIGHT * 3),
+            tick_tags_y_2.anim.points.shift(LEFT * 3),
+            axes1_l_new_ticks_text.anim.points.shift(RIGHT * 3),
+            axes2_l_new_ticks_text.anim.points.shift(LEFT * 3),
             graph_n100_l.anim.points.shift(RIGHT * 0.001), # fix
             graph_2n_l.anim.points.shift(LEFT * 0.001), # fix
             axes1_l_new_ticks.anim.astype(VItem).color.set(alpha=0.25),
             axes2_l_new_ticks.anim.astype(VItem).color.set(alpha=0.25),
             text_2n.anim.points.scale(0.75).shift(LEFT * 3.25 + DOWN * 1.5),
-            text_n100.anim.points.scale(0.75).shift(RIGHT * 4.5 + DOWN * 1.5),
+            text_n100.anim.points.scale(0.75).shift(RIGHT * 4.25 + DOWN * 1.5),
             log_tag_1.anim.points.shift(RIGHT * 3),
             log_tag_2.anim.points.shift(LEFT * 3),
         )
         self.forward(1.5)
 
         dot_2n_slider = Dot(axes2_l.c2p(1, 0)).points.scale(1.25).r \
-                                              .stroke.set(alpha=1, color=GREEN_A).r \
+                                              .stroke.set(alpha=1, color=BLUE_A).r \
                                               .fill.set(alpha=0).r
         dot_n100_slider = Dot(axes1_l.c2p(1, 0)).points.scale(1.25).r \
-                                                .stroke.set(alpha=1, color=BLUE_A).r \
+                                                .stroke.set(alpha=1, color=GREEN_A).r \
                                                 .fill.set(alpha=0).r
         dashline_sliders = DashedLine()
         
@@ -295,6 +355,10 @@ class s1_2(Timeline):
             FadeOut(text_2n),
             FadeOut(log_tag_1),
             FadeOut(log_tag_2),
+            FadeOut(tick_tags_y_1),
+            FadeOut(tick_tags_y_2),
+            FadeOut(axes1_l_new_ticks_text),
+            FadeOut(axes2_l_new_ticks_text),
         )
         self.forward(1)
 
