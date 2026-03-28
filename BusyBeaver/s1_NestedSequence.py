@@ -376,22 +376,31 @@ class s1_3(Timeline):
         text_fact = TypstMath("n!").points.shift(RIGHT * 2).scale(2).r
         text_fact.astype(VItem).color.set(color=RED_A).r
         text_frac_fact_2n = TypstMath("(2^n)/(n!)").points.scale(2).r
-        text_frac_fact_2n["2^n"].astype(VItem).color.set(color=GREEN_A).r
-        text_frac_fact_2n["n!"].astype(VItem).color.set(color=RED_A).r
+        def colorize_fact(item: TypstMath):
+            item["2^n"].astype(VItem).color.set(color=GREEN_A).r
+            item["n!"].astype(VItem).color.set(color=RED_A).r
+        colorize_fact(text_frac_fact_2n)
         text_frac_fact_2n_expanded = TypstMath(
-            "overbrace(2 times 2 times 2 times ... times 2, \"n\")/(1 times 2 times 3 times ... times n)"
+            "(2^n)/(n!) = overbrace(2 times 2 times 2 times ... times 2, \"n\")/(1 times 2 times 3 times ... times n)"
         ).points.scale(2).r
+        colorize_fact(text_frac_fact_2n_expanded)
+        text_frac_fact_2n_expanded_prefix = text_frac_fact_2n_expanded["(2^n)/(n!) = "]
+        text_frac_fact_2n_expanded_postfix = text_frac_fact_2n_expanded[
+            "overbrace(2 times 2 times 2 times ... times 2, \"n\")/(1 times 2 times 3 times ... times n)"
+        ]
         text_frac_fact_2n_expanded["overbrace(2 times 2 times 2 times ... times 2, \"n\")"].astype(VItem).color.set(color=GREEN_A).r
         text_frac_fact_2n_expanded["1 times 2 times 3 times ... times n"].astype(VItem).color.set(color=RED_A).r
-        text_frac_fact_2n_split = TypstMath("2/1 times 2/2 times 2/3 times 2/4 times ... times 2/n") \
+        text_frac_fact_2n_split = TypstMath("(2^n)/(n!) = 2/1 times 2/2 times 2/3 times 2/4 times ... times 2/n") \
             .points.scale(2).r
-        for i in range(5):
-            if i != 2:
+        for i in range(7):
+            if i != 3:
                 text_frac_fact_2n_split["2", i].astype(VItem).color.set(color=GREEN_A).r
         text_frac_fact_2n_split["1"].astype(VItem).color.set(color=RED_A).r
-        text_frac_fact_2n_split["2", 2].astype(VItem).color.set(color=RED_A).r
+        text_frac_fact_2n_split["2", 3].astype(VItem).color.set(color=RED_A).r
         text_frac_fact_2n_split["3"].astype(VItem).color.set(color=RED_A).r
-        text_frac_fact_2n_split["n"].astype(VItem).color.set(color=RED_A).r
+        text_frac_fact_2n_split["4"].astype(VItem).color.set(color=RED_A).r
+        text_frac_fact_2n_split["n", ...].astype(VItem).color.set(color=RED_A).r
+        colorize_fact(text_frac_fact_2n_split)
         box_1 = SurroundingRect(text_frac_fact_2n_split["2/1"]) \
             .color.set(color=YELLOW).r
         box_2 = SurroundingRect(text_frac_fact_2n_split["2/1 times 2/2"]) \
@@ -424,7 +433,8 @@ class s1_3(Timeline):
         )
         self.forward(1)
         self.play(
-            TransformMatchingDiff(text_frac_fact_2n, text_frac_fact_2n_expanded),
+            TransformMatchingDiff(text_frac_fact_2n.copy(), text_frac_fact_2n_expanded_prefix),
+            TransformMatchingDiff(text_frac_fact_2n, text_frac_fact_2n_expanded_postfix),
         )
         self.forward(2)
         self.play(
