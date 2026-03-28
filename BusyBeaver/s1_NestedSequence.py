@@ -378,10 +378,13 @@ class s1_3(Timeline):
         text_frac_fact_2n = TypstMath("(2^n)/(n!)").points.scale(2).r
         text_frac_fact_2n["2^n"].astype(VItem).color.set(color=GREEN_A).r
         text_frac_fact_2n["n!"].astype(VItem).color.set(color=RED_A).r
-        text_frac_fact_2n_expanded = TypstMath("overbrace(2 times 2 times 2 times ... times 2, \"n\")/(1 times 2 times 3 times ... times n)").points.scale(2).r
+        text_frac_fact_2n_expanded = TypstMath(
+            "overbrace(2 times 2 times 2 times ... times 2, \"n\")/(1 times 2 times 3 times ... times n)"
+        ).points.scale(2).r
         text_frac_fact_2n_expanded["overbrace(2 times 2 times 2 times ... times 2, \"n\")"].astype(VItem).color.set(color=GREEN_A).r
         text_frac_fact_2n_expanded["1 times 2 times 3 times ... times n"].astype(VItem).color.set(color=RED_A).r
-        text_frac_fact_2n_split = TypstMath("2/1 times 2/2 times 2/3 times ... times 2/n").points.scale(2).r
+        text_frac_fact_2n_split = TypstMath("2/1 times 2/2 times 2/3 times 2/4 times ... times 2/n") \
+            .points.scale(2).r
         for i in range(5):
             if i != 2:
                 text_frac_fact_2n_split["2", i].astype(VItem).color.set(color=GREEN_A).r
@@ -389,12 +392,28 @@ class s1_3(Timeline):
         text_frac_fact_2n_split["2", 2].astype(VItem).color.set(color=RED_A).r
         text_frac_fact_2n_split["3"].astype(VItem).color.set(color=RED_A).r
         text_frac_fact_2n_split["n"].astype(VItem).color.set(color=RED_A).r
-        box_1 = SurroundingRect(text_frac_fact_2n_split["2/2"]).color.set(color=YELLOW).r
-        box_2 = SurroundingRect(text_frac_fact_2n_split["2/2 times 2/3"]).color.set(color=YELLOW).r
-        box_3 = SurroundingRect(text_frac_fact_2n_split["2/2 times 2/3 times ... times 2/n"]).color.set(color=YELLOW).r
-        text_prod_res_1 = TypstMath("1.000").points.next_to(box_1, DOWN, buff=0.5).scale(1.5).r
-        text_prod_res_2 = TypstMath("0.667").points.next_to(box_2, DOWN, buff=0.5).scale(1.5).r
-        text_prod_res_3 = TypstMath("")
+        box_1 = SurroundingRect(text_frac_fact_2n_split["2/1"]) \
+            .color.set(color=YELLOW).r
+        box_2 = SurroundingRect(text_frac_fact_2n_split["2/1 times 2/2"]) \
+            .color.set(color=YELLOW).r
+        box_3 = SurroundingRect(text_frac_fact_2n_split["2/1 times 2/2 times 2/3"]) \
+            .color.set(color=YELLOW).r
+        box_4 = SurroundingRect(text_frac_fact_2n_split["2/1 times 2/2 times 2/3 times 2/4"]) \
+            .color.set(color=YELLOW).r
+        box_5 = SurroundingRect(text_frac_fact_2n_split["2/1 times 2/2 times 2/3 times 2/4 times ... times 2/n"]) \
+            .color.set(color=YELLOW).r
+        text_prod_res_1 = TypstMath("<= 2") \
+            .points.next_to(box_1, DOWN, buff=0.5).scale(1.5).r
+        text_prod_res_2 = TypstMath("<= 2 times 2/2") \
+            .points.next_to(box_2, DOWN, buff=0.5).scale(1.5).r
+        text_prod_res_3 = TypstMath("<= 2 times 2/2 times 2/3") \
+            .points.next_to(box_3, DOWN, buff=0.5).scale(1.5).r
+        text_prod_res_4 = TypstMath("<= 2 times 2/2 times 2/3 times 2/3") \
+            .points.next_to(box_4, DOWN, buff=0.5).scale(1.5).r
+        text_prod_res_5 = TypstMath("<= 2 times 2/2 times 2/3 times 2/3 times ...") \
+            .points.next_to(box_5, DOWN, buff=0.5).scale(1.5).r
+        text_prod_res_to_0 = TypstMath("<= 2 times 2/2 times 2/3 times 2/3 times ... -> 0") \
+            .points.next_to(box_5, DOWN, buff=0.5).scale(1.5).r
 
         self.play(Write(text_2n))
         self.play(Write(text_fact))
@@ -417,26 +436,33 @@ class s1_3(Timeline):
         self.forward(1)
         self.play(
             Transform(box_1, box_2),
-            TransformMatchingShapes(text_prod_res_1, text_prod_res_2)
+            TransformMatchingShapes(text_prod_res_1, text_prod_res_2),
+            duration=1.0,
         )
-        self.forward(1)
-        text_prod_res_2.hide()
+        self.forward(0.5)
         self.play(
             Transform(box_2, box_3),
-            ItemUpdater(
-                text_prod_res_3,
-                lambda p: TypstMath(
-                    "{:.3f}".format((1 - p.alpha) * 2 / 3, 3)
-                ).points.move_to(
-                    text_prod_res_2.points.box.center + \
-                    p.alpha * (box_3.points.box.bottom - box_2.points.box.bottom)
-                ).scale(1.5).r,
-                hide_at_begin=False,
-            ),
-            duration=2.5,
-            rate_func=smooth,
+            TransformMatchingShapes(text_prod_res_2, text_prod_res_3),
+            duration=1.0,
+        )
+        self.forward(0.5)
+        self.play(
+            Transform(box_3, box_4),
+            TransformMatchingShapes(text_prod_res_3, text_prod_res_4),
+            duration=1.0,
+        )
+        self.forward(0.5)
+        self.play(
+            Transform(box_4, box_5),
+            TransformMatchingShapes(text_prod_res_4, text_prod_res_5),
+            duration=1.0,
         )
         self.forward(1)
+        self.play(
+            TransformMatchingShapes(text_prod_res_5, text_prod_res_to_0),
+            duration=1.0,
+        )
+        self.forward(2)
 
 class s1_4(Timeline):
     """
@@ -571,13 +597,10 @@ class s1_4(Timeline):
         text_A_knuth_B = TypstMath("A arrow.t B").points.scale(2.5).r
         text_A_knuth_B_eq_A_pow_B = TypstMath("A arrow.t B = A^B").points.scale(2.5).r
         text_pow_2_nest_10_cpy = text_pow_2_nest_10.copy()
-        text_pow_2_nest_9_t_1 = TypstMath("2^underbrace(2^(2^(2^(2^(2^(2^(2^(2^2))))))), 9)").points.scale(2.5).r
         text_pow_2_t_1 = TypstMath("2^(2 arrow.t arrow.t 9)").points.scale(2.5).r
         text_pow_2_t_2 = TypstMath("2^(2^(2 arrow.t arrow.t 8))").points.scale(2.5).r
         text_pow_2_t_3 = TypstMath("2^(2^(2^(2 arrow.t arrow.t 7)))").points.scale(2.5).r
         text_pow_2_t_4 = TypstMath("2^(2^(2^(2^(2 arrow.t arrow.t 6))))").points.scale(2.5).r
-        surround_10 = SurroundingRect(text_pow_2_nest_10_cpy["space^(2^(2^(2^(2^(2^(2^(2^(2^2))))))))"])
-        surround_2 = SurroundingRect(text_pow_2_nest_10_cpy["2"]).color.set(color=BLUE_A).r
         text_2_knuth_2nest_n_eq_pow_2_nest_n = TypstMath("2 arrow.t arrow.t n = underbrace(2^(2^(2^(dots.up ^ 2))), n)").points.scale(2.5).r
         text_2_knuth_2nest_n_explain = TypstMath("2 arrow.t (2 arrow.t arrow.t (n-1) )").points.scale(2.5).r
         text_2_knuth_2nest_n_explain.match_pattern(
