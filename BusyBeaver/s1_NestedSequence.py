@@ -606,6 +606,10 @@ class s1_4(Timeline):
         text_knuth_name.points.move_to(ORIGIN)
         text_A_knuth_B = TypstMath("A arrow.t B").points.scale(2.5).r
         text_A_knuth_B_eq_A_pow_B = TypstMath("A arrow.t B = A^B").points.scale(2.5).r
+        text_A_kk_B_eq_A_nest_B = TypstMath("A arrow.t arrow.t B = underbrace(A^(A^(A^(dots.up ^ A))), B)").points.scale(2.5).r
+        text_A_kk_B_eq_A_pow_A_nest_B = TypstMath("A arrow.t arrow.t B = A^(underbrace(A^(A^(dots.up ^ A)), B-1))").points.scale(2.5).r
+        text_A_kk_B_eq_A_kk_Bsub1 = TypstMath("A arrow.t arrow.t B = A^(A arrow.t arrow.t (B-1))").points.scale(2.5).r
+        text_A_kk_B_eq_A_k_A_kk_Bsub1 = TypstMath("A arrow.t arrow.t B = A arrow.t (A arrow.t arrow.t (B-1))").points.scale(2.5).r
         text_pow_2_nest_10_cpy = text_pow_2_nest_10.copy()
         text_pow_2_t_1 = TypstMath("2^(2 arrow.t arrow.t 9)").points.scale(2.5).r
         text_pow_2_t_2 = TypstMath("2^(2^(2 arrow.t arrow.t 8))").points.scale(2.5).r
@@ -671,7 +675,39 @@ class s1_4(Timeline):
         )
         self.forward(1.5)
         self.play(
-            FadeOut(text_A_knuth_B_eq_A_pow_B)
+            TransformMatchingDiff(
+                text_A_knuth_B_eq_A_pow_B,
+                text_A_kk_B_eq_A_nest_B,
+                path_arc=PI / 2,
+            )
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_A_kk_B_eq_A_nest_B,
+                text_A_kk_B_eq_A_pow_A_nest_B,
+                path_arc=PI / 2,
+            ),
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_A_kk_B_eq_A_pow_A_nest_B,
+                text_A_kk_B_eq_A_kk_Bsub1,
+                path_arc=PI / 2,
+            ),
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(
+                text_A_kk_B_eq_A_kk_Bsub1,
+                text_A_kk_B_eq_A_k_A_kk_Bsub1,
+                path_arc=PI / 2,
+            ),
+        )
+        self.forward(1.5)
+        self.play(
+            text_A_kk_B_eq_A_k_A_kk_Bsub1.anim.points.scale(0.6).to_border(LEFT + UP),
         )
         self.forward(1)
 
@@ -781,14 +817,20 @@ class s1_4(Timeline):
             "3 arrow.t arrow.t arrow.t 3 = 3 arrow.t arrow.t (7625597484987)"
         ).points.scale(2.5).r
         text_3_knuth_3nest_3_eq_3_count_n = TypstMath(
-            "3 arrow.t arrow.t arrow.t 3 = underbrace(3^(3^(3^(3^(3^(dots.up^(3)))))), #[#box[$7625597484987$] <num>])"
+            "3 arrow.t arrow.t arrow.t 3 = underbrace("
+            "3^(3^(3^(3^(3^(3^(3^(3^(3^(3^(3^(3^(3^(3^(3^(dots.up^(3)))))))))))))))), "
+            "#scale(x: 60%, y: 60%)[#box[$7625597484987$] <num>个 3])"
         ).points.scale(2.5).r
         text_3_knuth_3nest_3_eq_3_2nest_7dot6["7625597484987"].astype(VItem).color.set(color=RED_A)
         text_3_knuth_3nest_3_eq_3_count_n.get_label("num").astype(VItem).color.set(color=RED_A)
+        text_3_knuth_3nest_3_eq_3_count_n["#scale(x: 60%, y: 60%)[个 3]"].points.shift(UP * 0.05)
         pow_tower_len = 200
         nested_str_3 = "3^(" * (pow_tower_len - 1) + "3^3" + ")" * (pow_tower_len - 1)
-        text_3_knuth_3nest_3_eq_3_pow_nearest_inf = TypstMath("3 arrow.t arrow.t arrow.t 3 = " + nested_str_3).points.scale(2.5).r
-        delta_pos_knuth_nested_eqs = text_3_knuth_3nest_3_eq_3_2nest_7dot6["="].points.box.center - text_3_knuth_3nest_3_eq_3_pow_nearest_inf["="].points.box.center
+        text_3_knuth_3nest_3_eq_3_pow_nearest_inf = TypstMath("3 arrow.t arrow.t arrow.t 3 = " \
+                                                              + nested_str_3).points.scale(2.5).r
+        delta_pos_knuth_nested_eqs = \
+            text_3_knuth_3nest_3_eq_3_2nest_7dot6["="].points.box.center \
+                - text_3_knuth_3nest_3_eq_3_pow_nearest_inf["="].points.box.center
         text_3_knuth_3nest_3_eq_3_pow_nearest_inf.points.shift(delta_pos_knuth_nested_eqs)
 
         self.play(Write(text_A_knuth_3nest_B))
