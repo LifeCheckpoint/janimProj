@@ -151,7 +151,7 @@ wheels = [
 [[package]]
 name = "janim"
 version = "4.0.0"
-source = { git = "https://github.com/jkjkil4/JAnim#ad432e7d73adf7045e2b6cfa8b394df626f94b09" }
+source = { git = "https://github.com/LifeCheckpoint/JAnim#b46abab377300d3a2b9d700dc15702a46f020820" }
 dependencies = [
     { name = "attrs" },
     { name = "colour" },
@@ -193,7 +193,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "dowhen", specifier = ">=0.1.0" },
-    { name = "janim", extras = ["gui"], git = "https://github.com/jkjkil4/JAnim" },
+    { name = "janim", extras = ["gui"], git = "https://github.com/LifeCheckpoint/JAnim" },
     { name = "numpy", specifier = ">=2.4.1" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "viztracer", specifier = ">=1.1.1" },

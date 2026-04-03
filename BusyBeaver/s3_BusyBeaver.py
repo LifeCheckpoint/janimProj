@@ -70,7 +70,7 @@ class s3_1(Timeline):
                     Write(tm_loop.framebox),
                 )
                 self.play(Write(dfa_tm_loop))
-                self.forward(4)
+                self.forward(0.5)
 
                 # text_trans_method = TypstDoc(Path("typ_docs/loop_5_1_trans.typ").read_text())
                 # text_trans_method.points.scale(0.7).next_to(dfa_tm_loop, RIGHT, buff=1).shift(LEFT * 2.5)
@@ -79,12 +79,14 @@ class s3_1(Timeline):
 
                 self.prepare(
                     hl_rect_state.anim.stroke.set(alpha=1),
-                    at=2
+                    at=1
                 )
 
                 for i in range(500):
                     cur_tag = ["A", "B", "C", "D", "E", "B"][(i + 1) % 6]
-                    if i >= 100 and (i + 1) % 6 == 0:
+                    if i >= 50 and (i + 1) % 6 == 0:
+                        self.forward(0.5)
+                    if i >= 62 and (i + 1) % 6 == 0:
                         self.forward(0.5)
                     tm_loop.step(duration=0.01).run_step_anim(self, compress=True)
                     hl_rect_state.points.move_to(dfa_tm_loop.get_label(cur_tag).points.box.center)
@@ -130,7 +132,7 @@ class s3_1(Timeline):
                     Write(tm_bb5.framebox),
                     Write(dfa_tm_bb5),
                 )
-                self.forward(15)
+                self.forward(3)
 
                 text_busybeaver = Text("忙碌海狸机", font=local_font, depth=-10)
                 text_busybeaver.color.set(color=LIGHT_PINK).r \
@@ -160,18 +162,6 @@ class s3_1(Timeline):
         self.play(FadeIn(clip_loop))
         self.forward(3)
 
-        subtimeline_bb5 = TMBB5().build().to_item().show()
-        clip_bb5 = TransformableFrameClip(
-            subtimeline_bb5,
-            clip=(1 / 3, 0, 1 / 3, 0),
-            offset=(1 / 3, 0),
-        )
-        line_seperator = DashedLine(
-            frame_height / 2 * DOWN,
-            frame_height / 2 * UP,
-            color=WHITE,
-        )
-        line_seperator.points.shift(RIGHT * frame_width * 1 / 6)
         text_config = Text("配置 / 格局", font=local_font, depth=-10)
         text_config.color.set(color=GREEN_A)
         text_config_en = Text("Configuration", font=local_font, depth=-10)
@@ -181,12 +171,7 @@ class s3_1(Timeline):
         mask_rec = Rect(20, 20)
         mask_rec.color.set(color=BLACK, alpha=0.6)
 
-        self.play(
-            FadeIn(clip_bb5),
-            Write(line_seperator),
-            clip_loop.anim.clip.set(1 / 6, 0, 1 / 6, 0, x_offset=-1 / 6),
-        )
-        self.forward(10)
+        self.forward(5)
         self.pause_point()
         self.play(
             FadeIn(mask_rec),
@@ -201,6 +186,21 @@ class s3_1(Timeline):
             FadeOut(text_config_en),
         )
         self.forward(2)
+
+        subtimeline_bb5 = TMBB5().build().to_item().show()
+        clip_bb5 = TransformableFrameClip(
+            subtimeline_bb5,
+            clip=(1 / 2, 0, 1 / 2, 0),
+            offset=(1, 0),
+        ).show()
+        line_seperator = DashedLine(
+            frame_height / 2 * DOWN,
+            frame_height / 2 * UP,
+            color=WHITE,
+        )
+        line_seperator.points.move_to(RIGHT * (frame_width + 0.5))
+
+        line_seperator.show()
         self.play(
             clip_loop.anim.clip.set(1 / 3, 0, 1 / 3, 0, x_offset=-1 / 3),
             clip_bb5.anim.clip.set(1 / 6, 0, 1 / 6, 0, x_offset=1 / 6),
@@ -211,34 +211,40 @@ class s3_1(Timeline):
         dfa_bb5 = load_dfa_typst("busy_5_1").dfa_main_item
         dfa_bb5.depth.set(-10)
         dfa_bb5.points.scale(0.85).shift(UP * 1.5)
-        mask_rec.color.set(alpha=0.8)
+        mask_rec2 = mask_rec.copy()
+        mask_rec2.depth.set(-5)
+        mask_rec2.color.set(alpha=0.8)
         text_step_counter = Text(
-            f"<c BLUE_B><fs 2.5>0</fs></c>步",
+            "<c BLUE_B><fs 2.5>0</fs></c>步",
             format="rich",
             font=local_font,
         ).points.next_to(dfa_bb5, DOWN, buff=0.5).r
         rect_hl_state = Rect(1, 1)
 
-        def get_cell_4098(n: int = 4098):
+        def get_cell_4098(n: int = 2000):
+            # 只显示前 2000 个
             res = []
             for _ in range(n):
-                cell = TapeCell(square_size=0.075, tile_data="")
+                cell = TapeCell(square_size=0.1, tile_data="")
                 cell.frame.apply_style(stroke_radius=0.001)
                 res.append(cell)
             return res
         
         group_cells_4098 = Group(*get_cell_4098())
-        group_cells_4098.points.arrange_in_grid(n_rows=33, n_cols=128, buff=0) \
+        group_cells_4098.points.arrange_in_grid(n_cols=96, buff=0) \
                                .next_to(text_step_counter, DOWN, buff=1)
         cell_1 = TapeCell(square_size=0.5, tile_data="1", text_scaling=0.75)
         cell_1.depth.set(-10)
-        brace_group_cells = Brace(group_cells_4098, UP, buff=0.1).points.shift(DOWN * 0.5).r
-        text_4098 = TypstMath("4098 times")
+        for it in cell_1.walk_descendants():
+            it.depth.set(-10)
+        brace_group_cells = Brace(group_cells_4098, UP, buff=0.1, depth=-10).points.shift(DOWN * 0.5).r
+        text_4098 = TypstMath("4098 times", depth=-10)
         cell_1.points.next_to(text_4098["times"], RIGHT, buff=0.25)
         group_text_4098 = Group(cell_1, text_4098).points.next_to(brace_group_cells, UP, buff=0.2).r
+        
 
         self.play(
-            FadeIn(mask_rec),
+            FadeIn(mask_rec2),
             FadeIn(dfa_bb5),
         )
         self.play(
@@ -284,7 +290,7 @@ class s3_1(Timeline):
             FadeOut(group_cells_4098),
             FadeOut(brace_group_cells),
             FadeOut(group_text_4098),
-            FadeOut(mask_rec),
+            FadeOut(mask_rec2),
             FadeOut(text_step_counter),
             FadeOut(rect_hl_state),
             FadeOut(dfa_bb5),
@@ -494,6 +500,10 @@ class s3_1(Timeline):
             ),
         )
         self.forward(1)
+        self.forward(2)
+
+        # 提早结束，不需要展示 SVG 细节
+        return
 
         svg_branch = SVGItem("resources/branch.svg").points.shift(DOWN * 6).r
         svg_beaver_dam = SVGItem("resources/beaver_dam.svg").points.shift(DOWN * 6).r
