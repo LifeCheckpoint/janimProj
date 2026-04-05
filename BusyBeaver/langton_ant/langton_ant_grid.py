@@ -9,9 +9,10 @@ class LangtonAntGrid(Group):
         self.cells: dict[tuple[int, int], Rect] = {}
 
         self.cells_group = Group()
-        self.ant_marker = Triangle(depth=-10).points.scale(cell_size * 0.4).r
-        self.ant_marker.stroke.set(color=BLACK, alpha=1)
-        self.ant_marker.fill.set(color=WHITE, alpha=1)
+        self.ant_marker = SVGItem(str(Path(__file__).parent.parent / "resources" / "ant.svg"), depth=-10)
+        self.ant_marker.points.scale(cell_size * 0.075)
+        self.ant_marker.astype(VItem).stroke.set(color=BLACK, alpha=1)
+        self.ant_marker.astype(VItem).fill.set(color=WHITE, alpha=1)
         self.ant_marker.points.move_to(self._grid_to_scene(0, 0))
 
         half = pre_alloc // 2

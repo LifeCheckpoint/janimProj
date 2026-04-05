@@ -566,6 +566,7 @@ class s3_2(Timeline):
             TransformMatchingShapes(text_state_5_steps, text_status_step),
         )
         self.forward(1)
+
         core_bb5 = TuringMachineCore(
             initial_tape="".join([random.choice("01") for _ in range(20)]),
             start_state="A",
@@ -598,7 +599,118 @@ class s3_2(Timeline):
         text_10x2eq20.points.scale(2).next_to(tm_bb5.table, DOWN, buff=0.5)
 
         self.play(Write(tm_bb5.table))
-        self.forward(0.5)
+        self.forward(1)
+        
+        # show the ruler: table -> str
+        group_cells_origin = Group.from_iterable(tm_bb5.table.cells.values())
+        group_cells_origin.save_state()
+        target_final_str = "1RB 1LC 1RC 1RB 1RD 0LE 1LA 1LD 1HR 0LA"
+        group_final_texts = Group.from_iterable(Text(t, font=local_font, font_size=23) for t in target_final_str.split())
+        group_final_texts.points.arrange(RIGHT, buff=0.25).move_to(text_10x2eq20)
+        single_final_str = "1RB1LC_1RC1RB_1RD0LE_1LA1LD_1HR0LA"
+        single_final_text = Text(single_final_str, font=local_font, font_size=23).points.move_to(text_10x2eq20).r
+
+        self.play(
+            self.camera.anim.points.move_to(tm_bb5.table.cells[("A", "0")]).scale(0.75),
+            *[
+                FadeOut(Group(cell.background, cell.border))
+                for cell in tm_bb5.table.cells.values()
+            ],
+            lag_ratio=0.05,
+            # rate_func=ease_inout_cubic,
+        )
+        self.forward(1)
+        first_cell_bb5 = tm_bb5.table.cells[("A", "0")]
+        pos_tmp_center_0 = first_cell_bb5.points.box.center
+        tmp_E0_state_text = Text("H", font=local_font, font_size=24).points.move_to(tm_bb5.table.cells[("E", "0")].state_text).r
+        self.play(
+            FadeOut(first_cell_bb5.label),
+            FadeOut(tm_bb5.table.cells[("HALT", "0")]),
+            FadeOut(tm_bb5.table.cells[("HALT", "1")]),
+            first_cell_bb5.dir_text.anim.points.scale(0.5),
+            first_cell_bb5.state_text.anim.points.next_to(pos_tmp_center_0, LEFT, buff=0.25),
+            first_cell_bb5.write_text.anim.points.next_to(pos_tmp_center_0, RIGHT, buff=0.25),
+            Transform(tm_bb5.table.cells[("E", "0")].state_text, tmp_E0_state_text),
+        )
+        self.forward(1)
+
+        valid_keys = [
+            ("A", "0"), ("A", "1"),
+            ("B", "0"), ("B", "1"),
+            ("C", "0"), ("C", "1"),
+            ("D", "0"), ("D", "1"),
+            ("E", "0"), ("E", "1"),
+        ]
+        tmbb5_cells_valid = {
+            key: tm_bb5.table.cells[key]
+            for key in valid_keys
+        }
+        text_all_dir = Group.from_iterable(
+            Text(t, font=local_font, font_size=24)
+            for t in "RLRRRLLLRL"
+        )
+        for cell, text in zip(tmbb5_cells_valid.values(), text_all_dir):
+            text.points.move_to(cell.dir_text)
+        self.play(TransformMatchingShapes(first_cell_bb5.dir_text, text_all_dir[0]))
+        self.forward(1.5)
+        pos_tmp_centers = [cell.dir_text.points.box.center for cell in tmbb5_cells_valid.values()]
+        self.play(
+            self.camera.anim.points.move_to(ORIGIN).scale(4 / 3),
+            *[
+                AnimGroup(
+                    FadeOut(cell.label),
+                    Succession(
+                        cell.dir_text.anim.points.scale(0.5),
+                        TransformMatchingShapes(cell.dir_text, text),
+                    ),
+                    cell.state_text.anim.points.next_to(center, LEFT, buff=0.25) \
+                        if i != 8
+                        else tmp_E0_state_text.anim.points.next_to(center, LEFT, buff=0.25),
+                    cell.write_text.anim.points.next_to(center, RIGHT, buff=0.25),
+                    lag_ratio=0.1,
+                    duration=2,
+                )
+                for i, (cell, text, center) in enumerate(zip(tmbb5_cells_valid.values(), text_all_dir, pos_tmp_centers))
+                if i != 0
+            ],
+            lag_ratio=0.4,
+        )
+        self.forward(1)
+        self.play(
+            *[
+                AnimGroup(
+                    TransformMatchingShapes(
+                        text_write_bit,
+                        final_segment[0][0],
+                    ),
+                    TransformMatchingShapes(
+                        text_dir,
+                        final_segment[0][1],
+                    ),
+                    TransformMatchingShapes(
+                        text_state if i != 8 else tmp_E0_state_text,
+                        final_segment[0][2],
+                    ),
+                )
+                for i, (text_write_bit, text_dir, text_state, final_segment) in enumerate(
+                        zip(
+                            [cell.write_text for cell in tmbb5_cells_valid.values()],
+                            text_all_dir,
+                            [cell.state_text for cell in tmbb5_cells_valid.values()],
+                            group_final_texts,
+                    )
+                )
+            ],
+            lag_ratio=0.3,
+            duration=3,
+        )
+        self.forward(1)
+        self.play(TransformMatchingShapes(group_final_texts, single_final_text))
+        self.forward(1.5)
+        self.play(FadeOut(single_final_text))
+        self.play(FadeIn(group_cells_origin.load_state()))
+        self.forward(1)
+
         self.play(Write(text_10x2eq20))
         self.forward(1.5)
         self.play(FadeOut(text_10x2eq20))
@@ -621,10 +733,13 @@ class s3_2(Timeline):
         rect_wh1.fill.set(color=WHITE, alpha=1).r.stroke.set(color=BLACK, alpha=1)
         rect_wh2 = rect_wh1.copy()
         rect_wh2.points.shift(RIGHT)
-        triangle_ant = Triangle(depth=-10).points.scale(0.3).r
+        triangle_ant = SVGItem("resources/ant.svg", depth=-10)
+        triangle_ant.points.scale(0.05)
+        triangle_ant.astype(VItem).stroke.set(color=WHITE, alpha=1)
         triangle_ant.points.move_to(rect_bl1)
-        triangle_ant2 = Triangle(depth=-10).points.scale(0.3).r
-        triangle_ant2.stroke.set(color=BLACK, alpha=1)
+        triangle_ant2 = SVGItem("resources/ant.svg", depth=-10)
+        triangle_ant2.points.scale(0.05)
+        triangle_ant2.astype(VItem).stroke.set(color=BLACK, alpha=1)
         triangle_ant2.points.move_to(rect_bl2)
         
         self.play(
@@ -657,7 +772,7 @@ class s3_2(Timeline):
                 Rotate(triangle_ant2, -PI / 2),
                 AnimGroup(
                     triangle_ant2.anim.points.shift(RIGHT),
-                    triangle_ant2.anim.stroke.set(color=WHITE, alpha=1),
+                    triangle_ant2.astype(VItem).anim.stroke.set(color=WHITE, alpha=1),
                 )
             ),
             TransformMatchingShapes(rect_wh2, rect_bl2),
@@ -671,32 +786,59 @@ class s3_2(Timeline):
         )
 
         grid = LangtonAntGrid(cell_size=0.25, pre_alloc=150)
+        def get_counter(n: int):
+            t0 = Text(
+                f"<c GREY_B>蚂蚁第</c> <c RED_B>{n}</c> <c GREY_B>步</c>",
+                font=local_font,
+                format="rich",
+                depth=-10
+            )
+            t0.points.move_to(LEFT * 4 + DOWN * 2.5).scale(1.5)
+            return t0
+        ant_counter = get_counter(0)
 
         self.play(
-            TransformMatchingShapes(
+            Transform(
                 Group(rect_wh1, rect_bl2),
                 grid,
+                flatten=True,
             ),
             TransformMatchingShapes(text_status_step, text_status_step_2),
+            FadeIn(ant_counter),
         )
         self.forward(1)
-        self.play(
-            AnimGroup(
-                grid.get_multi_step_anim(1000, duration=0.0003),
-                rate_func=ease_inout_cubic,
-                collapse=True,
-            ),
-            text_status_step_2.anim.points.shift(UP * 1.5 + LEFT * 1.5).scale(1.5),
-            self.camera.anim.points.scale(1.5),
-        )
-        fast_ant_anim = Succession(
+
+        def lanton_alpha2duration(i: int, total: int):
+            alpha = smooth(i / total)
+            FROM_N = 1
+            TO_N = 260
+            DURATION = 0.05
+            current_n = int(FROM_N * (1 - alpha) + TO_N * alpha)
+
+            return grid.multi_step(current_n, duration=DURATION), current_n
+
+        ANT_EPOCH = 90
+        lanton_succession = Succession(
             *[
-                grid.multi_step(120, duration=0.02)
-                for _ in range(100)
+                lanton_alpha2duration(i, ANT_EPOCH)[0]
+                for i in range(ANT_EPOCH)
             ],
             collapse=True,
         )
-        self.play(fast_ant_anim)
+        FULL_STEPS = sum(lanton_alpha2duration(i, ANT_EPOCH)[1] for i in range(ANT_EPOCH))
+
+        self.play(
+            lanton_succession,
+            AnimGroup(
+                text_status_step_2.anim.points.shift(UP * 1.5 + LEFT * 1.5).scale(1.5),
+                self.camera.anim.points.scale(1.5),
+                ItemUpdater(
+                    ant_counter,
+                    lambda p: get_counter(int(p.alpha * FULL_STEPS)),
+                ),
+                duration=5,
+            ),
+        )
         self.forward(1)
         self.prepare(
             AnimGroup(
@@ -713,6 +855,7 @@ class s3_2(Timeline):
         self.play(
             self.camera.anim.points.scale(2 / 3),
             TransformMatchingShapes(text_status_step_2, text_status_step_3),
+            FadeOut(ant_counter),
             duration=2,
         )
         self.forward(1)
