@@ -1,0 +1,1 @@
+$n+$ HALT #box[#place(dy: -0.7em, dx: 0.1em)[#rect(fill: red, height: 0.8em, width: 0.8em)]]

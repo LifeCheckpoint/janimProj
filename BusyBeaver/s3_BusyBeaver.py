@@ -952,6 +952,9 @@ class s3_3(Timeline):
         brace_n_text = TypstMath("n")
         brace_n_plus_1 = Brace(focus_table, UP, buff=0.1)
         brace_n_plus_1_text = TypstMath("n+1").points.scale(1.75).next_to(brace_n_plus_1, UP, buff=0.2).r
+        brace_n_plus_rect_text = TypstText(
+            "$n+$ HALT #box[#place(dy: -0.8em, dx: 0.2em)[#rect(fill: red, height: 1em, width: 1em)]]"
+        ).points.scale(1.75).next_to(brace_n_plus_1, UP, buff=0.2).r
         brace_n.points.align_to(brace_n_plus_1, UP)
         brace_n_text.points.scale(1.75).next_to(brace_n, UP, buff=0.2).r
         brace_2 = Brace(focus_table, LEFT, buff=0.1)
@@ -1014,6 +1017,9 @@ class s3_3(Timeline):
         brace_multi_text.points.scale(1.4).next_to(brace_multi, RIGHT, buff=0.2)
         brace_multi_text_2 = TypstMath("= 4(n+1)")
         brace_multi_text_2.points.scale(1.4).next_to(brace_multi, RIGHT, buff=0.2)
+        brace_1 = Brace(brace_multi_text_2["1"], DOWN)
+        brace_1_text = brace_1.points.create_typst(typst="\"HALT\"")
+        brace_1_text.points.scale(0.7)
         seperator_line = DashedLine(UP * 5, DOWN * 5).points.shift(RIGHT * 7.5).r
         text_final_status = TypstMath("(4(n+1))^(2n)")
         text_final_status.points.scale(2).move_to(RIGHT * 10.5)
@@ -1036,10 +1042,14 @@ class s3_3(Timeline):
         self.forward(1)
         self.play(
             Transform(brace_n, brace_n_plus_1),
-            TransformMatchingDiff(brace_n_text, brace_n_plus_1_text),
+            TransformMatchingDiff(brace_n_text, brace_n_plus_rect_text),
             Write(brace_2),
             Write(brace_2_text),
             lag_ratio=0.35,
+        )
+        self.forward(1)
+        self.play(
+            TransformMatchingDiff(brace_n_plus_rect_text, brace_n_plus_1_text),
         )
         self.forward(1)
         self.play(
@@ -1103,7 +1113,14 @@ class s3_3(Timeline):
             Write(brace_multi_text),
         )
         self.forward(1)
-        self.play(TransformMatchingDiff(brace_multi_text, brace_multi_text_2))
+        self.play(
+            TransformMatchingDiff(brace_multi_text, brace_multi_text_2),
+            AnimGroup(
+                Write(brace_1),
+                Write(brace_1_text),
+            ),
+            lag_ratio=0.3,
+        )
         self.forward(1)
         self.play(
             self.camera.anim.points.shift(RIGHT * 6),
@@ -1114,11 +1131,91 @@ class s3_3(Timeline):
         self.forward(0.5)
         self.play(Write(text_tms_upperbound))
         self.forward(1.5)
+
+        text_final_status.save_state()
+        text_tms_upperbound.save_state()
         self.play(
-            FadeOut(seperator_line),
-            Group(text_final_status, text_tms_upperbound).anim.points.shift(RIGHT),
-            self.camera.anim.points.shift(RIGHT * 10),
+            self.camera.anim.points.move_to(ORIGIN),
+            FadeOut(Group(
+                brace_n_plus_1, brace_n_plus_1_text, brace_2, brace_2_text,
+            )),
+            Group(text_final_status, text_tms_upperbound).anim.points.move_to(RIGHT * 5.5 + UP * 3).scale(0.7),
         )
+        self.forward(0.5)
+
+        states = ["A", "B", "C", "D", "E"]
+        rect_states = [
+            SurroundingRect(
+                Group(
+                    focus_table.get_cell("A", "0"),
+                    focus_table.get_cell(end_state, "1"),
+                ),
+                color=YELLOW,
+            )
+            for end_state in states
+        ]
+        grid_centers = [
+            (
+                focus_table.get_cell("A", "0").points.box.center + # type: ignore
+                focus_table.get_cell(end_state, "0").points.box.center # type: ignore
+            ) / 2
+            for end_state in states
+        ]
+        rect_explainations = [
+            TypstText(
+                f"{i + 1} 状态图灵机数量 $<= {n}$"
+            ) \
+                .points.next_to(
+                    center,
+                    UP,
+                    buff=1.25,
+                ).r
+            for (i, n), center in zip(
+                enumerate(
+                    [(4 * j) ** (2 * j) for j in range(1, 6)]
+                ),
+                grid_centers,
+            )
+        ]
+
+        self.play(
+            Write(rect_states[0]),
+            Write(rect_explainations[0]),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            Transform(rect_states[0], rect_states[1]),
+            TransformMatchingDiff(rect_explainations[0], rect_explainations[1]),
+            duration=0.5,
+        )
+        self.forward(0.5)
+        self.play(
+            Transform(rect_states[1], rect_states[2]),
+            TransformMatchingDiff(rect_explainations[1], rect_explainations[2]),
+            duration=0.5,
+        )
+        self.play(
+            Transform(rect_states[2], rect_states[3]),
+            TransformMatchingDiff(rect_explainations[2], rect_explainations[3]),
+            duration=0.5,
+        )
+        self.play(
+            Transform(rect_states[3], rect_states[4]),
+            TransformMatchingDiff(rect_explainations[3], rect_explainations[4]),
+            duration=0.5,
+        )
+        self.forward(1.5)
+        self.play(
+            FadeOut(Group(rect_states[4], rect_explainations[4])),
+            AnimGroup(
+                self.camera.anim.points.move_to(RIGHT * 15),
+                text_final_status.anim.load_state(),
+                text_tms_upperbound.anim.load_state(),
+            ),
+            lag_ratio=0.5,
+        )
+
         self.play(Write(text_n_eq_5))
         self.forward(0.5)
         self.play(Write(text_num_5_tm))
