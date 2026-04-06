@@ -1239,33 +1239,69 @@ class s3_4(Timeline):
         
         text_many_tms = TypstDoc(get_typ_doc("many_tms"), depth=10)
         text_many_tms.points.move_to(ORIGIN)
-        set_0_to_399 = list(range(400))
-        batch_1 = random.sample(set_0_to_399, 100)
+        set_0_to_299 = list(range(300))
+        batch_1 = random.sample(set_0_to_299, 50)
         rec_hl_1 = Group(*[
             SurroundingRect(text_many_tms[f"$H_({i})$"])
             for i in batch_1
         ])
         for i in batch_1:
-            set_0_to_399.remove(i)
-        batch_2 = random.sample(set_0_to_399, 150)
+            set_0_to_299.remove(i)
+        text_stop_steps = [
+            TypstText(f"== 停机\n\n{random.randint(1, 100000)} 步")
+            for _ in batch_1
+        ]
+        for i, idx in enumerate(batch_1):
+            text_stop_steps[i].points \
+                .move_to(text_many_tms[f"$H_({idx})$"]) \
+                .scale(0.6)
+            text_stop_steps[i]["== 停机"].astype(VItem).color.set(color=YELLOW)
+
+
+        batch_2 = random.sample(set_0_to_299, 100)
         rec_hl_2 = Group(*[
             SurroundingRect(text_many_tms[f"$H_({i})$"]).color.set(color=GREEN_B).r
             for i in batch_2
         ])
         for i in batch_2:
-            set_0_to_399.remove(i)
+            set_0_to_299.remove(i)
+        text_only_loop = [
+            TypstText(f"== 配置相同\n\n循环 {random.randint(1, 1000)} 步")
+            for _ in batch_2
+        ]
+        for i, idx in enumerate(batch_2):
+            text_only_loop[i].points \
+                .move_to(text_many_tms[f"$H_({idx})$"]) \
+                .scale(0.5)
+            text_only_loop[i]["== 配置相同"].astype(VItem).color.set(color=GREEN_B)
+
         # 视觉效果考虑
         H_only = rejection_sample(
-            set_0_to_399,
+            set_0_to_299,
             k=1,
-            cond=lambda m: m % 20 >= 5 and m % 20 <= 15 and 120 <= m <= 280,
+            cond=lambda m: m % 20 >= 5 and m % 20 <= 15 and 125 <= m <= 174,
         )[0]
-        set_0_to_399.remove(H_only)
-        batch_3 = set_0_to_399
+        set_0_to_299.remove(H_only)
+        batch_3 = set_0_to_299
         rec_hl_3 = Group(*[
             SurroundingRect(text_many_tms[f"$H_({i})$"]).color.set(color=RED_B).r
             for i in batch_3
         ])
+        text_self_copy = [
+            TypstText(
+                "== 自复制机\n\n"
+                f"{random.choice([
+                    "分形", "计数器", "弹跳", "钟", "嵌套"
+                ])}型"
+            )
+            for _ in batch_3
+        ]
+        for i, idx in enumerate(batch_3):
+            text_self_copy[i].points \
+                .move_to(text_many_tms[f"$H_({idx})$"]) \
+                .scale(0.5)
+            text_self_copy[i]["== 自复制机"].astype(VItem).color.set(color=RED_B)
+
         text_H_beaver = TypstMath("H_(\"BusyBeaver\")")
         text_H_beaver.points.scale(2).r.astype(VItem).color.set(color=CYAN)
 
@@ -1348,13 +1384,31 @@ class s3_4(Timeline):
         self.forward(5)
         self.play(
             FadeOut(rec_hl_1),
-            *[
-                text_many_tms[f"$H_({i})$"].astype(VItem).anim.fill.set(alpha=0.1)
-                for i in batch_1
-            ],
+            AnimGroup(
+                *[
+                    FadeOut(text_many_tms[f"$H_({i})$"])
+                    for i in batch_1
+                ],
+                lag_ratio=0.05,
+                duration=2,
+            ),
+            AnimGroup(
+                *[
+                    FadeIn(text_stop_steps[i])
+                    for i in range(len(batch_1))
+                ],
+                lag_ratio=0.05,
+                duration=2,
+            ),
             collapse=True,
         )
         self.forward(1.5)
+        self.play(
+            *[
+                text_stop_steps[i].astype(VItem).anim.fill.set(alpha=0.1)
+                for i in range(len(batch_1))
+            ],
+        )
         self.play(
             *[
                 Write(rec) for rec in rec_hl_2
@@ -1378,13 +1432,31 @@ class s3_4(Timeline):
         self.forward(6)
         self.play(
             FadeOut(rec_hl_2),
-            *[
-                text_many_tms[f"$H_({i})$"].astype(VItem).anim.fill.set(alpha=0.1)
-                for i in batch_2
-            ],
+            AnimGroup(
+                *[
+                    FadeOut(text_many_tms[f"$H_({i})$"])
+                    for i in batch_2
+                ],
+                lag_ratio=0.05,
+                duration=2,
+            ),
+            AnimGroup(
+                *[
+                    FadeIn(text_only_loop[i])
+                    for i in range(len(batch_2))
+                ],
+                lag_ratio=0.05,
+                duration=2,
+            ),
             collapse=True,
         )
         self.forward(1.5)
+        self.play(
+            *[
+                text_only_loop[i].astype(VItem).anim.fill.set(alpha=0.1)
+                for i in range(len(batch_2))
+            ],
+        )
         self.play(
             *[
                 Write(rec) for rec in rec_hl_3
@@ -1408,22 +1480,37 @@ class s3_4(Timeline):
         self.forward(6)
         self.play(
             FadeOut(rec_hl_3),
-            *[
-                text_many_tms[f"$H_({i})$"].astype(VItem).anim.fill.set(alpha=0.1)
-                for i in batch_3
-            ],
+            AnimGroup(
+                *[
+                    FadeOut(text_many_tms[f"$H_({i})$"])
+                    for i in batch_3
+                ],
+                lag_ratio=0.05,
+                duration=2,
+            ),
+            AnimGroup(
+                *[
+                    FadeIn(text_self_copy[i])
+                    for i in range(len(batch_3))
+                ],
+                lag_ratio=0.05,
+                duration=2,
+            ),
             collapse=True,
         )
         self.forward(1.5)
         self.play(
+            *[
+                text_self_copy[i].astype(VItem).anim.fill.set(alpha=0.1)
+                for i in range(len(batch_3))
+            ],
+        )
+        self.forward(0.5)
+        self.play(
             TransformMatchingShapes(
-                text_many_tms,
+                text_many_tms[f"$H_({H_only})$"],
                 text_H_beaver,
             ),
-            *[
-                FadeOut(text_many_tms[f"$H_({i})$"])
-                for i in range(400) if i != H_only
-            ],
             collapse=True,
         )
         self.forward(2)
