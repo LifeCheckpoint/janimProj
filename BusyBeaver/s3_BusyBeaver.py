@@ -1230,6 +1230,164 @@ class s3_3(Timeline):
 
 class s3_4(Timeline):
     """
+    uv run janim run s3_BusyBeaver.py s3_4_0 -i
+    """
+    CONFIG = Config(
+        typst_shared_preamble=get_typ_doc("preamble")
+    )
+    def construct(self) -> None:
+        core_bb5 = TuringMachineCore(
+            initial_tape=["0"],
+            start_state="A",
+            halt_states=["HALT"]
+        )
+        core_bb5.add_rule("A", "0", "B", "1", "R")
+        core_bb5.add_rule("A", "1", "C", "1", "L")
+        core_bb5.add_rule("B", "0", "C", "1", "R")
+        core_bb5.add_rule("B", "1", "B", "1", "R")
+        core_bb5.add_rule("C", "0", "D", "1", "R")
+        core_bb5.add_rule("C", "1", "E", "0", "L")
+        core_bb5.add_rule("D", "0", "A", "1", "L")
+        core_bb5.add_rule("D", "1", "D", "1", "L")
+        core_bb5.add_rule("E", "0", "HALT", "1", "R")
+        core_bb5.add_rule("E", "1", "A", "0", "L")
+        tm_bb5 = TuringMachine(
+            turing_core=core_bb5,
+            showcase_radius=11,
+            table_scaling=0.75,
+            tape_config={"center_scaling": 1},
+            table_config={"transpose": True},
+            counter_config={"max_value": 9999},
+        )
+        tm_bb5.is_table_shown = True
+        tm_bb5.is_counter_shown = False
+
+        self.forward(1)
+        self.play(
+            Write(tm_bb5.table),
+            Write(tm_bb5.framebox),
+            Write(tm_bb5.tape_item),
+        )
+        self.forward(1)
+
+        def wave_traversal(m: int, n: int):
+            batches = []
+            for k in range(m + n - 1):
+                start_row = max(0, k - n + 1)
+                end_row = min(m - 1, k)
+                
+                current_batch = set()
+                for i in range(start_row, end_row + 1):
+                    j = k - i
+                    current_batch.add((i, j))
+                batches.append(current_batch)
+            return batches
+        
+        history_list = []
+        def update_history_list(duration: float):
+            tm_bb5.step(duration=duration / 2.5).run_step_anim(self, compress=True)
+            new_his_grid = tm_bb5.tape_item.cells_group.copy()
+            new_his_grid.show()
+            history_list.append(new_his_grid)
+            self.play(
+                *[
+                    his_grid.anim.points.shift(DOWN * 1)
+                    for his_grid in history_list
+                ],
+                duration=duration,
+            )
+
+        self.prepare(
+            self.camera.anim.points.move_to(DOWN * 9),
+            at=1.5,
+            duration=7,
+        )
+        TMS_N = 12
+        for i in range(TMS_N):
+            if i < 3:
+                dur = 0.5
+            elif i < 8:
+                dur = 0.2
+            else:
+                dur = 0.1
+            update_history_list(dur)
+        
+        self.forward(1.5)
+        tm_bb5.hide()
+        cells_flatten: list[TapeCell] = []
+        for his_grid in history_list:
+            for cell in his_grid:
+                cells_flatten.append(cell)
+        his_grid_without_label = Group.from_iterable(
+            Group.from_iterable(cell[0] for cell in his)
+            for his in history_list 
+        )
+        self.prepare(
+            self.camera.anim.points.scale(1.6).move_to(DOWN * 9),
+            duration=3,
+        )
+        self.play(
+            Succession(
+                AnimGroup(
+                    *[
+                        FadeOut(Group(
+                            *cell[1:]
+                        ))
+                        for cell in cells_flatten
+                    ],
+                    duration=1.5,
+                ),
+                AnimGroup(
+                    his_grid_without_label.anim.points.arrange(UP, buff=0).move_to(DOWN * 9),
+                    duration=1.5,
+                ),
+            ),
+        )
+        self.forward(1)
+        wave_iters = wave_traversal(len(history_list), len(history_list[0]))
+        final_cell_wave_anims = []
+        for batch in wave_iters:
+            flap_anim_group = []
+            for i, j in batch:
+                cell: TapeCell = history_list[i][j]
+                flap_anim_group.append(
+                    cell[0].anim.fill.set(color=BLACK if cell.tile_data == "0" else WHITE)
+                )
+            final_cell_wave_anims.append(AnimGroup(*flap_anim_group, duration=0.5))
+        final_cell_wave_anim_group = AnimGroup(
+            *final_cell_wave_anims,
+            lag_ratio=0.1,
+        )
+            
+        self.play(final_cell_wave_anim_group)
+        self.forward(1)
+
+        text_history_grid = Text("历史配置表", font=local_font, font_size=64)
+        text_history_grid.points.next_to(his_grid_without_label, UP, buff=0.5)
+        cells_flatten_without_label = []
+        for his in his_grid_without_label:
+            for cell in his:
+                cells_flatten_without_label.append(cell)
+
+        self.play(
+            Write(text_history_grid),
+            self.camera.anim.points.shift(UP * 1),
+        )
+        self.forward(1.5)
+        random.shuffle(cells_flatten_without_label)
+        self.play(
+            FadeOut(text_history_grid),
+            *[
+                FadeOut(cell)
+                for cell in cells_flatten_without_label
+            ],
+            lag_ratio=0.05,
+            duration=2,
+        )
+        self.forward(1)
+
+class s3_5(Timeline):
+    """
     uv run janim run s3_BusyBeaver.py s3_4 -i
     """
     CONFIG = Config(
@@ -1532,7 +1690,7 @@ class s3_4(Timeline):
         )
         self.forward(1)
 
-class s3_5(Timeline):
+class s3_6(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_5 -i
     """
@@ -1957,7 +2115,7 @@ class s3_5(Timeline):
         )
         self.forward(1)
 
-class s3_6(Timeline):
+class s3_7(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_6 -i
     """
