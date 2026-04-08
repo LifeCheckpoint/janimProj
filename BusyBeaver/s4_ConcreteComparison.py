@@ -1137,10 +1137,8 @@ class s4_4(Timeline):
                 triangle_pointer.radius.set(radius=0.01)
                 triangle_pointer.color.set(color=WHITE, alpha=1)
                 text_bb_x = TypstMath("")
-                text_quote = Text("对于不可言说之物，\n我们必须保持沉默。\n—— Ludwig Wittgenstein", font=local_font, depth=-20)
-                text_quote[1].points.next_to(text_quote[0], DOWN, aligned_edge=LEFT)
-                text_quote[2].points.scale(0.7).next_to(text_quote[1], DOWN, aligned_edge=RIGHT)
-                text_quote.points.scale(1.5).move_to(ORIGIN)
+                text_quote = TypstText("对于不可言说之物，\\ 我们必须保持沉默。\n\n$quad quad$—— Ludwig Wittgenstein", depth=-20)
+                text_quote.points.scale(1.5).move_to(RIGHT * 0.5)
 
                 self.play(Write(group_axes))
                 self.forward(0.5)
