@@ -2606,6 +2606,32 @@ class s3_7(Timeline):
         text_10_pow_tower_15 = TypstMath("10 arrow.t arrow.t 15")
         text_10_pow_tower_15.points.scale(3)
 
+        text_pows = [
+            TypstText(f"需要 $2^(A_{i})$ 次操作", depth=-11)
+            for i in range(1, 15)
+        ]
+        for t in text_pows:
+            t.points.scale(1.25)
+        rec_pow_backs = [
+            SurroundingRect(
+                t,
+                depth=-10,
+                buff=0.25,
+            ) for t in text_pows
+        ]
+        recs_A_now = [
+            SurroundingRect(
+                group_f_t_col_An[i + 2][f"A_({i + 1})"],
+                color=CYAN,
+            )
+            for i in range(1, 15)
+        ]
+        for rp, rec_A, t in zip(rec_pow_backs, recs_A_now, text_pows):
+            rp.fill.set(color=BLACK, alpha=1)
+            rp.stroke.set(color=CYAN)
+            rp.points.next_to(rec_A, DOWN, aligned_edge=LEFT, buff=0.25)
+            t.points.move_to(rp)
+
         self.play(FadeOut(text_Cs))
         self.play(Write(group_formulas_table))
         self.forward(2)
@@ -2620,9 +2646,49 @@ class s3_7(Timeline):
             FadeOut(rec_rn),
             FadeOut(arrow_stop_con_rn),
         )
+        self.prepare(
+            Write(rec_pow_backs[0]),
+            Write(text_pows[0]),
+            Write(recs_A_now[0]),
+            lag_ratio=0.2,
+            duration=1.0
+        )
+        self.forward(1)
+        run_down_time = 6
+        linear_alpha = lambda t, a, b: (t - a) / (b - a)
+        wait_alpha = lambda t: 3 / 2 - 5 * t * (1 - t)
+        self.prepare(
+            Succession(
+                *[
+                    Succession(
+                        AnimGroup(
+                            TransformMatchingDiff(
+                                text_pows[i - 1],
+                                text_pows[i],
+                                duration=(run_down_time / 14) * (1 / 3),
+                            ),
+                            Transform(
+                                recs_A_now[i - 1],
+                                recs_A_now[i],
+                                duration=(run_down_time / 14) * (1 / 3),
+                            ),
+                            Transform(
+                                rec_pow_backs[i - 1],
+                                rec_pow_backs[i],
+                                duration=(run_down_time / 14) * (1 / 3),
+                            ),
+                        ),
+                        Wait(
+                            duration=(run_down_time / 14) * (2 / 3) * wait_alpha(linear_alpha(i, 1, 14)),
+                        ),
+                    )
+                    for i in range(1, 14)
+                ]
+            ),
+        )
         self.play(
             self.camera.anim.points.shift(DOWN * 14),
-            duration=5.0,
+            duration=4.0,
         )
         self.forward(1.5)
         self.play(Write(rec_halt))
@@ -2634,7 +2700,36 @@ class s3_7(Timeline):
             text_rec_halt2,
         ))
         self.forward(2)
-        self.play(self.camera.anim.points.shift(UP * 14))
+
+        def build_tower_iterative(n):
+            left_wrap = ""
+            right_wrap = ""    
+            for i in range(n - 1, 0, -1):
+                left_wrap += "2^("
+                right_wrap += ")"
+                yield f"A_({n}) \"步数\"={left_wrap}A_({i}){right_wrap}"
+        
+        text_tower = build_tower_iterative(10)
+        text_Ans = [
+            TypstMath(next(text_tower)).points.scale(2).move_to(DOWN * 18).r
+            for _ in range(9)
+        ]
+        self.play(
+            self.camera.anim.points.shift(DOWN * 2),
+            Write(text_Ans[0])
+        )
+        self.play(
+            Succession(*[
+                TransformMatchingDiff(
+                    text_Ans[i - 1],
+                    text_Ans[i],
+                    duration=0.5,
+                ) for i in range(1, 9)
+            ])
+        )
+        self.forward(1)
+
+        self.play(self.camera.anim.points.shift(UP * (14 + 2)))
         self.play(FadeOutToPoint(group_formulas_table, DOWN * 10))
         self.play(FadeIn(text_10_pow_tower_15))
         self.forward(1.5)
