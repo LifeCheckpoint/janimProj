@@ -8,6 +8,8 @@ from turing_machine.components.tape_cell import TapeCell
 from turing_machine.components.grid_cell import GridCell
 from turing_machine.components.grid_table import GridTable, Transition
 from turing_machine.effects.lens import LensEffect
+from turing_machine.logic.turingcore import TuringMachineCore
+from turing_machine.turing_machine import TuringMachine
 import math
 
 class s4_1(Timeline):
@@ -40,12 +42,6 @@ class s4_1(Timeline):
         text_halt_implies_collatz.points.scale(1.1).next_to(text_Hc_eq, DOWN, aligned_edge=LEFT, buff=0.1)
         text_halt_implies_collatz["停机"].astype(VItem).color.set(color=RED_A)
         text_halt_implies_collatz["不停机"].astype(VItem).color.set(color=RED_A)
-        rec_collatz_q = SurroundingRect(
-            text_halt_implies_collatz["不停机 $=>$ Collatz 猜想成立"],
-            color=YELLOW,
-            depth=10,
-        )
-        rec_collatz_q.fill.set(alpha=0.25)
         rec_bb6 = SurroundingRect(
             text_bb6_ge["\"BB\"_6"],
             color=GREY_B,
@@ -53,31 +49,31 @@ class s4_1(Timeline):
         text_S_step = TypstText("$S$ steps").points.scale(1.5).r
         text_S_step.points.next_to(rec_bb6, DOWN, buff=0.25)
         text_S_step.astype(VItem).color.set(color=GREY_B)
-        def step_compress(alpha: float, to_step: int = 1000000, k: float = 10000000):
-            _s = to_step * math.log(1 + to_step * alpha) / math.log(1 + k)
-            return int(np.clip(_s, 1, to_step))
-        def get_hc_step_text(
-            step: int,
-            next_to: VItem | None = None,
-            final_S: int = 500000,
-            ellipsis_threshold: int = 7,
-            scaling_coeff: float = 0.8,
-        ):
-            step_text = str(step)
-            if len(step_text) > ellipsis_threshold:
-                step_text = f"{step_text[:ellipsis_threshold // 2]}...{step_text[-ellipsis_threshold // 2:]}"
-            t = f"{step_text} \"steps\" " + ("<= " if step <= final_S else "> ") + "S"
-            text = TypstMath(t).points.scale(1.75).r
-            text[f"{step_text} \"steps\""].astype(VItem).color.set(color=GREEN_C)
-            text["S"].astype(VItem).color.set(color=GREY_B)
-            if step <= final_S:
-                text["<= "].astype(VItem).color.set(color=WHITE)
-            else:
-                text["> "].astype(VItem).color.set(color=RED_A)
-            if next_to is not None:
-                text.points.next_to(next_to, UP, buff=0.5)
-            return text
-        text_Hc_steps = get_hc_step_text(0, next_to=rect_Hc)
+        # def step_compress(alpha: float, to_step: int = 1000000, k: float = 10000000):
+        #     _s = to_step * math.log(1 + to_step * alpha) / math.log(1 + k)
+        #     return int(np.clip(_s, 1, to_step))
+        # def get_hc_step_text(
+        #     step: int,
+        #     next_to: VItem | None = None,
+        #     final_S: int = 500000,
+        #     ellipsis_threshold: int = 7,
+        #     scaling_coeff: float = 0.8,
+        # ):
+        #     step_text = str(step)
+        #     if len(step_text) > ellipsis_threshold:
+        #         step_text = f"{step_text[:ellipsis_threshold // 2]}...{step_text[-ellipsis_threshold // 2:]}"
+        #     t = f"{step_text} \"steps\" " + ("<= " if step <= final_S else "> ") + "S"
+        #     text = TypstMath(t).points.scale(1.75).r
+        #     text[f"{step_text} \"steps\""].astype(VItem).color.set(color=GREEN_C)
+        #     text["S"].astype(VItem).color.set(color=GREY_B)
+        #     if step <= final_S:
+        #         text["<= "].astype(VItem).color.set(color=WHITE)
+        #     else:
+        #         text["> "].astype(VItem).color.set(color=RED_A)
+        #     if next_to is not None:
+        #         text.points.next_to(next_to, UP, buff=0.5)
+        #     return text
+        # text_Hc_steps = get_hc_step_text(0, next_to=rect_Hc)
         
         self.play(
             Write(quest_6_sim),
@@ -105,43 +101,177 @@ class s4_1(Timeline):
             Write(text_S_step),
         )
         self.forward(1)
-        self.play(Write(text_Hc_steps))
-        self.forward(0.5)
+
         self.play(
-            ItemUpdater(
-                text_Hc_steps,
-                lambda p: get_hc_step_text(
-                    step=step_compress(p.alpha, to_step=10000000, k=10**65),
-                    next_to=rect_Hc,
-                    final_S=1000000,
-                    ellipsis_threshold=6,
+            Group(
+                text_halt_implies_collatz,
+                text_Hc_eq[:-1],
+            ).anim.points.move_to(LEFT * 4 + UP * 4),
+            Group(
+                text_bb6_ge,
+                text_collatz_p,
+                rec_bb6,
+                text_S_step,
+            ).anim.points.move_to(RIGHT * 4 + UP * 4).scale(0.8),
+            FadeOut(
+                Group(
+                    text_Hc_eq[-1:],
+                    rect_Hc,
+                    text_collatz_2,
                 )
             ),
-            duration=5.0,
+            self.camera.anim.points.move_to(UP),
         )
-        
-        rec_ge = SurroundingRect(
-            text_Hc_steps["> S"],
-            color=RED_A,
+
+        core_collatz = TuringMachineCore(
+            initial_tape=["0"],
+            start_state="P",
+            halt_states=["HALT"]
         )
-        text_no_halt = Text("不停机", font=local_font, color=RED_A)
-        text_no_halt.points.scale(1.5).next_to(rec_ge, UP, buff=0.25)
+        core_collatz.add_rule("P", "0", "Q", "1", "R")
+        core_collatz.add_rule("P", "1", "R", "1", "R")
+        core_collatz.add_rule("Q", "0", "P", "0", "L")
+        core_collatz.add_rule("Q", "1", "Z", "0", "R")
+        core_collatz.add_rule("R", "0", "Z", "1", "R")
+        core_collatz.add_rule("R", "1", "Q", "0", "L")
+        core_collatz.add_rule("X", "0", "R", "1", "L")
+        core_collatz.add_rule("X", "1", "Y", "0", "R")
+        core_collatz.add_rule("Y", "0", "HALT", "1", "L")
+        core_collatz.add_rule("Y", "1", "Z", "0", "L")
+        core_collatz.add_rule("Z", "0", "Q", "0", "R")
+        core_collatz.add_rule("Z", "1", "P", "0", "R")
+        tm_collatz = TuringMachine(
+            turing_core=core_collatz,
+            showcase_radius=11,
+            table_scaling=1,
+            tape_config={"center_scaling": 1},
+            table_config={"transpose": True},
+            counter_config={"max_value": 9999},
+        )
+        tm_collatz.is_table_shown = True
+        tm_collatz.is_counter_shown = False
+        rec_table_collatz = SurroundingRect(
+            tm_collatz.table,
+            color=GREEN,
+        )
+        text_table_explaination = TypstText("判定猜想真伪的图灵机 $H_c$\n\n（示意机器）")
+        text_table_explaination["$H_c$"].astype(VItem).color.set(color=GREEN)
+        text_table_explaination["判定猜想真伪"].astype(VItem).color.set(color=RED_A)
+        text_table_explaination["（示意机器）"].astype(VItem).color.set(color=GREY_C)
+        text_table_explaination.points \
+            .next_to(rec_table_collatz, DOWN, aligned_edge=LEFT, buff=0.5) \
+            .shift(LEFT)
+        text_bb6_max_step = TypstText("$\"BB\"(6)$ 停机前 \\ 至多运行 $S$ 步")
+        text_bb6_max_step.points \
+            .next_to(rec_table_collatz, DOWN, aligned_edge=RIGHT, buff=0.1)
+        text_bb6_max_step["$S$"].astype(VItem).color.set(color=BLUE)
+        triangle_tip = Triangle()
+        triangle_tip.color.set(color=BLUE, alpha=1).r.stroke.set(alpha=0)
+        triangle_tip.points.scale(0.1).rotate(PI).next_to(text_bb6_max_step["$S$"], DOWN, buff=0.1)
+        rec_back_progress = Rect(3, 0.25)
+        rec_back_progress.color.set(color=GREY_E, alpha=1)
+        rec_back_progress.points \
+            .next_to(rec_table_collatz, DOWN, aligned_edge=RIGHT, buff=1.25)
+        rec_front_progress = Rect(0.01, 0.25)
+        rec_front_progress.color.set(color=GREEN, alpha=1)
+        rec_front_progress.points.move_to(rec_back_progress.points.box.left, aligned_edge=LEFT)
+        text_exceed_S = TypstText("超出 $S$ 步 \\ 不停机")
+        text_exceed_S.points.next_to(rec_back_progress, RIGHT, buff=0.5)
+        text_exceed_S["$S$"].astype(VItem).color.set(color=BLUE)
+        text_exceed_S["不停机"].astype(VItem).color.set(color=RED_A)
 
         self.play(
-            Write(rec_ge),
-            Write(text_no_halt),
+            Write(tm_collatz.table),
+            Write(tm_collatz.tape_item),
         )
-        self.forward(0.5)
+        self.play(
+            Write(rec_table_collatz),
+            Write(text_table_explaination),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(FadeOut(rec_table_collatz))
+        self.play(
+            Write(triangle_tip),
+            Write(rec_back_progress),
+            Write(rec_front_progress),
+            Write(text_bb6_max_step),
+        )
+        self.forward(1.5)
+
+        def update_progress(progress_front_item: VItem, alpha: float, threshold: float = 0.82):
+            progress_front_item.points.set_width(rec_back_progress.points.box.width * alpha, stretch=True)
+            progress_front_item.points.move_to(rec_back_progress.points.box.left, aligned_edge=LEFT)
+            if alpha >= threshold:
+                progress_front_item.color.set(color=BLUE)
+            else:
+                progress_front_item.color.set(color=GREEN)
+
+        self.prepare(
+            DataUpdater(
+                rec_front_progress,
+                lambda item, p: update_progress(item, p.alpha),
+            ),
+            duration=5,
+        )
+        self.prepare(
+            Flash(rec_back_progress.points.box.right, color=WHITE),
+            at=5,
+        )
+        self.prepare(
+            Write(text_exceed_S),
+            at=5.5,
+        )
+        for _ in range(100):
+            tm_collatz.step(duration=0.01).run_step_anim(self, compress=True)
+
+        self.forward(3)
+        rec_collatz_q = SurroundingRect(
+            text_halt_implies_collatz["不停机 $=>$ Collatz 猜想成立"],
+            color=YELLOW,
+            depth=10,
+        )
+        rec_collatz_q.fill.set(alpha=0.25)
         self.play(Write(rec_collatz_q))
+        self.forward(1)
+        self.play(FadeOut(rec_collatz_q))
+
+        # self.play(Write(text_Hc_steps))
+        # self.forward(0.5)
+        # self.play(
+        #     ItemUpdater(
+        #         text_Hc_steps,
+        #         lambda p: get_hc_step_text(
+        #             step=step_compress(p.alpha, to_step=10000000, k=10**65),
+        #             next_to=rect_Hc,
+        #             final_S=1000000,
+        #             ellipsis_threshold=6,
+        #         )
+        #     ),
+        #     duration=5.0,
+        # )
+        
+        # rec_ge = SurroundingRect(
+        #     text_Hc_steps["> S"],
+        #     color=RED_A,
+        # )
+        # text_no_halt = Text("不停机", font=local_font, color=RED_A)
+        # text_no_halt.points.scale(1.5).next_to(rec_ge, UP, buff=0.25)
+
+        # self.play(
+        #     Write(rec_ge),
+        #     Write(text_no_halt),
+        # )
+        # self.forward(0.5)
+        # self.play(Write(rec_collatz_q))
         self.forward(2)
 
-        text_bb6_ge_collatz = TypstText("Difficulty of $\"BB\"(6) >=$ Collatz conjecture")
-        text_bb27_ge_goldbach = TypstText("Difficulty of $\"BB\"(27) >=$ Goldbach's conjecture")
-        text_bb744_ge_riemann = TypstText("Difficulty of $\"BB\"(744) >=$ Riemann conjecture")
+        text_bb27_ge_goldbach = TypstText("计算 $\"BB\"(27)$ 难度 $>=$ Goldbach's conjecture")
+        text_bb744_ge_riemann = TypstText("计算 $\"BB\"(744)$ 难度 $>=$ Riemann conjecture")
         group_ges = Group()
         for t, step in zip(
-            [text_bb6_ge_collatz, text_bb27_ge_goldbach, text_bb744_ge_riemann],
-            [6, 27, 744],
+            [text_bb27_ge_goldbach, text_bb744_ge_riemann],
+            [27, 744],
         ):
             t.points.scale(1.25)
             t[f"$\"BB\"({step})$"].astype(VItem).color.set(color=YELLOW)
@@ -183,24 +313,30 @@ class s4_1(Timeline):
             for txt in group_riemann_hl
         )
 
+        tm_collatz.framebox.hide()
+        fadeouts = [
+            text_S_step,
+            rec_bb6,
+            text_halt_implies_collatz,
+            tm_collatz.table,
+            tm_collatz.tape_item,
+            Group(rec_back_progress, rec_front_progress, triangle_tip),
+            text_exceed_S,
+            text_bb6_max_step,
+            text_table_explaination,
+        ]
         self.play(
-            FadeOut(Group(
-                text_Hc_steps,
-                rec_ge,
-                text_no_halt,
-                rect_Hc,
-                text_Hc_eq,
-                text_collatz_2,
-                text_S_step,
-                rec_bb6,
-                text_halt_implies_collatz,
-                rec_collatz_q,
-            )),
-            TransformMatchingDiff(
-                Group(text_bb6_ge, text_collatz_p),
-                group_ges[0],
+            AnimGroup(
+                *[
+                    FadeOut(t) for t in fadeouts
+                ],
+                lag_ratio=0.2,
             ),
-            self.camera.anim.points.shift(UP * 1),
+            # TransformMatchingDiff(
+            #     Group(text_bb6_ge, text_collatz_p),
+            #     group_ges[0],
+            # ),
+            self.camera.anim.points.move_to(ORIGIN),
         )
         self.play(
             self.camera.anim.points.shift(LEFT * 4),
@@ -212,7 +348,7 @@ class s4_1(Timeline):
         self.play(
             self.camera.anim.points.shift(RIGHT * 4),
             FadeOut(arxiv_bb27),
-            Write(group_ges[1]),
+            Write(group_ges[0]),
         )
         self.forward(1)
         self.play(
@@ -223,7 +359,7 @@ class s4_1(Timeline):
         self.forward(1)
         self.play(Uncreate(rects_riemann_hl))
         self.play(
-            Write(group_ges[2]),
+            Write(group_ges[1]),
             self.camera.anim.points.shift(RIGHT * 4),
             FadeOut(blog_riemann),
         )
