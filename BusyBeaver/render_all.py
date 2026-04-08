@@ -1,8 +1,10 @@
 """
-并行渲染 BusyBeaver 文件夹中的所有动画，至多同时运行 2 个任务。
+并行渲染 BusyBeaver 文件夹中的所有动画
 用法: 在 BusyBeaver 目录下运行 python render_all.py
 """
-import subprocess, concurrent.futures, time
+import subprocess
+import concurrent.futures
+import time
 from pathlib import Path
 
 CWD = Path(__file__).parent
@@ -23,6 +25,7 @@ TASKS = [
     ("s3_BusyBeaver.py", "s3_4"),
     ("s3_BusyBeaver.py", "s3_5"),
     ("s3_BusyBeaver.py", "s3_6"),
+    ("s3_BusyBeaver.py", "s3_7"),
     ("s4_ConcreteComparison.py", "s4_1"),
     ("s4_ConcreteComparison.py", "s4_2"),
     ("s4_ConcreteComparison.py", "s4_3"),
