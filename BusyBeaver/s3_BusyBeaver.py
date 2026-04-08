@@ -21,6 +21,7 @@ def history_grid_gen(
     square_size: float = 0.25,
     transpose: bool = False,
     max_per_line: int = 75,
+    flap_color: bool = False,
 ) -> Group:
     DEBUG = False
     height = len(seq.splitlines())
@@ -41,14 +42,14 @@ def history_grid_gen(
                 if char == "0":
                     group.add(
                         Rect(square_size, square_size) \
-                            .fill.set(color=BLACK, alpha=1).r \
+                            .fill.set(color=BLACK if not flap_color else WHITE, alpha=1).r \
                             .stroke.set(color=WHITE, alpha=1).r \
                             .radius.set(radius=0.005).r
                     )
                 else:
                     group.add(
                         Rect(square_size, square_size) \
-                            .fill.set(color=WHITE, alpha=1).r \
+                            .fill.set(color=WHITE if not flap_color else BLACK, alpha=1).r \
                             .stroke.set(color=WHITE, alpha=1).r \
                             .radius.set(radius=0.005).r
                     )
@@ -1778,6 +1779,27 @@ class s3_6(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
+        def get_only_table(
+            core_rulers: list[Callable[[TuringMachineCore], TuringMachineCore]] | Callable[[TuringMachineCore], TuringMachineCore],
+            table_scaling: float = 1.0,
+        ):
+            from functools import reduce
+            core = TuringMachineCore(
+                initial_tape="",
+                start_state="A",
+                halt_states=["HALT"],
+            )
+            core = core_rulers(core) if isinstance(core_rulers, Callable) else reduce(lambda c, r: r(c), core_rulers, core)
+            tm = TuringMachine(
+                turing_core=core,
+                showcase_radius=2,
+                table_scaling=table_scaling,
+                tape_config={"center_scaling": 1},
+                table_config={"transpose": True},
+                counter_config={"max_value": 9999},
+            )
+            return tm.table
+
         tm_types = [
             "cycler",
             "translated_cycler",
@@ -1798,7 +1820,8 @@ class s3_6(Timeline):
         group_types = Group(*[
             Group(
                 text_diff_type.get_label(type_name),
-                history_grid_gen(type_txt, square_size=0.1, transpose=True),
+                history_grid_gen(type_txt, square_size=0.1, transpose=True) \
+                    .points.rotate(PI, axis=UP).r,
             ).points.arrange(DOWN).move_to(ORIGIN).r
             for type_name, type_txt in zip(tm_types, file_txts)
         ])
@@ -1846,7 +1869,20 @@ class s3_6(Timeline):
         text_bb = TypstText("1RB1LC_1RC1RB_1RD0LE_1LA1LD_1RZ0LA")
         text_bb.points.scale(3)
         text_bb.astype(VItem).color.set(color=CYAN)
-        
+        def ruler_bb5(c: TuringMachineCore):
+            c.add_rule("A", "0", "B", "1", "R")
+            c.add_rule("A", "1", "C", "1", "L")
+            c.add_rule("B", "0", "C", "1", "R")
+            c.add_rule("B", "1", "B", "1", "R")
+            c.add_rule("C", "0", "D", "1", "R")
+            c.add_rule("C", "1", "E", "0", "L")
+            c.add_rule("D", "0", "A", "1", "L")
+            c.add_rule("D", "1", "D", "1", "L")
+            c.add_rule("E", "0", "HALT", "1", "R")
+            c.add_rule("E", "1", "A", "0", "L")
+            return c
+        table_bb5 = get_only_table(ruler_bb5, table_scaling=2.5).points.next_to(text_bb, DOWN, buff=0.5).r
+
         self.play(Write(text_10pow12))
         self.forward(0.5)
         self.play(
@@ -1888,8 +1924,16 @@ class s3_6(Timeline):
             ),
             duration=2,
         )
+        self.play(
+            Write(table_bb5),
+            self.camera.anim.points.move_to(table_bb5.points.box.center),
+        )
         self.forward(1.5)
-        self.play(FadeOut(text_bb))
+        self.play(
+            FadeOut(text_bb),
+            FadeOut(table_bb5),
+        )
+        self.camera.points.move_to(ORIGIN)
 
         text_1962_2024 = TypstMath("1962")
         text_1962_2024.points.scale(2.5)
@@ -1914,27 +1958,6 @@ class s3_6(Timeline):
             text_4bbs,
         ))
         self.forward(0.5)
-
-        def get_only_table(
-                core_rulers: list[Callable[[TuringMachineCore], TuringMachineCore]] | Callable[[TuringMachineCore], TuringMachineCore],
-                table_scaling: float = 1.0,
-            ):
-            from functools import reduce
-            core = TuringMachineCore(
-                initial_tape="",
-                start_state="A",
-                halt_states=["HALT"],
-            )
-            core = core_rulers(core) if isinstance(core_rulers, Callable) else reduce(lambda c, r: r(c), core_rulers, core)
-            tm = TuringMachine(
-                turing_core=core,
-                showcase_radius=2,
-                table_scaling=table_scaling,
-                tape_config={"center_scaling": 1},
-                table_config={"transpose": True},
-                counter_config={"max_value": 9999},
-            )
-            return tm.table
         
         def ruler_bb1(c: TuringMachineCore):
             c.add_rule("A", "0", "HALT", "1", "R")
@@ -1996,21 +2019,23 @@ class s3_6(Timeline):
                 seq,
                 square_size=0.35 - (i / 4) * 0.345,
                 transpose=True,
-                max_per_line=54,
+                max_per_line=200,
+                flap_color=True,
             )
+            # ).points.rotate(PI, axis=UP).r
             for i, seq in enumerate(seqs)
         ]
-        text_ellipsis = TypstMath("...").points.scale(1.5).r
-        bb_grids[3] = Group( # type: ignore
-            Group(
-                bb_grids[3][0],
-                text_ellipsis.copy().points.next_to(bb_grids[3][0], RIGHT).r
-            ),
-            Group(
-                text_ellipsis.copy().points.next_to(bb_grids[3][1], LEFT).r,
-                bb_grids[3][1]
-            ),
-        ).points.arrange(DOWN, buff=0.2).r
+        # text_ellipsis = TypstMath("...").points.scale(1.5).r
+        # bb_grids[3] = Group( # type: ignore
+        #     Group(
+        #         bb_grids[3][0],
+        #         text_ellipsis.copy().points.next_to(bb_grids[3][0], RIGHT).r
+        #     ),
+        #     Group(
+        #         text_ellipsis.copy().points.next_to(bb_grids[3][1], LEFT).r,
+        #         bb_grids[3][1]
+        #     ),
+        # ).points.arrange(DOWN, buff=0.2).r
         groups_bb_info = [
             Group(
                 txt, table, grid
@@ -2018,7 +2043,7 @@ class s3_6(Timeline):
             for txt, table, grid in zip(text_H1234, table_bbs, bb_grids)
         ]
         groups_bb_info[1].points.next_to(groups_bb_info[0], RIGHT, buff=1.5)
-        group_groups_bb_info = Group(
+        Group(
             Group(groups_bb_info[0], groups_bb_info[1]),
             groups_bb_info[2], groups_bb_info[3],
         ).points.arrange(
@@ -2027,6 +2052,11 @@ class s3_6(Timeline):
             aligned_edge=LEFT,
         ).next_to(text_4bbs, DOWN, aligned_edge=LEFT, buff=0.15)
 
+        self.prepare(
+            self.camera.anim.points.scale(1.2).shift(RIGHT * 1),
+            at=3,
+            duration=7,
+        )
         self.play(
             Succession(*[
                 Succession(
