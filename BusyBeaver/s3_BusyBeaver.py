@@ -16,6 +16,54 @@ from langton_ant.langton_ant_grid import LangtonAntGrid
 from typst_dfa.typst_dfa import load_dfa_typst
 import random
 
+def history_grid_gen(
+    seq: str,
+    square_size: float = 0.25,
+    transpose: bool = False,
+    max_per_line: int = 75,
+) -> Group:
+    DEBUG = False
+    height = len(seq.splitlines())
+    width = max([len(line) for line in seq.splitlines()])
+    lines = seq.splitlines()
+    if transpose:
+        lines = list(reversed(lines))
+        
+    final_group = Group()
+    idl_total = len(lines) // max_per_line + 1
+    for idl in range(idl_total):
+        slice = lines[idl * max_per_line:(idl + 1) * max_per_line]
+        if len(slice) == 0:
+            continue
+        group = Group()
+        for i, line in enumerate(slice):
+            for j, char in enumerate(line):
+                if char == "0":
+                    group.add(
+                        Rect(square_size, square_size) \
+                            .fill.set(color=BLACK, alpha=1).r \
+                            .stroke.set(color=WHITE, alpha=1).r \
+                            .radius.set(radius=0.005).r
+                    )
+                else:
+                    group.add(
+                        Rect(square_size, square_size) \
+                            .fill.set(color=WHITE, alpha=1).r \
+                            .stroke.set(color=WHITE, alpha=1).r \
+                            .radius.set(radius=0.005).r
+                    )
+        if DEBUG:
+            print(f"slice {idl}: width {width}, height {height}, max_per_line {max_per_line}, actual lines {len(slice)}")
+        group.points.arrange_in_grid(height, width, buff=0)
+        if transpose:
+            group.points.rotate(PI / 2)
+        final_group.add(group)
+    if not transpose:
+        final_group.points.arrange_in_grid(n_rows=1, buff=0.2, aligned_edge=UP).move_to(ORIGIN)
+    else:
+        final_group.points.arrange_in_grid(n_cols=1, buff=0.2, aligned_edge=LEFT).move_to(ORIGIN)
+    return final_group
+
 class s3_1(Timeline):
     """
     uv run janim run s3_BusyBeaver.py s3_1 -i
@@ -1327,7 +1375,7 @@ class s3_4(Timeline):
             duration=3,
         )
         self.play(
-            Succession(
+            AnimGroup(
                 AnimGroup(
                     *[
                         FadeOut(Group(
@@ -1335,12 +1383,19 @@ class s3_4(Timeline):
                         ))
                         for cell in cells_flatten
                     ],
+                    at=0,
                     duration=1.5,
                 ),
                 AnimGroup(
                     his_grid_without_label.anim.points.arrange(UP, buff=0).move_to(DOWN * 9),
-                    duration=1.5,
+                    at=1,
+                    duration=2,
                 ),
+                AnimGroup(
+                    Rotate(his_grid_without_label, -PI / 2),
+                    at=1.5,
+                    duration=1.5,
+                )
             ),
         )
         self.forward(1)
@@ -1363,7 +1418,7 @@ class s3_4(Timeline):
         self.forward(1)
 
         text_history_grid = Text("历史配置表", font=local_font, font_size=64)
-        text_history_grid.points.next_to(his_grid_without_label, UP, buff=0.5)
+        text_history_grid.points.next_to(his_grid_without_label, direction=LEFT, buff=2)
         cells_flatten_without_label = []
         for his in his_grid_without_label:
             for cell in his:
@@ -1371,7 +1426,7 @@ class s3_4(Timeline):
 
         self.play(
             Write(text_history_grid),
-            self.camera.anim.points.shift(UP * 1),
+            self.camera.anim.points.shift(LEFT * 1),
         )
         self.forward(1.5)
         random.shuffle(cells_flatten_without_label)
@@ -1526,6 +1581,22 @@ class s3_5(Timeline):
             lag_ratio=0.01,
             collapse=True,
         )
+
+        history_stop = history_grid_gen(
+            Path("resources/3_5_bbs_track/stop.txt").read_text(),
+            square_size=0.2,
+            transpose=True,
+        )
+        history_same_config = history_grid_gen(
+            Path("resources/3_5_bbs_track/same_config.txt").read_text(),
+            square_size=0.2,
+            transpose=True,
+        )
+        history_self_copy = history_grid_gen(
+            Path("resources/3_5_bbs_track/self_copy.txt").read_text(),
+            square_size=0.2,
+            transpose=True,
+        )
         core_stop = TuringMachineCore(
             initial_tape="00001",
             start_state="A",
@@ -1539,7 +1610,10 @@ class s3_5(Timeline):
             offset=(1 / 6, 0),
             scale=0.6,
         ).show()
-        self.forward(5)
+        history_stop.points.move_to(LEFT * 4)
+        self.play(Write(history_stop))
+        self.forward(3)
+        self.play(FadeOut(history_stop))
         self.play(
             FadeOut(rec_hl_1),
             AnimGroup(
@@ -1587,7 +1661,10 @@ class s3_5(Timeline):
             offset=(-1 / 6, 0),
             scale=0.6,
         ).show()
-        self.forward(6)
+        history_same_config.points.move_to(RIGHT * 4)
+        self.play(Write(history_same_config))
+        self.forward(4)
+        self.play(FadeOut(history_same_config))
         self.play(
             FadeOut(rec_hl_2),
             AnimGroup(
@@ -1632,10 +1709,13 @@ class s3_5(Timeline):
         tm_copy = TMShow(core_copy, "配置自我复制类", stop_at=10).build().to_item().show()
         clip_tm_copy = TransformableFrameClip(
             tm_copy,
-            offset=(0, 1 / 12),
+            offset=(1 / 6, 0),
             scale=0.6,
         ).show()
-        self.forward(6)
+        history_self_copy.points.move_to(LEFT * 4)
+        self.play(Write(history_self_copy))
+        self.forward(4)
+        self.play(FadeOut(history_self_copy))
         self.play(
             FadeOut(rec_hl_3),
             AnimGroup(
@@ -1698,53 +1778,6 @@ class s3_6(Timeline):
         typst_shared_preamble=get_typ_doc("preamble")
     )
     def construct(self) -> None:
-        
-        def history_grid_gen(
-            seq: str,
-            square_size: float = 0.25,
-            transpose: bool = False,
-            max_per_line: int = 75,
-        ) -> Group:
-            DEBUG = False
-            height = len(seq.splitlines())
-            width = max([len(line) for line in seq.splitlines()])
-            lines = seq.splitlines()
-            if transpose:
-                lines = list(reversed(lines))
-                
-            final_group = Group()
-            idl_total = len(lines) // max_per_line + 1
-            for idl in range(idl_total):
-                slice = lines[idl * max_per_line:(idl + 1) * max_per_line]
-                if len(slice) == 0:
-                    continue
-                group = Group()
-                for i, line in enumerate(slice):
-                    for j, char in enumerate(line):
-                        if char == "0":
-                            group.add(
-                                Rect(square_size, square_size) \
-                                    .fill.set(color=WHITE, alpha=1).r \
-                                    .stroke.set(color=WHITE, alpha=1).r
-                            )
-                        else:
-                            group.add(
-                                Rect(square_size, square_size) \
-                                    .fill.set(color=BLACK, alpha=1).r
-                                    .stroke.set(color=WHITE, alpha=1).r
-                            )
-                if DEBUG:
-                    print(f"slice {idl}: width {width}, height {height}, max_per_line {max_per_line}, actual lines {len(slice)}")
-                group.points.arrange_in_grid(height, width, buff=0)
-                if transpose:
-                    group.points.rotate(PI / 2)
-                final_group.add(group)
-            if not transpose:
-                final_group.points.arrange_in_grid(n_rows=1, buff=0.2, aligned_edge=UP).move_to(ORIGIN)
-            else:
-                final_group.points.arrange_in_grid(n_cols=1, buff=0.2, aligned_edge=LEFT).move_to(ORIGIN)
-            return final_group
-        
         tm_types = [
             "cycler",
             "translated_cycler",
@@ -1765,17 +1798,22 @@ class s3_6(Timeline):
         group_types = Group(*[
             Group(
                 text_diff_type.get_label(type_name),
-                history_grid_gen(type_txt, square_size=0.1),
+                history_grid_gen(type_txt, square_size=0.1, transpose=True),
             ).points.arrange(DOWN).move_to(ORIGIN).r
             for type_name, type_txt in zip(tm_types, file_txts)
         ])
         for i, item in enumerate(group_types):
-            item[1].points.next_to(item[0], DOWN, aligned_edge=LEFT, buff=0.2)
-            if i > 0 and i != 5:
-                group_types[i].points.next_to(group_types[i - 1][1], RIGHT, aligned_edge=UP, buff=0.35)
-            if i == 5:
-                group_types[i].points.next_to(group_types[1][0], RIGHT, aligned_edge=UP, buff=4.5)
+            item[1].points.next_to(item[0], RIGHT, buff=0.2)
+        #     if i > 0:
+        #         group_types[i].points.next_to(group_types[i - 1][1], RIGHT, aligned_edge=UP, buff=1)
 
+        group_types.points.arrange_in_grid(
+            n_cols=2,
+            h_buff=6.5,
+            v_buff=1.5,
+            by_center_point=True,
+            aligned_edge=UP + LEFT,
+        )
         group_types.points.move_to(ORIGIN)
 
         self.play(
