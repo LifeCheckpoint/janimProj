@@ -154,13 +154,13 @@ class s4_1(Timeline):
             tm_collatz.table,
             color=GREEN,
         )
-        text_table_explaination = TypstText("判定猜想真伪的图灵机 $H_c$\n\n（示意机器）")
+        text_table_explaination = TypstText("试图找到猜想反例的图灵机 $H_c$\n\n（示意机器）")
         text_table_explaination["$H_c$"].astype(VItem).color.set(color=GREEN)
-        text_table_explaination["判定猜想真伪"].astype(VItem).color.set(color=RED_A)
+        text_table_explaination["找到猜想反例"].astype(VItem).color.set(color=RED_A)
         text_table_explaination["（示意机器）"].astype(VItem).color.set(color=GREY_C)
         text_table_explaination.points \
-            .next_to(rec_table_collatz, DOWN, aligned_edge=LEFT, buff=0.5) \
-            .shift(LEFT)
+            .next_to(rec_table_collatz, DOWN, aligned_edge=LEFT, buff=0.25) \
+            .shift(LEFT * 1.5)
         text_bb6_max_step = TypstText("$\"BB\"(6)$ 停机前 \\ 至多运行 $S$ 步")
         text_bb6_max_step.points \
             .next_to(rec_table_collatz, DOWN, aligned_edge=RIGHT, buff=0.1)
@@ -266,8 +266,8 @@ class s4_1(Timeline):
         # self.play(Write(rec_collatz_q))
         self.forward(2)
 
-        text_bb27_ge_goldbach = TypstText("计算 $\"BB\"(27)$ 难度 $>=$ Goldbach's conjecture")
-        text_bb744_ge_riemann = TypstText("计算 $\"BB\"(744)$ 难度 $>=$ Riemann conjecture")
+        text_bb27_ge_goldbach = TypstText("计算 $\"BB\"(27)$ 难度 $>=$ Goldbach's 猜想")
+        text_bb744_ge_riemann = TypstText("计算 $\"BB\"(744)$ 难度 $>=$ Riemann 猜想")
         group_ges = Group()
         for t, step in zip(
             [text_bb27_ge_goldbach, text_bb744_ge_riemann],
