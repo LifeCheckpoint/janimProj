@@ -2707,7 +2707,7 @@ class s3_7(Timeline):
             for i in range(n - 1, 0, -1):
                 left_wrap += "2^("
                 right_wrap += ")"
-                yield f"A_({n}) \"步数\"={left_wrap}A_({i}){right_wrap}"
+                yield f"A_({n}) \"步数\" > {left_wrap}A_({i}){right_wrap}"
         
         text_tower = build_tower_iterative(10)
         text_Ans = [
