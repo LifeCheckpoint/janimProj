@@ -545,7 +545,7 @@ class s4_3(Timeline):
         group_definable = Group(text_definable, rec_definable)
         list_seq_an = [
             "1", "2", "3", "4", "5", "6", "7", "8", "...",
-            "-4", "-1", "4", "11", "20", "31", "44", "59", "...",
+            "0", "2", "6", "12", "20", "30", "42", "56", "...",
         ]
         table_seq_an = Group.from_iterable(
             TypstMath(item).points.scale(1.1).r for item in list_seq_an
@@ -559,12 +559,12 @@ class s4_3(Timeline):
         group_seq_an.astype(VItem).color.set(color=BLUE)
         group_seq_an.astype(VItem).color.set(color=YELLOW)
         text_seq_n = TypstMath("n").points.scale(1.1).r
-        text_seq_an = TypstMath("f(n)=n^2-5").points.scale(1.1).r
+        text_seq_an = TypstMath("f(n)=n^2-n").points.scale(1.1).r
         text_seq_an.astype(VItem).color.set(color=YELLOW)
         Group(text_seq_n, text_seq_an).points.arrange(DOWN, buff=0.25, aligned_edge=LEFT) \
             .next_to(table_seq_an, LEFT, buff=0.75)
         Group(table_seq_an, text_seq_n, text_seq_an).points.move_to(DOWN * 0.5)
-        group_example = Group(group_seq_n[1], group_seq_an[1])
+        group_example = Group(group_seq_n[2], group_seq_an[2])
         rect_example = SurroundingRect(group_example, color=CYAN, buff=0.25)
 
         self.play(
@@ -596,7 +596,7 @@ class s4_3(Timeline):
 
         data_1_original = ["...", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "..."]
         data_2_write_n = ["...", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "..."]
-        data_3_write_an = ["...", "0", "0", "0", "1", "1", "1", "1", "1", "1", "0", "0", "0", "..."]
+        data_3_write_an = ["...", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "0", "..."]
         data_4_clear_all = ["...", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "..."]
         tapes = [
             Group.from_iterable(
@@ -633,16 +633,16 @@ class s4_3(Timeline):
             GridCell(
                 state_name=f"C<fs 0.6>{i}</fs>",
                 write_bit="0",
-                move_dir="RIGHT" if i < 3 else "STOP",
+                move_dir="LEFT" if i < 3 else "STOP",
             ) for i in range(3)
         ).points.arrange(RIGHT, buff=0.1).next_to(grid_chain_fn, RIGHT, buff=0.75).r
         brace_grid_chain_constant = Brace(grid_chain_constant, UP)
         label_grid_chain_constant = TypstText("常数 $c$ 个").points.scale(1.25).next_to(brace_grid_chain_constant, UP).r
         label_grid_chain_constant["$c$"].astype(VItem).color.set(color=ORANGE)
         brace_tape_n = Brace(tapes[1][tape_center_idx:tape_center_idx + 2], DOWN)
-        brace_tape_an = Brace(tapes[1][tape_center_idx + 2:tape_center_idx + 6], DOWN)
+        brace_tape_an = Brace(tapes[1][tape_center_idx + 2:tape_center_idx + 8], DOWN)
         label_tape_n = TypstMath("n=3 \\\n ceil(log_2 n)=2").points.scale(1.3).next_to(brace_tape_n, DOWN, buff=0.2).r
-        label_tape_an = TypstMath("a_n=4").points.scale(1.3).next_to(brace_tape_an, DOWN, buff=0.2).r
+        label_tape_an = TypstMath("a_n=6").points.scale(1.3).next_to(brace_tape_an, DOWN, buff=0.2).r
         label_tape_an.astype(VItem).color.set(color=YELLOW)
 
         self.play(
@@ -707,6 +707,16 @@ class s4_3(Timeline):
                     tapes[1][tape_center_idx + 5],
                     tapes[2][tape_center_idx + 5],
                 ),
+                tape_frame.anim.points.move_to(tapes[2][tape_center_idx + 6]),
+                TransformMatchingShapes(
+                    tapes[1][tape_center_idx + 6],
+                    tapes[2][tape_center_idx + 6],
+                ),
+                tape_frame.anim.points.move_to(tapes[2][tape_center_idx + 7]),
+                TransformMatchingShapes(
+                    tapes[1][tape_center_idx + 7],
+                    tapes[2][tape_center_idx + 7],
+                ),
                 duration=1.5,
             )
         )
@@ -725,12 +735,12 @@ class s4_3(Timeline):
         self.forward(1)
         self.play(
             TransformMatchingShapes(
-                tapes[2][tape_center_idx + 5],
-                tapes[3][tape_center_idx + 5],
+                tapes[2][tape_center_idx + 7],
+                tapes[3][tape_center_idx + 7],
             ),
             duration=0.5,
         )
-        for i in range(4, -1, -1):
+        for i in range(6, -1, -1):
             self.play(
                 Succession(
                     tape_frame.anim.points.move_to(tapes[3][tape_center_idx + i]),
@@ -763,7 +773,7 @@ class s4_3(Timeline):
         text_most_bb.points.scale(1.25).next_to(brace_all_states, UP)
         text_most_bb["$C$", ...].astype(VItem).color.set(color=ORANGE)
         text_most_bb["步数"].astype(VItem).color.set(color=BLUE_B)
-        text_bb_ge_bb_log = TypstMath("\"BB\"(n) >= \"BB\"(log_2 n + C)").points.scale(1.25).next_to(text_steps_2, DOWN).r
+        text_bb_ge_bb_log = TypstMath("\"BB\"(n) >= \"BB\"(log_2 n + C)").points.scale(1.25).move_to(DOWN * 3 + LEFT * 3).r
         text_bb_ge_bb_log["C"].astype(VItem).color.set(color=ORANGE)
         rec_running_steps = SurroundingRect(text_steps_2["运行步数 $\"steps\"$"], color=BLUE_B)
         rec_bb_log2n_plus_C = SurroundingRect(text_bb_ge_bb_log["\"BB\"(log_2 n + C)"], color=BLUE_B)
@@ -772,11 +782,11 @@ class s4_3(Timeline):
         text_bb_ge_2f["f"].astype(VItem).color.set(color=YELLOW)
         text_bb_ge_2f.points.scale(1.5).move_to(text_steps_2)
 
-        Group(tapes[0][4:10], tapes[1][4:10]).hide()
+        Group(tapes[0][4:12], tapes[1][4:12]).hide()
         self.play(
             FadeOut(Group(group_seq_n, group_seq_an, text_seq_n, text_seq_an, rect_example)),
             Group(
-                tapes[0][0:4], tapes[3][4:10], tapes[0][10:],
+                tapes[0][0:4], tapes[3][4:12], tapes[0][12:],
                 tape_frame,
                 brace_tape_n, brace_tape_an, label_tape_n, label_tape_an,
             ).anim.points.move_to(DOWN * 1),
@@ -832,7 +842,11 @@ class s4_3(Timeline):
         self.forward(1)
         self.play(TransformMatchingDiff(label_all_states_3, text_most_bb))
         self.forward(1)
-        self.play(Write(text_bb_ge_bb_log))
+        rec_running_steps.points.shift(RIGHT * 3)
+        self.play(
+            text_steps_2.anim.points.shift(RIGHT * 3),
+            Write(text_bb_ge_bb_log),
+        )
         self.forward(1)
         self.play(
             Write(rec_running_steps),
@@ -859,6 +873,17 @@ class s4_3(Timeline):
             FadeOut(text_most_bb),
             Group(grid_chain_n, grid_chain_fn, grid_chain_constant).anim.points.shift(UP * 0.5),
         )
+        self.play(
+            FadeOut(Group(
+                label_tape_n,
+                label_tape_an,
+                tapes[0][0:4], tapes[3][4:12], tapes[0][12:],
+                brace_tape_an, brace_tape_n,
+                tape_frame,
+            )),
+            text_bb_ge_2f.anim.points.move_to(ORIGIN),
+            self.camera.anim.points.move_to(UP),
+        )
         self.forward(1.5)
 
         rect_n_1 = SurroundingRect(
@@ -867,7 +892,7 @@ class s4_3(Timeline):
             buff=0.05,
         )
         rect_n_2 = SurroundingRect(
-            text_bb_ge_2f["n", 1],
+            text_bb_ge_2f["log_2 n", 0],
             color=GREEN_A,
             buff=0.05,
         )
@@ -908,6 +933,11 @@ class s4_3(Timeline):
             rect_c,
         )))
         self.forward(1)
+        text_bb_ge_2f_ge_fnpc.points.move_to(ORIGIN)
+        text_bb_ge_fnpc.points.move_to(ORIGIN)
+        text_bb_ge_fn.points.move_to(ORIGIN)
+        text_bb_gg_fn.points.move_to(ORIGIN)
+        rec_bb_gg_fn.points.move_to(text_bb_gg_fn)
         self.play(
             FadeOut(text_bb_ge_2f[">= \"BB\"(log_2 n + C)"]),
             TransformMatchingDiff(
@@ -942,11 +972,6 @@ class s4_3(Timeline):
         self.play(
             FadeOut(Group(
                 text_bb_gg_fn, rec_bb_gg_fn,
-                label_tape_n,
-                label_tape_an,
-                tapes[0][0:4], tapes[3][4:10], tapes[0][10:],
-                brace_tape_an, brace_tape_n,
-                tape_frame,
                 grid_chain_n, grid_chain_fn, grid_chain_constant,
                 rec_calculable, rec_definable,
                 text_calculable, text_definable,
