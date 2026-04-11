@@ -545,10 +545,10 @@ class s4_3(Timeline):
         group_definable = Group(text_definable, rec_definable)
         list_seq_an = [
             "1", "2", "3", "4", "5", "6", "7", "8", "...",
-            "1", "4", "9", "16", "25", "36", "49", "64", "...",
+            "-4", "-1", "4", "11", "20", "31", "44", "59", "...",
         ]
         table_seq_an = Group.from_iterable(
-            TypstMath(item).points.scale(1.5).r for item in list_seq_an
+            TypstMath(item).points.scale(1.1).r for item in list_seq_an
         ).points.arrange_in_grid(
             n_rows=2, n_cols=9,
             h_buff=0.75, v_buff=0.25,
@@ -558,8 +558,8 @@ class s4_3(Timeline):
         group_seq_an = Group.from_iterable(table_seq_an[9:])
         group_seq_an.astype(VItem).color.set(color=BLUE)
         group_seq_an.astype(VItem).color.set(color=YELLOW)
-        text_seq_n = TypstMath("n").points.scale(1.5).r
-        text_seq_an = TypstMath("f(n)=n^2").points.scale(1.5).r
+        text_seq_n = TypstMath("n").points.scale(1.1).r
+        text_seq_an = TypstMath("f(n)=n^2-5").points.scale(1.1).r
         text_seq_an.astype(VItem).color.set(color=YELLOW)
         Group(text_seq_n, text_seq_an).points.arrange(DOWN, buff=0.25, aligned_edge=LEFT) \
             .next_to(table_seq_an, LEFT, buff=0.75)
@@ -586,8 +586,9 @@ class s4_3(Timeline):
         )
         self.forward(2)
         self.play(
-            group_calculable.anim.points.move_to(LEFT * 5.5 + UP * 3),
-            group_definable.anim.points.move_to(LEFT * 3.5 + UP * 3),
+            group_calculable.anim.points.move_to(LEFT * 5.5 + UP * 3.25),
+            group_definable.anim.points.move_to(LEFT * 3.5 + UP * 3.25),
+            self.camera.anim.points.shift(DOWN * 0.25),
         )
         self.play(Write(group_seq_n), Write(text_seq_n))
         self.play(Write(group_seq_an), Write(text_seq_an))
@@ -615,7 +616,7 @@ class s4_3(Timeline):
             ) for i in range(1, 3)
         ).points.arrange(RIGHT, buff=0.1).to_border(LEFT).shift(UP * 1).r
         brace_grid_chain_n = Brace(grid_chain_n, UP)
-        label_grid_chain_n = TypstText("$n$ 个").points.scale(1.25).next_to(brace_grid_chain_n, UP).r
+        label_grid_chain_n = TypstText("$ceil(log_2 n)$ 个").points.scale(1.25).next_to(brace_grid_chain_n, UP).r
         grid_chain_fn = Group.from_iterable(
             GridCell(
                 state_name=name,
@@ -640,8 +641,8 @@ class s4_3(Timeline):
         label_grid_chain_constant["$c$"].astype(VItem).color.set(color=ORANGE)
         brace_tape_n = Brace(tapes[1][tape_center_idx:tape_center_idx + 2], DOWN)
         brace_tape_an = Brace(tapes[1][tape_center_idx + 2:tape_center_idx + 6], DOWN)
-        label_tape_n = TypstMath("n=2").points.scale(1.5).next_to(brace_tape_n, DOWN, buff=0.2).r
-        label_tape_an = TypstMath("a_n=4").points.scale(1.5).next_to(brace_tape_an, DOWN, buff=0.2).r
+        label_tape_n = TypstMath("n=3 \\\n ceil(log_2 n)=2").points.scale(1.3).next_to(brace_tape_n, DOWN, buff=0.2).r
+        label_tape_an = TypstMath("a_n=4").points.scale(1.3).next_to(brace_tape_an, DOWN, buff=0.2).r
         label_tape_an.astype(VItem).color.set(color=YELLOW)
 
         self.play(
@@ -750,17 +751,24 @@ class s4_3(Timeline):
         text_steps_2["$f(n)$"].astype(VItem).color.set(color=YELLOW)
         text_steps_2["$\"steps\"$"].astype(VItem).color.set(color=BLUE_B)
         brace_all_states = Brace(Group(grid_chain_n, grid_chain_fn, grid_chain_constant), UP)
-        label_all_states = TypstText("共 $n+F_m+c$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
+        label_all_states = TypstText("共 $ceil(log_2 n)+F_m+c$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
         label_all_states["$F_m$"].astype(VItem).color.set(color=ORANGE)
         label_all_states["$c$"].astype(VItem).color.set(color=ORANGE)
-        label_all_states_2 = TypstText("共 $n+c$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
+        label_all_states_2 = TypstText("共 $log_2 n+F_m+c$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
+        label_all_states_2["$F_m$"].astype(VItem).color.set(color=ORANGE)
         label_all_states_2["$c$"].astype(VItem).color.set(color=ORANGE)
-        text_most_bb = TypstText("共 $n+c$ 个状态 $=>$ 最大可达 $\"BB\"(n+c) \"steps\"$")
+        label_all_states_3 = TypstText("共 $log_2 n+C$ 个状态").points.scale(1.25).next_to(brace_all_states, UP).r
+        label_all_states_3["$C$"].astype(VItem).color.set(color=ORANGE)
+        text_most_bb = TypstText("共 $log_2 n+C$ 个状态 $=>$ 该图灵机步数一定不超过 $\"BB\"(log_2 n + C)$")
         text_most_bb.points.scale(1.25).next_to(brace_all_states, UP)
-        text_most_bb["$c$", ...].astype(VItem).color.set(color=ORANGE)
-        text_most_bb["$\"steps\"$"].astype(VItem).color.set(color=BLUE_B)
-        text_bb_ge_2f = TypstMath("\"BB\"(n+c) >= 2f(n)")
-        text_bb_ge_2f["c"].astype(VItem).color.set(color=ORANGE)
+        text_most_bb["$C$", ...].astype(VItem).color.set(color=ORANGE)
+        text_most_bb["步数"].astype(VItem).color.set(color=BLUE_B)
+        text_bb_ge_bb_log = TypstMath("\"BB\"(n) >= \"BB\"(log_2 n + C)").points.scale(1.25).next_to(text_steps_2, DOWN).r
+        text_bb_ge_bb_log["C"].astype(VItem).color.set(color=ORANGE)
+        rec_running_steps = SurroundingRect(text_steps_2["运行步数 $\"steps\"$"], color=BLUE_B)
+        rec_bb_log2n_plus_C = SurroundingRect(text_bb_ge_bb_log["\"BB\"(log_2 n + C)"], color=BLUE_B)
+        text_bb_ge_2f = TypstMath("\"BB\"(n) >= \"BB\"(log_2 n + C) >= 2f(n)")
+        text_bb_ge_2f["C"].astype(VItem).color.set(color=ORANGE)
         text_bb_ge_2f["f"].astype(VItem).color.set(color=YELLOW)
         text_bb_ge_2f.points.scale(1.5).move_to(text_steps_2)
 
@@ -785,22 +793,71 @@ class s4_3(Timeline):
             )
         )
         self.play(
-            *[
-                TransformMatchingDiff(lb, label_all_states)
-                for lb in [label_grid_chain_n, label_grid_chain_fn, label_grid_chain_constant]
-            ]
+            FadeOut(Group(
+                label_grid_chain_n["个"],
+                label_grid_chain_fn["常数"],
+                label_grid_chain_fn["个"],
+                label_grid_chain_constant["常数"],
+                label_grid_chain_constant["个"],
+            )),
+            AnimGroup(
+                TransformMatchingDiff(
+                    label_grid_chain_n["$ceil(log_2 n)$"],
+                    label_all_states["$ceil(log_2 n)$"],
+                    path_arc=PI / 2,
+                ),
+                TransformMatchingDiff(
+                    label_grid_chain_fn["$F_m$"],
+                    label_all_states["$F_m$"],
+                    path_arc=PI / 2,
+                ),
+                TransformMatchingDiff(
+                    label_grid_chain_constant["$c$"],
+                    label_all_states["$c$"],
+                    path_arc=PI / 2,
+                ),
+            ),
+            FadeIn(Group(
+                label_all_states["$+$", ...],
+                label_all_states["共"],
+                label_all_states["个状态"],
+            )),
+            lag_ratio=0.3,
+            duration=2,
         )
         self.forward(1)
         self.play(TransformMatchingDiff(label_all_states, label_all_states_2))
         self.forward(1)
-        self.play(TransformMatchingDiff(label_all_states_2, text_most_bb))
+        self.play(TransformMatchingDiff(label_all_states_2, label_all_states_3))
+        self.forward(1)
+        self.play(TransformMatchingDiff(label_all_states_3, text_most_bb))
+        self.forward(1)
+        self.play(Write(text_bb_ge_bb_log))
         self.forward(1)
         self.play(
+            Write(rec_running_steps),
+            Write(rec_bb_log2n_plus_C),
+        )
+        self.forward(0.5)
+        self.play(
+            FadeOut(rec_running_steps),
+            FadeOut(rec_bb_log2n_plus_C),
+        )
+        self.forward(1)
+        
+        self.play(
             TransformMatchingDiff(
-                Group(text_most_bb, text_steps_2),
-                text_bb_ge_2f,
+                text_steps_2["$>= 2f(n)$"],
+                text_bb_ge_2f[">= 2f(n)"],
             ),
+            TransformMatchingDiff(
+                text_bb_ge_bb_log,
+                text_bb_ge_2f["\"BB\"(n) >= \"BB\"(log_2 n + C)"],
+            ),
+            FadeOut(text_steps_2["运行步数 $\"steps\"$"]),
             FadeOut(brace_all_states),
+            FadeOut(text_most_bb),
+            Group(grid_chain_n, grid_chain_fn, grid_chain_constant).anim.points.shift(UP * 0.5),
         )
         self.forward(1.5)
 
@@ -815,16 +872,14 @@ class s4_3(Timeline):
             buff=0.05,
         )
         rect_c = SurroundingRect(
-            text_bb_ge_2f["c"],
+            text_bb_ge_2f["C"],
             color=ORANGE,
             buff=0.05,
         )
-        text_bb_ge_2f_ge_fnpc = TypstMath("\"BB\"(n+c) >= 2f(n) >= f(n+c)")
-        text_bb_ge_2f_ge_fnpc["c", ...].astype(VItem).color.set(color=ORANGE)
+        text_bb_ge_2f_ge_fnpc = TypstMath("\"BB\"(n) >= 2f(n)")
         text_bb_ge_2f_ge_fnpc["f", ...].astype(VItem).color.set(color=YELLOW)
         text_bb_ge_2f_ge_fnpc.points.scale(1.5).move_to(text_steps_2)
-        text_bb_ge_fnpc = TypstMath("\"BB\"(n+c) >= f(n+c)")
-        text_bb_ge_fnpc["c", ...].astype(VItem).color.set(color=ORANGE)
+        text_bb_ge_fnpc = TypstMath("\"BB\"(n) >= f(n)")
         text_bb_ge_2f_ge_fnpc["f", ...].astype(VItem).color.set(color=YELLOW)
         text_bb_ge_fnpc.points.scale(1.5).move_to(text_steps_2)
         text_bb_ge_fnpc["f"].astype(VItem).color.set(color=YELLOW)
@@ -854,10 +909,12 @@ class s4_3(Timeline):
         )))
         self.forward(1)
         self.play(
+            FadeOut(text_bb_ge_2f[">= \"BB\"(log_2 n + C)"]),
             TransformMatchingDiff(
-                text_bb_ge_2f,
+                Group(text_bb_ge_2f["\"BB\"(n)"], text_bb_ge_2f[">= 2f(n)"]),
                 text_bb_ge_2f_ge_fnpc,
-            )
+            ),
+            lag_ratio=0.3,
         )
         self.forward(1.5)
         self.play(
@@ -881,7 +938,7 @@ class s4_3(Timeline):
             ),
             Write(rec_bb_gg_fn),
         )
-        self.forward(2)
+        self.forward(3)
         self.play(
             FadeOut(Group(
                 text_bb_gg_fn, rec_bb_gg_fn,
