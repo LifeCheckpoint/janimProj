@@ -1149,10 +1149,13 @@ class s4_3(Timeline):
         )
         # endregion
 
+        text_n_ge_N = TypstMath("(n >= N \"时\")")
+        text_n_ge_N.points.scale(0.75).next_to(text_bb_ge_bb_log[">="], DOWN, buff=0.25)
         rec_running_steps.points.shift(RIGHT * 3)
         self.play(
             text_steps_2.anim.points.shift(RIGHT * 3),
             Write(text_bb_ge_bb_log),
+            Write(text_n_ge_N),
         )
         self.forward(1)
         self.play(
@@ -1174,6 +1177,7 @@ class s4_3(Timeline):
                 text_bb_ge_bb_log,
                 text_bb_ge_2f["\"BB\"(n) >= \"BB\"(log_2 n + C)"],
             ),
+            text_n_ge_N.anim(duration=2).points.shift(RIGHT * 2),
             FadeOut(text_steps_2["运行步数 $\"steps\"$"]),
             FadeOut(brace_all_states),
             FadeOut(text_most_bb),
@@ -1189,6 +1193,7 @@ class s4_3(Timeline):
             )),
             FadeOut(Group(grid_chain_n, grid_chain_fn, grid_chain_constant)),
             text_bb_ge_2f.anim.points.move_to(ORIGIN),
+            text_n_ge_N.anim.points.shift(UP * 3),
             self.camera.anim.points.move_to(UP),
         )
         self.forward(1.5)
@@ -1250,9 +1255,12 @@ class s4_3(Timeline):
         rec_bb_gg_fn.points.move_to(text_bb_gg_fn)
         self.play(
             FadeOut(text_bb_ge_2f[">= \"BB\"(log_2 n + C)"]),
-            TransformMatchingDiff(
-                Group(text_bb_ge_2f["\"BB\"(n)"], text_bb_ge_2f[">= 2f(n)"]),
-                text_bb_ge_2f_ge_fnpc,
+            AnimGroup(
+                TransformMatchingDiff(
+                    Group(text_bb_ge_2f["\"BB\"(n)"], text_bb_ge_2f[">= 2f(n)"]),
+                    text_bb_ge_2f_ge_fnpc,
+                ),
+                text_n_ge_N.anim(duration=2).points.shift(RIGHT * 2),
             ),
             lag_ratio=0.3,
         )
@@ -1272,11 +1280,13 @@ class s4_3(Timeline):
         )
         self.forward(1)
         self.play(
+            FadeOut(text_n_ge_N),
             TransformMatchingDiff(
                 text_bb_ge_fn,
                 text_bb_gg_fn,
             ),
             Write(rec_bb_gg_fn),
+            lag_ratio=0.2,
         )
         self.forward(3)
         self.play(
