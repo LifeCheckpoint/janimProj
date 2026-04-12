@@ -842,6 +842,313 @@ class s4_3(Timeline):
         self.forward(1)
         self.play(TransformMatchingDiff(label_all_states_3, text_most_bb))
         self.forward(1)
+
+        # region 坐标轴动画
+        axe_comparison = Axes(
+            x_range=(0, 5, 1),
+            y_range=(0, 5, 1),
+            x_length=7,
+            y_length=6,
+            axis_config={
+                "include_tip": True,
+                "include_ticks": True,
+                "include_numbers": True,
+            }
+        )
+        axe_comparison.points.move_to(DOWN * 1)
+        axe_comparison(VItem).color.set(alpha=0.5)
+        axes_labels = axe_comparison.get_axis_labels(x_label="n", y_label="f(n)")
+        axes_labels[0].points.shift(DOWN * 0.75)
+        axes_labels[1].points.shift(LEFT * 1.5 + DOWN * 0.5)
+        axes_labels(VItem).fill.set(alpha=0.5)
+        graph_n = axe_comparison.get_graph(lambda x: x, color=GREEN_A)
+        label_n = TypstMath("n")
+        label_n(VItem).fill.set(color=GREEN_A)
+        label_n.points.next_to(axe_comparison.coords_to_point(5, 5), RIGHT, buff=0.2)
+        graph_log2n = axe_comparison.get_graph(
+            lambda x: math.log2(x) if x > 0.001 else -10,
+            color=BLUE_A,
+            x_range=(0.001, 5, 0.001),
+        )
+        label_log2n = TypstMath("log_2 n")
+        label_log2n(VItem).fill.set(color=BLUE_A)
+        label_log2n.points.next_to(axe_comparison.coords_to_point(5, math.log2(5)), RIGHT, buff=0.2)
+        graph_log2n_plus_2 = axe_comparison.get_graph(
+            lambda x: math.log2(x) + 2 if x > 0.001 else -10,
+            color=BLUE_A,
+            x_range=(0.001, 5, 0.001),
+        )
+        label_log2n_plus_2 = TypstMath("log_2 n + 2")
+        label_log2n_plus_2(VItem).fill.set(color=BLUE_A)
+        label_log2n_plus_2.points.next_to(axe_comparison.coords_to_point(5, math.log2(5) + 2), RIGHT, buff=0.2)
+        intersection_log2n_p2_with_n = axe_comparison.coords_to_point(4, 4)
+        intersection_log2n_p2_with_n_right = axe_comparison.coords_to_point(5, 4)
+        brace_log_2n_p2_with_n = Brace(
+            Line(intersection_log2n_p2_with_n, intersection_log2n_p2_with_n_right),
+        )
+        brace_log_2n_p2_with_n_label = brace_log_2n_p2_with_n.points.create_typst("n > log_2 n + 2")
+
+        self.play(
+            FadeOut(Group(
+                text_most_bb, brace_all_states,
+                grid_chain_n, grid_chain_fn, grid_chain_constant,
+                tapes[0][0:4], tapes[3][4:12], tapes[0][12:], tape_frame,
+                brace_tape_n, brace_tape_an,
+                label_tape_n, label_tape_an,
+                text_steps_2,
+            ))
+        )
+        self.play(
+            self.camera.anim.points.shift(DOWN * 1),
+            # FadeOut(Group(grid_chain_n, grid_chain_fn, grid_chain_constant)),
+            # Group(rect_n_1, rect_n_2, rect_c, text_bb_ge_2f).anim.points.shift(UP * 2.25),
+            Write(axe_comparison),
+            Write(axes_labels),
+        )
+        self.play(
+            Succession(
+                Write(Group(graph_n, label_n)),
+                Write(Group(graph_log2n, label_log2n)),
+            )
+        )
+        self.forward(1.5)
+        self.play(
+            TransformMatchingDiff(label_log2n, label_log2n_plus_2, duration=1.5),
+            Transform(graph_log2n, graph_log2n_plus_2, duration=1.5),
+        )
+        self.forward(1)
+        self.play(
+            Write(brace_log_2n_p2_with_n),
+            Write(brace_log_2n_p2_with_n_label),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(
+            FadeOut(Group(
+                brace_log_2n_p2_with_n, brace_log_2n_p2_with_n_label,
+            ))
+        )
+
+        axe_comparison_2 = Axes(
+            x_range=(0, 10, 1),
+            y_range=(0, 10, 1),
+            x_length=7,
+            y_length=6,
+            axis_config={
+                "include_tip": True,
+                "include_ticks": True,
+                "include_numbers": True,
+            }
+        )
+        axe_comparison_2.points.move_to(axe_comparison)
+        axe_comparison_2(VItem).color.set(alpha=0.5)
+        graph_n_2 = axe_comparison_2.get_graph(lambda x: x, color=GREEN_A)
+        label_n_2 = TypstMath("n")
+        label_n_2(VItem).fill.set(color=GREEN_A)
+        label_n_2.points.next_to(axe_comparison_2.coords_to_point(10, 10), RIGHT, buff=0.2)
+        graph_log2n_plus_2_2 = axe_comparison_2.get_graph(
+            lambda x: math.log2(x) + 2 if x > 0.001 else -10,
+            color=BLUE_A,
+            x_range=(0.001, 10, 0.01),
+        )
+        label_log2n_plus_2_2 = TypstMath("log_2 n + 2")
+        label_log2n_plus_2_2(VItem).fill.set(color=BLUE_A)
+        label_log2n_plus_2_2.points.next_to(axe_comparison_2.coords_to_point(10, math.log2(10) + 2), RIGHT, buff=0.2)
+        graph_log2n_plus_6_2 = axe_comparison_2.get_graph(
+            lambda x: math.log2(x) + 6 if x > 0.001 else -10,
+            color=BLUE_A,
+            x_range=(0.001, 10, 0.01),
+        )
+        label_log2n_plus_6_2 = TypstMath("log_2 n + 6")
+        label_log2n_plus_6_2(VItem).fill.set(color=BLUE_A)
+        label_log2n_plus_6_2.points.next_to(axe_comparison_2.coords_to_point(10, math.log2(10) + 6), RIGHT, buff=0.2)
+        intersection_log2n_p6_with_n = axe_comparison_2.coords_to_point(9.20194, 9.20194)
+        intersection_log2n_p2_with_n_right = axe_comparison_2.coords_to_point(10, 9.20194)
+        brace_log_2n_p6_with_n = Brace(
+            Line(intersection_log2n_p6_with_n, intersection_log2n_p2_with_n_right),
+        )
+        brace_log_2n_p6_with_n_label = brace_log_2n_p6_with_n.points.create_typst("n > log_2 n + 6")
+
+        self.play(
+            TransformMatchingShapes(axe_comparison, axe_comparison_2, path_arc=PI / 2, duration=2),
+            Transform(graph_n, graph_n_2, duration=2),
+            Transform(label_n, label_n_2, duration=2),
+            TransformMatchingDiff(label_log2n_plus_2, label_log2n_plus_2_2, duration=2),
+            Transform(graph_log2n_plus_2, graph_log2n_plus_2_2, duration=2),
+        )
+        self.forward(1.5)
+        self.play(
+            Transform(graph_log2n_plus_2_2, graph_log2n_plus_6_2, duration=1.5),
+            TransformMatchingDiff(label_log2n_plus_2_2, label_log2n_plus_6_2, duration=1.5),
+        )
+        self.forward(1)
+        self.play(
+            Write(brace_log_2n_p6_with_n),
+            Write(brace_log_2n_p6_with_n_label),
+            lag_ratio=0.2,
+        )
+        self.forward(1)
+        self.play(FadeOut(Group(
+            brace_log_2n_p6_with_n, brace_log_2n_p6_with_n_label,
+        )))
+
+        axe_comparison_3 = Axes(
+            x_range=(0, 100, 10),
+            y_range=(0, 100, 10),
+            x_length=7,
+            y_length=6,
+            axis_config={
+                "include_tip": True,
+                "include_ticks": True,
+                "include_numbers": True,
+            }
+        )
+        axe_comparison_3.points.move_to(axe_comparison_2)
+        axe_comparison_3(VItem).color.set(alpha=0.5)
+        graph_n_3 = axe_comparison_3.get_graph(lambda x: x, color=GREEN_A)
+        label_n_3 = TypstMath("n")
+        label_n_3(VItem).fill.set(color=GREEN_A)
+        label_n_3.points.next_to(axe_comparison_3.coords_to_point(100, 100), RIGHT, buff=0.2)
+        graph_log2n_plus_6_3 = axe_comparison_3.get_graph(
+            lambda x: math.log2(x) + 6 if x > 0.001 else -10,
+            color=BLUE_A,
+            x_range=(0.001, 100, 0.001),
+        )
+        label_log2n_plus_6_3 = TypstMath("log_2 n + 6")
+        label_log2n_plus_6_3(VItem).fill.set(color=BLUE_A)
+        label_log2n_plus_6_3.points.next_to(axe_comparison_3.coords_to_point(100, math.log2(100) + 6), RIGHT, buff=0.2)
+        text_n_ge_log2n = TypstText("对于足够大的 $n$ \\\n$n > log_2 n + C$")
+        text_n_ge_log2n.points.scale(1.25).move_to(RIGHT * 4 + DOWN * 1)
+        text_n_ge_log2n["$C$"].astype(VItem).color.set(color=ORANGE)
+        text_n_ge_log2n["$n$", 1].astype(VItem).color.set(color=GREEN_A)
+        text_n_ge_log2n["$log_2 n$"].astype(VItem).color.set(color=BLUE_A)
+        rec_group_1 = Group(
+            SurroundingRect(text_n_ge_log2n["$n$", 1], color=GREEN_A),
+            SurroundingRect(text_n_ge_log2n["$log_2 n + C$"], color=BLUE_A),
+        )
+        text_bb_n_ge_bb_log2n = TypstText("对于足够大的 $n$ \\\n$\"BB\"(n) > \"BB\"(log_2 n + C)$")
+        text_bb_n_ge_bb_log2n.points.scale(1.25).move_to(text_n_ge_log2n)
+        text_bb_n_ge_bb_log2n["$C$"].astype(VItem).color.set(color=ORANGE)
+        text_bb_n_ge_bb_log2n["$n$", 1].astype(VItem).color.set(color=GREEN_A)
+        text_bb_n_ge_bb_log2n["$log_2 n$"].astype(VItem).color.set(color=BLUE_A)
+        rec_group_2 = Group(
+            SurroundingRect(text_bb_n_ge_bb_log2n["$n$", 1], color=GREEN_A, buff=0.05),
+            SurroundingRect(text_bb_n_ge_bb_log2n["$log_2 n + C$"], color=BLUE_A, buff=0.05),
+        )
+
+        def intersection_position_sol_with_c(c: float):
+            """交点坐标随着 C 变化的情况，帕德展开"""
+            x = c
+            if x <= 50:
+                final = (2175.08 - 8445.36 * x - 5101.48 * x ** 2 + 30152. * x ** 3 - 8508.27 * x ** 4 \
+                        - 11088.3 * x ** 5 - 1109.61 * x ** 6) / (323.731 - 5216.47 * x + 8535.71 * x ** 2 \
+                        + 2837.12 * x ** 3 - 6406.35 * x ** 4 - 1035.45 * x ** 5 - 1. * x ** 6)
+            else:
+                final = (5.441380144053301e11 + 3.5143912338124725e11 * x + 8.882157939136904e9 * x ** 2 + 
+                        2.4985369276173228e8 * x ** 3 + 375085.5264803801 * x ** 4 + 29261.98128528243 * x ** 5 - 
+                        316.45751520221734 * x ** 6) / (2.617571874508069e11 + 9.591097502383093e9 * x + 1.746713728786957e8 * x ** 2 + 
+                        1.7921879588214043e6 * x ** 3 + 6307.78304394071 * x ** 4 - 84.51166760997418 * x ** 5 - 1. * x ** 6)
+            return axe_comparison_3.coords_to_point(final, final), axe_comparison_3.coords_to_point(100, final)
+        
+        def get_brace(c: float):
+            it = intersection_position_sol_with_c(c)
+            line = Line(*it)
+            brace = Brace(line, UP)
+            brace.points.shift(UP * 0.2)
+            return brace
+        def get_label(c: float, brace: Brace):
+            label = brace.points.create_typst(f"n > log_2 n + {c:.0f}")
+            return label
+        def get_graph(c: float):
+            graph = axe_comparison_3.get_graph(
+                lambda x: math.log2(x) + c if x > 0.001 else -10,
+                color=BLUE_A,
+                x_range=(0.001, 100, 0.001),
+            )
+            return graph
+        def get_graph_label(c: float):
+            label = TypstMath(f"log_2 n + {c:.0f}")
+            label(VItem).fill.set(color=BLUE_A)
+            label.points.next_to(axe_comparison_3.coords_to_point(100, math.log2(100) + c), RIGHT, buff=0.2)
+            return label
+        
+        brace_log_2n_pc_with_n = get_brace(6)
+        brace_log_2n_pc_with_n_label = get_label(6, brace_log_2n_pc_with_n)
+        
+        self.play(
+            TransformMatchingShapes(axe_comparison_2, axe_comparison_3, duration=2),
+            Transform(graph_n_2, graph_n_3, duration=2),
+            Transform(label_n_2, label_n_3, duration=2),
+            Transform(graph_log2n_plus_6_2, graph_log2n_plus_6_3, duration=2),
+            Transform(label_log2n_plus_6_2, label_log2n_plus_6_3, duration=2),
+        )
+        self.forward(1)
+        self.play(
+            Write(brace_log_2n_pc_with_n),
+            Write(brace_log_2n_pc_with_n_label),
+        )
+        self.forward(0.5)
+        alpha2c = lambda alpha: alpha * 74 + 6
+        self.prepare(FadeOut(brace_log_2n_pc_with_n_label))
+        self.play(
+            ItemUpdater(
+                graph_log2n_plus_6_3,
+                lambda p: get_graph(alpha2c(p.alpha))
+            ),
+            ItemUpdater(
+                label_log2n_plus_6_3,
+                lambda p: get_graph_label(alpha2c(p.alpha))
+            ),
+            ItemUpdater(
+                brace_log_2n_pc_with_n,
+                lambda p: get_brace(alpha2c(p.alpha))
+            ),
+            duration=4,
+        )
+        self.forward(1.5)
+        self.play(
+            Write(text_n_ge_log2n),
+        )
+        self.play(Write(rec_group_1))
+        self.forward(1.5)
+        self.play(
+            TransformMatchingDiff(
+                text_n_ge_log2n,
+                text_bb_n_ge_bb_log2n,
+                duration=1.5,
+            ),
+            Transform(
+                rec_group_1,
+                rec_group_2,
+                duration=1.5,
+            ),
+        )
+        self.play(
+            FadeOut(rec_group_2),
+        )
+        self.forward(1.5)
+        self.play(
+            FadeOut(Group(
+                axe_comparison_3, axes_labels,
+                graph_log2n_plus_6_3, label_log2n_plus_6_3,
+                graph_n_3, label_n_3,
+                brace_log_2n_pc_with_n,
+                text_bb_n_ge_bb_log2n,
+            ))
+        )
+        self.play(
+            FadeIn(Group(
+                text_most_bb, brace_all_states,
+                grid_chain_n, grid_chain_fn, grid_chain_constant,
+                tapes[0][0:4], tapes[3][4:12], tapes[0][12:], tape_frame,
+                brace_tape_n, brace_tape_an,
+                label_tape_n, label_tape_an,
+                text_steps_2,
+            )),
+            self.camera.anim.points.shift(UP * 1),
+        )
+        # endregion
+
         rec_running_steps.points.shift(RIGHT * 3)
         self.play(
             text_steps_2.anim.points.shift(RIGHT * 3),
@@ -858,7 +1165,6 @@ class s4_3(Timeline):
             FadeOut(rec_bb_log2n_plus_C),
         )
         self.forward(1)
-        
         self.play(
             TransformMatchingDiff(
                 text_steps_2["$>= 2f(n)$"],
@@ -881,6 +1187,7 @@ class s4_3(Timeline):
                 brace_tape_an, brace_tape_n,
                 tape_frame,
             )),
+            FadeOut(Group(grid_chain_n, grid_chain_fn, grid_chain_constant)),
             text_bb_ge_2f.anim.points.move_to(ORIGIN),
             self.camera.anim.points.move_to(UP),
         )
@@ -893,7 +1200,7 @@ class s4_3(Timeline):
         )
         rect_n_2 = SurroundingRect(
             text_bb_ge_2f["log_2 n", 0],
-            color=GREEN_A,
+            color=BLUE_A,
             buff=0.05,
         )
         rect_c = SurroundingRect(
@@ -927,6 +1234,9 @@ class s4_3(Timeline):
         self.forward(1)
         self.play(Write(rect_c))
         self.forward(1)
+
+
+
         self.play(FadeOut(Group(
             rect_n_1,
             rect_n_2,
@@ -972,7 +1282,6 @@ class s4_3(Timeline):
         self.play(
             FadeOut(Group(
                 text_bb_gg_fn, rec_bb_gg_fn,
-                grid_chain_n, grid_chain_fn, grid_chain_constant,
                 rec_calculable, rec_definable,
                 text_calculable, text_definable,
             ))
